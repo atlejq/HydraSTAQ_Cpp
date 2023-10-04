@@ -360,19 +360,20 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
             std::vector yRef = clean(yvec[argmax(qualVec, 0)]);
 
             //writeCSV(path + parameterDir + "offsets" + filter + ".csv", offsets);
+            int scaling = 4;
             cv::Mat maxQualFrame = cv::imread(lightFrameArray[argmax(qualVec, 0)], cv::IMREAD_GRAYSCALE);
             cv::Mat small;
 
-            cv::resize(maxQualFrame, small, cv::Size(1036, 704), 0, 0, cv::INTER_CUBIC);    
+            cv::resize(maxQualFrame, small, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
             cv::Mat img_rgb(small.size(), CV_8UC3);
             cv::cvtColor(small, img_rgb, cv::COLOR_GRAY2BGR);
 
                 for (int i = 0; i < xRef.size(); i++) {
-                    cv::circle(img_rgb, cv::Point_(xRef[i] / 4, yRef[i] / 4), 8, cv::Scalar(0, 0, 255));
+                    cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(0, 0, 255));
                 }
 
                 for (int i = 0; i < xRef.size(); i++) {
-                    cv::circle(img_rgb, cv::Point_(xRef[i] / 4, yRef[i] / 4), 6, cv::Scalar(0, 255, 0));
+                    cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 6, cv::Scalar(0, 255, 0));
                 }
 
             cv::imshow("Starfield", img_rgb);
