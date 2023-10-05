@@ -370,7 +370,7 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
                     std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[e[k]]), clean(yvec[e[k]]));
                     std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvec[argmax(qualVec, 0)]), clean(yvec[argmax(qualVec, 0)]));
                     std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVec, 0)]), clean(yvecAlign[argmax(qualVec, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
-                    offsets.push_back({ std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple), float(e[k]), float(k)});
+                    offsets.push_back({ std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple), float(e[k])});
                 }
             }
 
@@ -413,7 +413,7 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
                     cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 6, cv::Scalar(0, 255, 0));
                 }
             }
-            cv::imshow("Starfield", img_rgb);
+            cv::imshow("Debug", img_rgb);
             cv::waitKey(0);
             cv::destroyAllWindows();
         }
@@ -427,7 +427,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
     std::string lightFrameArrayPath =  path + parameterDir + "lightFrameArray" +  filter + ".csv";
     std::string offsetsPath =  path + parameterDir + "offsets" +  filter + ".csv";
-    std::string qualVecPath =  path + parameterDir + "qualVecPath" +  filter + ".csv";
+    std::string qualVecPath =  path + parameterDir + "qualVec" +  filter + ".csv";
 
     bool filesExist = (std::filesystem::exists(lightFrameArrayPath) && std::filesystem::exists(offsetsPath) && std::filesystem::exists(qualVecPath));
 
@@ -438,6 +438,45 @@ int CppCLRWinFormsProject::Form1::Stack() {
         std::vector<std::string> lightFrameArray = readStrings(lightFrameArrayPath);
         std::vector<std::vector<float>> offsets = readCSV(offsetsPath, lightFrameArray.size(), 4);
         std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, lightFrameArray.size(), 2);
+
+        std::vector<float> th(offsets.size());
+        std::vector<float> dx(offsets.size());
+        std::vector<float> dy(offsets.size());
+        std::vector<float> e(offsets.size());
+
+        for (int i = 0; i < offsets.size(); i++) {
+            th[i] = offsets[i][0];
+            dx[i] = offsets[i][1];
+            dy[i] = offsets[i][2];
+            e[i] = offsets[i][3];
+        }
+
+        cv::Mat stackFrame(4144, 2822, CV_32F, cv::Scalar(0));
+
+        std::ofstream out(path + parameterDir + "output.txt");
+
+        int k = 0;
+        int i = 0;
+        while ((k < e.size())) {
+            i = k;
+            out << i << " " << e[i] << "\n";
+            //cv::Mat lightFrame = cv::imread(lightFrameArray[e[i]], cv::IMREAD_GRAYSCALE);
+            //lightFrame.convertTo(lightFrame, CV_32F);
+            //lightFrame /= pow(255, lightFrame.elemSize());
+            //lightFrame *= mean(background[e]) / background[e[i]];
+            //lightFrame -= darkFrame;
+            //lightFrame /= flatFrame;
+         
+            //cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
+            //warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
+            //stackFrame = stackFrame + lightFrame / float(k);
+            k++;
+        }
+
+       out.close();
+       // cv::imshow("Stack", stackFrame);
+       // cv::waitKey(0);
+        //cv::destroyAllWindows();
 
         auto t2 = std::chrono::high_resolution_clock::now();
         auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
