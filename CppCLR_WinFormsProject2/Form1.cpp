@@ -367,21 +367,21 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
 
             std::vector<int> e;
             for (int i = 0; i < qualVec.size(); i++) {
-                if (qualVec[i][0] >= qualityThreshold) {
+                if (qualVec[i][0] > qualityThreshold) {
                     e.push_back(i);
                     out << i << " " << qualVec[i][0] << "\n";
                 }
             }
             out << "\n"; 
 
-            for (int k = 0; k < size(xvec); k++) {
-                if (!clean(xvec[k]).empty() && clean(xvec[k]).size() >= topMatches)
+            for (int k = 0; k < size(e); k++) {
+                if (!clean(xvec[e[k]]).empty() && clean(xvec[e[k]]).size() >= topMatches)
                 {
-                    std::cout << clean(xvec[k]).size() << "\n";
-                    std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[k]), clean(yvec[k]));
+                    std::cout << clean(xvec[e[k]]).size() << "\n";
+                    std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[e[k]]), clean(yvec[e[k]]));
                     std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvec[argmax(qualVec, 0)]), clean(yvec[argmax(qualVec, 0)]));
-                    std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVec, 0)]), clean(yvecAlign[argmax(qualVec, 0)]), clean(xvec[k]), clean(yvec[k]), topMatches);
-                    offsets.push_back({ std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple), float(k)});
+                    std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVec, 0)]), clean(yvecAlign[argmax(qualVec, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
+                    offsets.push_back({ std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple), float(e[k])});
                 }
             }
 
@@ -392,12 +392,6 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
 
             std::vector<float> xDeb(maxStars);
             std::vector<float> yDeb(maxStars);
-
-           /*   double debugMatrix[2][xvec[e[i]].size()];
-                for (int j = 0; j < xvec[e[i]].size(); j++) {
-                    debugMatrix[0][j] = R[0][0] * xvec[e[i]][j] + R[0][1] * yvec[e[i]][j] + t[0];
-                    debugMatrix[1][j] = R[1][0] * xvec[e[i]][j] + R[1][1] * yvec[e[i]][j] + t[1];
-                }*/
             
             out.close();
 
@@ -414,12 +408,19 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
                 cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(0, 0, 255));
             }
 
+            /*   double debugMatrix[2][xvec[e[i]].size()];
+            for (int j = 0; j < xvec[e[i]].size(); j++) {
+            debugMatrix[0][j] = R[0][0] * xvec[e[i]][j] + R[0][1] * yvec[e[i]][j] + t[0];
+            debugMatrix[1][j] = R[1][0] * xvec[e[i]][j] + R[1][1] * yvec[e[i]][j] + t[1];
+            }*/
+
             for (int i = 0; i < offsets.size(); i++) {
                 float R[2][2] = { {cos(offsets[i][0]), -sin(offsets[i][0])}, {sin(offsets[i][0]), cos(offsets[i][0])} };
                 float t[2] = { offsets[i][1], offsets[i][2] };
-                for (int j = 0; j < xvec[i].size(); j++) {
-                    xDeb[j] = R[0][0] * xvec[i][j] + R[0][1] * yvec[i][j] + t[0];
-                    yDeb[j] = R[1][0] * xvec[i][j] + R[1][1] * yvec[i][j] + t[1];
+
+                for (int j = 0; j < xvec[e[i]].size(); j++) {
+                    xDeb[j] = R[0][0] * xvec[e[i]][j] + R[0][1] * yvec[e[i]][j] + t[0];
+                    yDeb[j] = R[1][0] * xvec[e[i]][j] + R[1][1] * yvec[e[i]][j] + t[1];
                 }
                 xDeb = clean(xDeb);
                 yDeb = clean(yDeb);
