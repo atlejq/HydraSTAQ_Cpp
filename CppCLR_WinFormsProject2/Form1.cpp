@@ -154,7 +154,7 @@ std::tuple<float, float, float> findRT(Eigen::MatrixXf A, Eigen::MatrixXf B) {
     }
     double theta = std::atan2(R(1, 0), R(0, 0));
     Eigen::Vector2f t = -R * centroid_A + centroid_B;
-    return std::make_tuple(t[0], t[1], theta);
+    return std::make_tuple(theta, t[0], t[1]);
 }
 
 std::vector<std::vector<float>> getCorrectedVoteMatrix(std::vector<std::vector<float>> refTriangles, std::vector<std::vector<float>> frameTriangles, std::vector<float> refVectorX, std::vector<float> yvec) {
@@ -318,6 +318,8 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
 int CppCLRWinFormsProject::Form1::ComputeOffsets() {
     auto t1 = std::chrono::high_resolution_clock::now();
 
+    std::ofstream out(path + parameterDir + "out.txt");   
+
     std::string lightFrameArrayPath = path + parameterDir + "lightFrameArray" + filter + ".csv";
     std::string xvecPath =  path + parameterDir + "xvec" +  filter + ".csv";
     std::string yvecPath =  path + parameterDir + "yvec" +  filter + ".csv";
@@ -356,11 +358,39 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
                 }
             }
 
+            //writeCSV(path + parameterDir + "offsets" + filter + ".csv", offsets);
+
             std::vector xRef = clean(xvec[argmax(qualVec, 0)]);
             std::vector yRef = clean(yvec[argmax(qualVec, 0)]);
 
-            //writeCSV(path + parameterDir + "offsets" + filter + ".csv", offsets);
+            std::vector<float> xDeb(15);
+            std::vector<float> yDeb(15);
+
+            for (int i = 0; i < offsets.size(); i++) {
+                float R[2][2] = { {cos(offsets[i][0]), -sin(offsets[i][0])}, {sin(offsets[i][0]), cos(offsets[i][0])} };
+                float t[2] = { offsets[i][1], offsets[i][2] };
+                for (int j = 0; j < xvec[i].size(); j++) {
+                    xDeb[j] = R[0][0] * xvec[i][j] + R[0][1] * yvec[i][j] + t[0];
+                    yDeb[j] = R[1][0] * xvec[i][j] + R[1][1] * yvec[i][j] + t[1];
+                    out << R[0][0] << " " << R[0][1] << " " << R[1][0] << " " << R[1][1] << " ";
+                }
+                out << "\n";
+            }
+           /*   double debugMatrix[2][xvec[e[i]].size()];
+                for (int j = 0; j < xvec[e[i]].size(); j++) {
+                    debugMatrix[0][j] = R[0][0] * xvec[e[i]][j] + R[0][1] * yvec[e[i]][j] + t[0];
+                    debugMatrix[1][j] = R[1][0] * xvec[e[i]][j] + R[1][1] * yvec[e[i]][j] + t[1];
+                }*/
+            
+
+            xDeb = clean(xDeb);
+            yDeb = clean(yDeb);
+
+
             int scaling = 4;
+
+            out.close();
+
             cv::Mat maxQualFrame = cv::imread(lightFrameArray[argmax(qualVec, 0)], cv::IMREAD_GRAYSCALE);
             cv::Mat small;
 
@@ -373,7 +403,7 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
                 }
 
                 for (int i = 0; i < xRef.size(); i++) {
-                    cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 6, cv::Scalar(0, 255, 0));
+                    cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 6, cv::Scalar(0, 255, 0));
                 }
 
             cv::imshow("Starfield", img_rgb);
