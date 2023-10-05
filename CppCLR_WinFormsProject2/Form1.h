@@ -4,6 +4,7 @@
 
 extern std::string path;
 extern std::string parameterDir;
+extern std::string outDir;
 extern std::string lightDir;
 extern std::string ext;
 extern float detectionThreshold;

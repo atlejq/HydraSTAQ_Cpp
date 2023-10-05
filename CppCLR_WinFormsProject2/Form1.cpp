@@ -3,6 +3,7 @@
 
 std::string path = "C:/F/astro/matlab/m1test/";
 std::string parameterDir = "/parametersCPP/";
+std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
 std::string ext = ".png";
 float detectionThreshold = 0.9;
@@ -460,18 +461,15 @@ int CppCLRWinFormsProject::Form1::Stack() {
         while ((k < e.size())) {
             i = k;
             cv::Mat lightFrame = cv::imread(lightFrameArray[e[i]], cv::IMREAD_GRAYSCALE);
-            // pow(255, lightFrame.elemSize())
-            lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / 255.0);
+            lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
 
-            //lightFrame /= pow(255, lightFrame.elemSize());
             //lightFrame *= mean(background[e]) / background[e[i]];
             //lightFrame -= darkFrame;
             //lightFrame /= flatFrame;
          
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
-
-            addWeighted(stackFrame, 1, lightFrame, 0.02, 0.0, stackFrame);
+            addWeighted(stackFrame, 1, lightFrame, 1/float(e.size()), 0.0, stackFrame);
 
             k++;
         } 
@@ -479,6 +477,8 @@ int CppCLRWinFormsProject::Form1::Stack() {
         int scaling = 4;
         cv::Mat small;
         cv::resize(stackFrame, small, cv::Size(stackFrame.cols / scaling, stackFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
+        imwrite(path + outDir + "out.tif", stackFrame);
+
         cv::imshow("Stack", small*10);
         cv::waitKey(0);
         cv::destroyAllWindows();
