@@ -371,7 +371,7 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
                     std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[e[k]]), clean(yvec[e[k]]));
                     std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvec[argmax(qualVec, 0)]), clean(yvec[argmax(qualVec, 0)]));
                     std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVec, 0)]), clean(yvecAlign[argmax(qualVec, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
-                    offsets.push_back({ std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple), float(e[k])});
+                    offsets.push_back({ std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple), float(e[k]), qualVec[e[k]][1]});
                 }
             }
 
@@ -428,33 +428,36 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
     std::string lightFrameArrayPath =  path + parameterDir + "lightFrameArray" +  filter + ".csv";
     std::string offsetsPath =  path + parameterDir + "offsets" +  filter + ".csv";
-    std::string qualVecPath =  path + parameterDir + "qualVec" +  filter + ".csv";
 
-    bool filesExist = (std::filesystem::exists(lightFrameArrayPath) && std::filesystem::exists(offsetsPath) && std::filesystem::exists(qualVecPath));
+    bool filesExist = (std::filesystem::exists(lightFrameArrayPath) && std::filesystem::exists(offsetsPath));
 
     if (filesExist)
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
         std::vector<std::string> lightFrameArray = readStrings(lightFrameArrayPath);
-        std::vector<std::vector<float>> offsets = readCSV(offsetsPath, 4);
-        std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, 2);
+        std::vector<std::vector<float>> offsets = readCSV(offsetsPath, 5);
 
         std::vector<float> th(offsets.size());
         std::vector<float> dx(offsets.size());
         std::vector<float> dy(offsets.size());
         std::vector<float> e(offsets.size());
+        std::vector<float> background(offsets.size());
+
+        float mean_background = 0;
+
+        std::ofstream out(path + parameterDir + "output.txt");
 
         for (int i = 0; i < offsets.size(); i++) {
             th[i] = offsets[i][0];
             dx[i] = offsets[i][1];
             dy[i] = offsets[i][2];
             e[i] = offsets[i][3];
+            background[i] = offsets[i][4];
+            mean_background = mean_background + background[i]/float(offsets.size());
         }
 
         cv::Mat stackFrame(2822, 4144, CV_32FC1, cv::Scalar(0));
-
-        std::ofstream out(path + parameterDir + "output.txt");
 
         int k = 0;
         int i = 0;
@@ -463,7 +466,10 @@ int CppCLRWinFormsProject::Form1::Stack() {
             cv::Mat lightFrame = cv::imread(lightFrameArray[e[i]], cv::IMREAD_GRAYSCALE);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
 
-            //lightFrame *= mean(background[e]) / background[e[i]];
+            lightFrame *= mean_background / background[i];
+
+            out << mean_background / background[i] << "\n";
+
             //lightFrame -= darkFrame;
             //lightFrame /= flatFrame;
          
