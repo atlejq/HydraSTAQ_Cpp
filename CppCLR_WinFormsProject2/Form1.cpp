@@ -461,15 +461,23 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
         int k = 0;
         int i = 0;
+        std::vector<int> m(e.size());
+
+        for (int j = 0; j < e.size(); j++)
+        {
+            m[j] = j;
+        }
+
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        shuffle(m.begin(), m.end(), std::default_random_engine(seed));
+
         while ((k < e.size())) {
-            i = k;
+            i = m[k];
+            out << k << " " << i << "\n";
             cv::Mat lightFrame = cv::imread(lightFrameArray[e[i]], cv::IMREAD_GRAYSCALE);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
 
             lightFrame *= mean_background / background[i];
-
-            out << mean_background / background[i] << "\n";
-
             //lightFrame -= darkFrame;
             //lightFrame /= flatFrame;
          
