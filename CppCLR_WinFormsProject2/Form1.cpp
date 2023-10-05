@@ -451,7 +451,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             e[i] = offsets[i][3];
         }
 
-        cv::Mat stackFrame(4144, 2822, CV_32F, cv::Scalar(0));
+        cv::Mat stackFrame(2822, 4144, CV_32FC1, cv::Scalar(0));
 
         std::ofstream out(path + parameterDir + "output.txt");
 
@@ -460,23 +460,28 @@ int CppCLRWinFormsProject::Form1::Stack() {
         while ((k < e.size())) {
             i = k;
             cv::Mat lightFrame = cv::imread(lightFrameArray[e[i]], cv::IMREAD_GRAYSCALE);
-            lightFrame.convertTo(lightFrame, CV_32F);
+            // pow(255, lightFrame.elemSize())
+            lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / 255.0);
+
             //lightFrame /= pow(255, lightFrame.elemSize());
             //lightFrame *= mean(background[e]) / background[e[i]];
             //lightFrame -= darkFrame;
             //lightFrame /= flatFrame;
          
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
-            //warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
-            //stackFrame = stackFrame + lightFrame / float(k);
+            warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
+
+            addWeighted(stackFrame, 1, lightFrame, 0.02, 0.0, stackFrame);
 
             k++;
-        }
+        } 
 
-       out.close();
-       // cv::imshow("Stack", stackFrame);
-       // cv::waitKey(0);
-        //cv::destroyAllWindows();
+        int scaling = 4;
+        cv::Mat small;
+        cv::resize(stackFrame, small, cv::Size(stackFrame.cols / scaling, stackFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
+        cv::imshow("Stack", small*10);
+        cv::waitKey(0);
+        cv::destroyAllWindows();
 
         auto t2 = std::chrono::high_resolution_clock::now();
         auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
