@@ -347,6 +347,33 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
             std::vector<std::vector<float>> refTriangles = triangles(clean(xvec[argmax(qualVec, 0)]), clean(yvec[argmax(qualVec, 0)]));
             std::vector<std::vector<float>> offsets;
 
+            std::vector<float> rankedQualVec(qualVec.size());
+
+            for (int i = 0; i < qualVec.size(); i++) {
+                rankedQualVec[i] = qualVec[i][0];
+            }
+
+            std::sort(rankedQualVec.begin(), rankedQualVec.end());
+
+            for (int i = 0; i < qualVec.size(); i++) {
+                out << i << " " << qualVec[i][0] << " " << rankedQualVec[i] << "\n";
+            }
+
+            out << "\n";
+
+            float qualityThreshold = rankedQualVec[floor(rankedQualVec.size() * discardPercentage / 100)];
+
+            out << qualityThreshold << "\n";
+
+            std::vector<int> e;
+            for (int i = 0; i < qualVec.size(); i++) {
+                if (qualVec[i][0] >= qualityThreshold) {
+                    e.push_back(i);
+                    out << i << " " << qualVec[i][0] << "\n";
+                }
+            }
+            out << "\n"; 
+
             for (int k = 0; k < size(xvec); k++) {
                 if (!clean(xvec[k]).empty() && clean(xvec[k]).size() >= topMatches)
                 {
@@ -358,7 +385,7 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
                 }
             }
 
-            //writeCSV(path + parameterDir + "offsets" + filter + ".csv", offsets);
+            writeCSV(path + parameterDir + "offsets" + filter + ".csv", offsets);
 
             std::vector xRef = clean(xvec[argmax(qualVec, 0)]);
             std::vector yRef = clean(yvec[argmax(qualVec, 0)]);
@@ -372,6 +399,7 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
                     debugMatrix[1][j] = R[1][0] * xvec[e[i]][j] + R[1][1] * yvec[e[i]][j] + t[1];
                 }*/
             
+            out.close();
 
             int scaling = 4;
 
@@ -395,11 +423,8 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
                 }
                 xDeb = clean(xDeb);
                 yDeb = clean(yDeb);
-                int u = rand() % 255;
-                int v = rand() % 255;
-                int w = rand() % 255;
                 for (int i = 0; i < xDeb.size(); i++) {
-                    cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 6, cv::Scalar(u, v, w));
+                    cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 6, cv::Scalar(0, 255, 0));
                 }
             }
             cv::imshow("Starfield", img_rgb);
