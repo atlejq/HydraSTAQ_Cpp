@@ -303,22 +303,19 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
             }
         }
     }
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
     writeStrings(path + parameterDir + "lightFrameArray" + filter + ".csv", lightFrames);
     writeCSV(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
     writeCSV(path + parameterDir + "xvec" + filter + ".csv", xvec);
     writeCSV(path + parameterDir + "yvec" + filter + ".csv", yvec);
 
-    auto t2 = std::chrono::high_resolution_clock::now();
-    auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-    
     return ms_int.count();
 }
 
 int CppCLRWinFormsProject::Form1::ComputeOffsets() {
-    auto t1 = std::chrono::high_resolution_clock::now();
-
-    std::ofstream out(path + parameterDir + "out.txt");   
+    int elapsedTime = 0;
 
     std::string lightFrameArrayPath = path + parameterDir + "lightFrameArray" + filter + ".csv";
     std::string xvecPath =  path + parameterDir + "xvec" +  filter + ".csv";
@@ -334,6 +331,8 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
 
     if (filesExist)
     {
+        auto t1 = std::chrono::high_resolution_clock::now();
+
         std::vector<std::string> lightFrameArray = readStrings(lightFrameArrayPath);
         std::vector<std::vector<float>> xvec = readCSV(xvecPath, lightFrameArray.size(), maxStars);
         std::vector<std::vector<float>> yvec = readCSV(yvecPath, lightFrameArray.size(), maxStars);
@@ -355,24 +354,14 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
 
             std::sort(rankedQualVec.begin(), rankedQualVec.end());
 
-            for (int i = 0; i < qualVec.size(); i++) {
-                out << i << " " << qualVec[i][0] << " " << rankedQualVec[i] << "\n";
-            }
-
-            out << "\n";
-
             float qualityThreshold = rankedQualVec[floor(rankedQualVec.size() * discardPercentage / 100)];
-
-            out << qualityThreshold << "\n";
 
             std::vector<int> e;
             for (int i = 0; i < qualVec.size(); i++) {
                 if (qualVec[i][0] > qualityThreshold) {
                     e.push_back(i);
-                    out << i << " " << qualVec[i][0] << "\n";
                 }
             }
-            out << "\n"; 
 
             for (int k = 0; k < size(e); k++) {
                 if (!clean(xvec[e[k]]).empty() && clean(xvec[e[k]]).size() >= topMatches)
@@ -381,9 +370,13 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
                     std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[e[k]]), clean(yvec[e[k]]));
                     std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvec[argmax(qualVec, 0)]), clean(yvec[argmax(qualVec, 0)]));
                     std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVec, 0)]), clean(yvecAlign[argmax(qualVec, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
-                    offsets.push_back({ std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple), float(e[k])});
+                    offsets.push_back({ std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple), float(e[k]), float(k)});
                 }
             }
+
+            auto t2 = std::chrono::high_resolution_clock::now();
+            auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
+            elapsedTime = ms_int.count();
 
             writeCSV(path + parameterDir + "offsets" + filter + ".csv", offsets);
 
@@ -393,8 +386,6 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
             std::vector<float> xDeb(maxStars);
             std::vector<float> yDeb(maxStars);
             
-            out.close();
-
             int scaling = 4;
 
             cv::Mat maxQualFrame = cv::imread(lightFrameArray[argmax(qualVec, 0)], cv::IMREAD_GRAYSCALE);
@@ -407,12 +398,6 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
             for (int i = 0; i < xRef.size(); i++) {
                 cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(0, 0, 255));
             }
-
-            /*   double debugMatrix[2][xvec[e[i]].size()];
-            for (int j = 0; j < xvec[e[i]].size(); j++) {
-            debugMatrix[0][j] = R[0][0] * xvec[e[i]][j] + R[0][1] * yvec[e[i]][j] + t[0];
-            debugMatrix[1][j] = R[1][0] * xvec[e[i]][j] + R[1][1] * yvec[e[i]][j] + t[1];
-            }*/
 
             for (int i = 0; i < offsets.size(); i++) {
                 float R[2][2] = { {cos(offsets[i][0]), -sin(offsets[i][0])}, {sin(offsets[i][0]), cos(offsets[i][0])} };
@@ -434,31 +419,30 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
         }
     }
 
-    auto t2 = std::chrono::high_resolution_clock::now();
-    auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-
-    return ms_int.count();
-    return 0;
+    return elapsedTime;
 }
 
-int CppCLRWinFormsProject::Form1::Stack() {/*
-    auto t1 = std::chrono::high_resolution_clock::now();
-    std::string lightFrameArrayPath =  path +  parameterDir + "lightFrameArray" +  filter + ".csv";
-    std::string offsetsPath =  path +  parameterDir + "offsets" +  filter + ".csv";
-    std::string qualVecPath =  path +  parameterDir + "qualVecPath" +  filter + ".csv";
+int CppCLRWinFormsProject::Form1::Stack() {
+    int elapsedTime = 0;
+
+    std::string lightFrameArrayPath =  path + parameterDir + "lightFrameArray" +  filter + ".csv";
+    std::string offsetsPath =  path + parameterDir + "offsets" +  filter + ".csv";
+    std::string qualVecPath =  path + parameterDir + "qualVecPath" +  filter + ".csv";
 
     bool filesExist = (std::filesystem::exists(lightFrameArrayPath) && std::filesystem::exists(offsetsPath) && std::filesystem::exists(qualVecPath));
 
     if (filesExist)
     {
+        auto t1 = std::chrono::high_resolution_clock::now();
+
         std::vector<std::string> lightFrameArray = readStrings(lightFrameArrayPath);
         std::vector<std::vector<float>> offsets = readCSV(offsetsPath, lightFrameArray.size(), 4);
         std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, lightFrameArray.size(), 2);
+
+        auto t2 = std::chrono::high_resolution_clock::now();
+        auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
+        elapsedTime = ms_int.count();
     }
-
-    auto t2 = std::chrono::high_resolution_clock::now();
-    auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-
-    return ms_int.count();*/
-    return 0;
+    
+    return elapsedTime;
 }
