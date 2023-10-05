@@ -37,25 +37,25 @@ void writeStrings(std::string path, std::vector<std::string> stringArray)
     stringFileStream.close();
 }
 
-std::vector<std::vector<float>> readCSV(std::string path, int size1, int size2)
+std::vector<std::vector<float>> readCSV(std::string path, int size)
 {
-    std::vector<std::vector<float>> commaSeparatedArray(size1, std::vector<float>(size2));
+    std::vector<std::vector<float>> commaSeparatedArray;
+    std::vector<float> tmpArray(size);
     std::string line;
     std::ifstream commaSeparatedArrayStream(path);
     if (commaSeparatedArrayStream.is_open())
     {
-        int s = 0;
         int r = 0;
         while (std::getline(commaSeparatedArrayStream, line)) {
             int pos = 0;
             int r = 0;
             while (pos > -1) {
                 pos = line.find(",");
-                commaSeparatedArray[s][r] = stof(line.substr(0, pos));
+                tmpArray[r] = stof(line.substr(0, pos));
                 line.erase(0, pos + 1);
                 r++;
             }
-            s++;
+            commaSeparatedArray.push_back(tmpArray);
         }
         commaSeparatedArrayStream.close();
     }
@@ -334,12 +334,12 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
         auto t1 = std::chrono::high_resolution_clock::now();
 
         std::vector<std::string> lightFrameArray = readStrings(lightFrameArrayPath);
-        std::vector<std::vector<float>> xvec = readCSV(xvecPath, lightFrameArray.size(), maxStars);
-        std::vector<std::vector<float>> yvec = readCSV(yvecPath, lightFrameArray.size(), maxStars);
-        std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, lightFrameArray.size(), 2);
-        std::vector<std::vector<float>> xvecAlign = readCSV(xvecAlignPath, lightFrameArray.size(), maxStars);
-        std::vector<std::vector<float>> yvecAlign = readCSV(yvecAlignPath, lightFrameArray.size(), maxStars);
-        std::vector<std::vector<float>> qualVecAlign = readCSV(qualVecAlignPath, lightFrameArray.size(), 2);
+        std::vector<std::vector<float>> xvec = readCSV(xvecPath, maxStars);
+        std::vector<std::vector<float>> yvec = readCSV(yvecPath, maxStars);
+        std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, 2);
+        std::vector<std::vector<float>> xvecAlign = readCSV(xvecAlignPath, maxStars);
+        std::vector<std::vector<float>> yvecAlign = readCSV(yvecAlignPath, maxStars);
+        std::vector<std::vector<float>> qualVecAlign = readCSV(qualVecAlignPath, 2);
 
         if (!clean(xvec[argmax(qualVec, 0)]).empty()&&xvec[argmax(qualVec, 0)].size() >= topMatches)
         {
@@ -436,8 +436,8 @@ int CppCLRWinFormsProject::Form1::Stack() {
         auto t1 = std::chrono::high_resolution_clock::now();
 
         std::vector<std::string> lightFrameArray = readStrings(lightFrameArrayPath);
-        std::vector<std::vector<float>> offsets = readCSV(offsetsPath, lightFrameArray.size(), 4);
-        std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, lightFrameArray.size(), 2);
+        std::vector<std::vector<float>> offsets = readCSV(offsetsPath, 4);
+        std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, 2);
 
         std::vector<float> th(offsets.size());
         std::vector<float> dx(offsets.size());
@@ -459,17 +459,17 @@ int CppCLRWinFormsProject::Form1::Stack() {
         int i = 0;
         while ((k < e.size())) {
             i = k;
-            out << i << " " << e[i] << "\n";
-            //cv::Mat lightFrame = cv::imread(lightFrameArray[e[i]], cv::IMREAD_GRAYSCALE);
-            //lightFrame.convertTo(lightFrame, CV_32F);
+            cv::Mat lightFrame = cv::imread(lightFrameArray[e[i]], cv::IMREAD_GRAYSCALE);
+            lightFrame.convertTo(lightFrame, CV_32F);
             //lightFrame /= pow(255, lightFrame.elemSize());
             //lightFrame *= mean(background[e]) / background[e[i]];
             //lightFrame -= darkFrame;
             //lightFrame /= flatFrame;
          
-            //cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
+            cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             //warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
             //stackFrame = stackFrame + lightFrame / float(k);
+
             k++;
         }
 
