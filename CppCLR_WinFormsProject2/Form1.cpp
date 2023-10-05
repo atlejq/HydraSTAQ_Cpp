@@ -363,19 +363,9 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
             std::vector xRef = clean(xvec[argmax(qualVec, 0)]);
             std::vector yRef = clean(yvec[argmax(qualVec, 0)]);
 
-            std::vector<float> xDeb(15);
-            std::vector<float> yDeb(15);
+            std::vector<float> xDeb(maxStars);
+            std::vector<float> yDeb(maxStars);
 
-            for (int i = 0; i < offsets.size(); i++) {
-                float R[2][2] = { {cos(offsets[i][0]), -sin(offsets[i][0])}, {sin(offsets[i][0]), cos(offsets[i][0])} };
-                float t[2] = { offsets[i][1], offsets[i][2] };
-                for (int j = 0; j < xvec[i].size(); j++) {
-                    xDeb[j] = R[0][0] * xvec[i][j] + R[0][1] * yvec[i][j] + t[0];
-                    yDeb[j] = R[1][0] * xvec[i][j] + R[1][1] * yvec[i][j] + t[1];
-                    out << R[0][0] << " " << R[0][1] << " " << R[1][0] << " " << R[1][1] << " ";
-                }
-                out << "\n";
-            }
            /*   double debugMatrix[2][xvec[e[i]].size()];
                 for (int j = 0; j < xvec[e[i]].size(); j++) {
                     debugMatrix[0][j] = R[0][0] * xvec[e[i]][j] + R[0][1] * yvec[e[i]][j] + t[0];
@@ -383,13 +373,7 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
                 }*/
             
 
-            xDeb = clean(xDeb);
-            yDeb = clean(yDeb);
-
-
             int scaling = 4;
-
-            out.close();
 
             cv::Mat maxQualFrame = cv::imread(lightFrameArray[argmax(qualVec, 0)], cv::IMREAD_GRAYSCALE);
             cv::Mat small;
@@ -398,14 +382,26 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
             cv::Mat img_rgb(small.size(), CV_8UC3);
             cv::cvtColor(small, img_rgb, cv::COLOR_GRAY2BGR);
 
-                for (int i = 0; i < xRef.size(); i++) {
-                    cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(0, 0, 255));
-                }
+            for (int i = 0; i < xRef.size(); i++) {
+                cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(0, 0, 255));
+            }
 
-                for (int i = 0; i < xRef.size(); i++) {
-                    cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 6, cv::Scalar(0, 255, 0));
+            for (int i = 0; i < offsets.size(); i++) {
+                float R[2][2] = { {cos(offsets[i][0]), -sin(offsets[i][0])}, {sin(offsets[i][0]), cos(offsets[i][0])} };
+                float t[2] = { offsets[i][1], offsets[i][2] };
+                for (int j = 0; j < xvec[i].size(); j++) {
+                    xDeb[j] = R[0][0] * xvec[i][j] + R[0][1] * yvec[i][j] + t[0];
+                    yDeb[j] = R[1][0] * xvec[i][j] + R[1][1] * yvec[i][j] + t[1];
                 }
-
+                xDeb = clean(xDeb);
+                yDeb = clean(yDeb);
+                int u = rand() % 255;
+                int v = rand() % 255;
+                int w = rand() % 255;
+                for (int i = 0; i < xDeb.size(); i++) {
+                    cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 6, cv::Scalar(u, v, w));
+                }
+            }
             cv::imshow("Starfield", img_rgb);
             cv::waitKey(0);
             cv::destroyAllWindows();
