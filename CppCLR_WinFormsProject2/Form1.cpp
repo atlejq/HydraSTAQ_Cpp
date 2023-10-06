@@ -319,28 +319,34 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
     int elapsedTime = 0;
 
     std::string lightFrameArrayPath = path + parameterDir + "lightFrameArray" + filter + ".csv";
+    std::string lightFrameArrayAlignPath = path + parameterDir + "lightFrameArray" + align + ".csv";
     std::string xvecPath =  path + parameterDir + "xvec" +  filter + ".csv";
+    std::string xvecAlignPath = path + parameterDir + "xvec" + align + ".csv";
     std::string yvecPath =  path + parameterDir + "yvec" +  filter + ".csv";
+    std::string yvecAlignPath = path + parameterDir + "yvec" + align + ".csv";
     std::string qualVecPath =  path + parameterDir + "qualVec" +  filter + ".csv";
-    std::string xvecAlignPath =  path + parameterDir + "xvec" +  align + ".csv";
-    std::string yvecAlignPath =  path +  parameterDir + "yvec" +  align + ".csv";
     std::string qualVecAlignPath =  path + parameterDir + "qualVec" +  align + ".csv";
 
-    bool filesExist = (std::filesystem::exists(lightFrameArrayPath) && std::filesystem::exists(xvecPath) && std::filesystem::exists(yvecPath) &&
-        std::filesystem::exists(qualVecPath) && std::filesystem::exists(xvecAlignPath) && std::filesystem::exists(yvecAlignPath) &&
-        std::filesystem::exists(qualVecAlignPath));
+    bool filesExist = (std::filesystem::exists(lightFrameArrayPath) && std::filesystem::exists(lightFrameArrayAlignPath) &&       
+                       std::filesystem::exists(xvecPath) && std::filesystem::exists(xvecAlignPath) &&
+                       std::filesystem::exists(yvecPath) && std::filesystem::exists(yvecAlignPath) &&
+                       std::filesystem::exists(qualVecPath) && std::filesystem::exists(qualVecAlignPath));
 
     if (filesExist)
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
         std::vector<std::string> lightFrameArray = readStrings(lightFrameArrayPath);
+        std::vector<std::string> lightFrameArrayAlign = readStrings(lightFrameArrayAlignPath);
+
         std::vector<std::vector<float>> xvec = readCSV(xvecPath, size(lightFrameArray), maxStars);
+        std::vector<std::vector<float>> xvecAlign = readCSV(xvecAlignPath, size(lightFrameArrayAlign), maxStars);
+
         std::vector<std::vector<float>> yvec = readCSV(yvecPath, size(lightFrameArray), maxStars);
+        std::vector<std::vector<float>> yvecAlign = readCSV(yvecAlignPath, size(lightFrameArrayAlign), maxStars);
+
         std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, size(lightFrameArray), 2);
-        std::vector<std::vector<float>> xvecAlign = readCSV(xvecAlignPath, size(lightFrameArray), maxStars);
-        std::vector<std::vector<float>> yvecAlign = readCSV(yvecAlignPath, size(lightFrameArray), maxStars);
-        std::vector<std::vector<float>> qualVecAlign = readCSV(qualVecAlignPath, size(lightFrameArray), 2);
+        std::vector<std::vector<float>> qualVecAlign = readCSV(qualVecAlignPath, size(lightFrameArrayAlign), 2);
 
         std::vector xRef = clean(xvecAlign[argmax(qualVecAlign, 0)]);
         std::vector yRef = clean(yvecAlign[argmax(qualVecAlign, 0)]);
