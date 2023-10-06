@@ -367,7 +367,6 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
             for (int k = 0; k < size(e); k++) {
                 if (!clean(xvec[e[k]]).empty() && clean(xvec[e[k]]).size() >= topMatches)
                 {
-                    std::cout << clean(xvec[e[k]]).size() << "\n";
                     std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[e[k]]), clean(yvec[e[k]]));
                     std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvec[argmax(qualVec, 0)]), clean(yvec[argmax(qualVec, 0)]));
                     std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVec, 0)]), clean(yvecAlign[argmax(qualVec, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
