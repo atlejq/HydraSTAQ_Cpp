@@ -344,7 +344,7 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
 
         if (!clean(xvec[argmax(qualVec, 0)]).empty()&&xvec[argmax(qualVec, 0)].size() >= topMatches)
         {
-            std::vector<std::vector<float>> refTriangles = triangles(clean(xvec[argmax(qualVec, 0)]), clean(yvec[argmax(qualVec, 0)]));
+            std::vector<std::vector<float>> refTriangles = triangles(clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvecAlign[argmax(qualVecAlign, 0)]));
 
             std::vector<float> rankedQualVec(qualVec.size());
 
@@ -370,8 +370,8 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
                 if (!clean(xvec[e[k]]).empty() && clean(xvec[e[k]]).size() >= topMatches)
                 {
                     std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[e[k]]), clean(yvec[e[k]]));
-                    std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvec[argmax(qualVec, 0)]), clean(yvec[argmax(qualVec, 0)]));
-                    std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVec, 0)]), clean(yvecAlign[argmax(qualVec, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
+                    std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvec[argmax(qualVec, 0)]));
+                    std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvecAlign[argmax(qualVecAlign, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
                     offsets[k][0] = std::get<0>(tuple);
                     offsets[k][1] = std::get<1>(tuple);
                     offsets[k][2] = std::get<2>(tuple);
@@ -387,8 +387,8 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
             writeCSV(path + parameterDir + "offsets" + filter + ".csv", offsets);
             writeStrings(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
 
-            std::vector xRef = clean(xvec[argmax(qualVec, 0)]);
-            std::vector yRef = clean(yvec[argmax(qualVec, 0)]);
+            std::vector xRef = clean(xvecAlign[argmax(qualVecAlign, 0)]);
+            std::vector yRef = clean(yvecAlign[argmax(qualVecAlign, 0)]);
 
             std::vector<float> xDeb(maxStars);
             std::vector<float> yDeb(maxStars);
