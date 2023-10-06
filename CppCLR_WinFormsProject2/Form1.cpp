@@ -342,9 +342,12 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
         std::vector<std::vector<float>> yvecAlign = readCSV(yvecAlignPath, size(lightFrameArray), maxStars);
         std::vector<std::vector<float>> qualVecAlign = readCSV(qualVecAlignPath, size(lightFrameArray), 2);
 
-        if (!clean(xvec[argmax(qualVec, 0)]).empty()&&xvec[argmax(qualVec, 0)].size() >= topMatches)
+        std::vector xRef = clean(xvecAlign[argmax(qualVecAlign, 0)]);
+        std::vector yRef = clean(yvecAlign[argmax(qualVecAlign, 0)]);
+
+        if (!xRef.empty()&&xRef.size() >= topMatches)
         {
-            std::vector<std::vector<float>> refTriangles = triangles(clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvecAlign[argmax(qualVecAlign, 0)]));
+            std::vector<std::vector<float>> refTriangles = triangles(xRef, yRef);
 
             std::vector<float> rankedQualVec(qualVec.size());
 
@@ -386,9 +389,6 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
 
             writeCSV(path + parameterDir + "offsets" + filter + ".csv", offsets);
             writeStrings(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
-
-            std::vector xRef = clean(xvecAlign[argmax(qualVecAlign, 0)]);
-            std::vector yRef = clean(yvecAlign[argmax(qualVecAlign, 0)]);
 
             std::vector<float> xDeb(maxStars);
             std::vector<float> yDeb(maxStars);
