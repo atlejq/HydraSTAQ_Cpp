@@ -345,7 +345,6 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
         if (!clean(xvec[argmax(qualVec, 0)]).empty()&&xvec[argmax(qualVec, 0)].size() >= topMatches)
         {
             std::vector<std::vector<float>> refTriangles = triangles(clean(xvec[argmax(qualVec, 0)]), clean(yvec[argmax(qualVec, 0)]));
-            std::vector<std::vector<float>> offsets;
 
             std::vector<float> rankedQualVec(qualVec.size());
 
@@ -364,13 +363,20 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
                 }
             }
 
+            std::vector<std::vector<float>> offsets(e.size(), std::vector<float>(4));
+            std::vector<std::string> stackArray(size(e));
+
             for (int k = 0; k < size(e); k++) {
                 if (!clean(xvec[e[k]]).empty() && clean(xvec[e[k]]).size() >= topMatches)
                 {
                     std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[e[k]]), clean(yvec[e[k]]));
                     std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvec[argmax(qualVec, 0)]), clean(yvec[argmax(qualVec, 0)]));
                     std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVec, 0)]), clean(yvecAlign[argmax(qualVec, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
-                    offsets.push_back({ std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple), float(e[k]), qualVec[e[k]][1]});
+                    offsets[k][0] = std::get<0>(tuple);
+                    offsets[k][1] = std::get<1>(tuple);
+                    offsets[k][2] = std::get<2>(tuple);
+                    offsets[k][3] = float(qualVec[e[k]][1]);
+                    stackArray[k] = lightFrameArray[e[k]];
                 }
             }
 
@@ -379,6 +385,7 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
             elapsedTime = ms_int.count();
 
             writeCSV(path + parameterDir + "offsets" + filter + ".csv", offsets);
+            writeStrings(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
 
             std::vector xRef = clean(xvec[argmax(qualVec, 0)]);
             std::vector yRef = clean(yvec[argmax(qualVec, 0)]);
@@ -425,34 +432,30 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
 int CppCLRWinFormsProject::Form1::Stack() {
     int elapsedTime = 0;
 
-    std::string lightFrameArrayPath =  path + parameterDir + "lightFrameArray" +  filter + ".csv";
+    std::string stackArrayPath =  path + parameterDir + "stackArray" +  filter + ".csv";
     std::string offsetsPath =  path + parameterDir + "offsets" +  filter + ".csv";
 
-    bool filesExist = (std::filesystem::exists(lightFrameArrayPath) && std::filesystem::exists(offsetsPath));
+    bool filesExist = (std::filesystem::exists(stackArrayPath) && std::filesystem::exists(offsetsPath));
 
     if (filesExist)
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
-        std::vector<std::string> lightFrameArray = readStrings(lightFrameArrayPath);
-        std::vector<std::vector<float>> offsets = readCSV(offsetsPath, size(lightFrameArray), 5);
+        std::vector<std::string> stackArray = readStrings(stackArrayPath);
+        std::vector<std::vector<float>> offsets = readCSV(offsetsPath, size(stackArray), 4);
 
         std::vector<float> th(offsets.size());
         std::vector<float> dx(offsets.size());
         std::vector<float> dy(offsets.size());
-        std::vector<float> e(offsets.size());
         std::vector<float> background(offsets.size());
 
         float mean_background = 0;
-
-        std::ofstream out(path + parameterDir + "output.txt");
 
         for (int i = 0; i < offsets.size(); i++) {
             th[i] = offsets[i][0];
             dx[i] = offsets[i][1];
             dy[i] = offsets[i][2];
-            e[i] = offsets[i][3];
-            background[i] = offsets[i][4];
+            background[i] = offsets[i][3];
             mean_background = mean_background + background[i]/float(offsets.size());
         }
 
@@ -460,9 +463,9 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
         int k = 0;
         int i = 0;
-        std::vector<int> m(e.size());
+        std::vector<int> m(offsets.size());
 
-        for (int j = 0; j < e.size(); j++)
+        for (int j = 0; j < offsets.size(); j++)
         {
             m[j] = j;
         }
@@ -470,10 +473,9 @@ int CppCLRWinFormsProject::Form1::Stack() {
         unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
         shuffle(m.begin(), m.end(), std::default_random_engine(seed));
 
-        while ((k < e.size())) {
+        while ((k < offsets.size())) {
             i = m[k];
-            out << k << " " << i << "\n";
-            cv::Mat lightFrame = cv::imread(lightFrameArray[e[i]], cv::IMREAD_GRAYSCALE);
+            cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_GRAYSCALE);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
 
             lightFrame *= mean_background / background[i];
@@ -482,23 +484,24 @@ int CppCLRWinFormsProject::Form1::Stack() {
          
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
-            addWeighted(stackFrame, 1, lightFrame, 1/float(e.size()), 0.0, stackFrame);
+            addWeighted(stackFrame, 1, lightFrame, 1/float(offsets.size()), 0.0, stackFrame);
 
             k++;
         } 
 
-        int scaling = 4;
-        cv::Mat small;
-        cv::resize(stackFrame, small, cv::Size(stackFrame.cols / scaling, stackFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
-        imwrite(path + outDir + "out.tif", stackFrame);
-
-        cv::imshow("Stack", small*10);
-        cv::waitKey(0);
-        cv::destroyAllWindows();
+        imwrite(path + outDir + "out" + filter + ".tif", stackFrame);
 
         auto t2 = std::chrono::high_resolution_clock::now();
         auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
         elapsedTime = ms_int.count();
+
+        int scaling = 4;
+        cv::Mat small;
+        cv::resize(stackFrame, small, cv::Size(stackFrame.cols / scaling, stackFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
+
+        cv::imshow("Stack", small*5);
+        cv::waitKey(0);
+        cv::destroyAllWindows();
     }
     
     return elapsedTime;
