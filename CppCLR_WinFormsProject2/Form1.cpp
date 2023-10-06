@@ -38,25 +38,25 @@ void writeStrings(std::string path, std::vector<std::string> stringArray)
     stringFileStream.close();
 }
 
-std::vector<std::vector<float>> readCSV(std::string path, int size)
+std::vector<std::vector<float>> readCSV(std::string path, int size1, int size2)
 {
-    std::vector<std::vector<float>> commaSeparatedArray;
-    std::vector<float> tmpArray(size);
+    std::vector<std::vector<float>> commaSeparatedArray(size1, std::vector<float>(size2));
     std::string line;
     std::ifstream commaSeparatedArrayStream(path);
     if (commaSeparatedArrayStream.is_open())
     {
+        int s = 0;
         int r = 0;
         while (std::getline(commaSeparatedArrayStream, line)) {
             int pos = 0;
             int r = 0;
             while (pos > -1) {
                 pos = line.find(",");
-                tmpArray[r] = stof(line.substr(0, pos));
+                commaSeparatedArray[s][r] = stof(line.substr(0, pos));
                 line.erase(0, pos + 1);
                 r++;
             }
-            commaSeparatedArray.push_back(tmpArray);
+            s++;
         }
         commaSeparatedArrayStream.close();
     }
@@ -335,12 +335,12 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
         auto t1 = std::chrono::high_resolution_clock::now();
 
         std::vector<std::string> lightFrameArray = readStrings(lightFrameArrayPath);
-        std::vector<std::vector<float>> xvec = readCSV(xvecPath, maxStars);
-        std::vector<std::vector<float>> yvec = readCSV(yvecPath, maxStars);
-        std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, 2);
-        std::vector<std::vector<float>> xvecAlign = readCSV(xvecAlignPath, maxStars);
-        std::vector<std::vector<float>> yvecAlign = readCSV(yvecAlignPath, maxStars);
-        std::vector<std::vector<float>> qualVecAlign = readCSV(qualVecAlignPath, 2);
+        std::vector<std::vector<float>> xvec = readCSV(xvecPath, size(lightFrameArray), maxStars);
+        std::vector<std::vector<float>> yvec = readCSV(yvecPath, size(lightFrameArray), maxStars);
+        std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, size(lightFrameArray), 2);
+        std::vector<std::vector<float>> xvecAlign = readCSV(xvecAlignPath, size(lightFrameArray), maxStars);
+        std::vector<std::vector<float>> yvecAlign = readCSV(yvecAlignPath, size(lightFrameArray), maxStars);
+        std::vector<std::vector<float>> qualVecAlign = readCSV(qualVecAlignPath, size(lightFrameArray), 2);
 
         if (!clean(xvec[argmax(qualVec, 0)]).empty()&&xvec[argmax(qualVec, 0)].size() >= topMatches)
         {
@@ -436,7 +436,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
         auto t1 = std::chrono::high_resolution_clock::now();
 
         std::vector<std::string> lightFrameArray = readStrings(lightFrameArrayPath);
-        std::vector<std::vector<float>> offsets = readCSV(offsetsPath, 5);
+        std::vector<std::vector<float>> offsets = readCSV(offsetsPath, size(lightFrameArray), 5);
 
         std::vector<float> th(offsets.size());
         std::vector<float> dx(offsets.size());
