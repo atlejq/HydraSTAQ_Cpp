@@ -240,9 +240,9 @@ namespace CppCLRWinFormsProject {
 			// 
 			// textBox10
 			// 
-			this->textBox10->Location = System::Drawing::Point(12, 180);
+			this->textBox10->Location = System::Drawing::Point(339, 188);
 			this->textBox10->Name = L"textBox10";
-			this->textBox10->Size = System::Drawing::Size(100, 22);
+			this->textBox10->Size = System::Drawing::Size(209, 22);
 			this->textBox10->TabIndex = 20;
 			// 
 			// trackBar1
@@ -253,7 +253,7 @@ namespace CppCLRWinFormsProject {
 			this->trackBar1->Name = L"trackBar1";
 			this->trackBar1->Size = System::Drawing::Size(104, 56);
 			this->trackBar1->TabIndex = 17;
-			this->trackBar1->Value = 50;
+			this->trackBar1->Value = 90;
 			this->trackBar1->ValueChanged += gcnew System::EventHandler(this, &Form1::trackbar1_changed);
 			// 
 			// textBox1
@@ -262,6 +262,7 @@ namespace CppCLRWinFormsProject {
 			this->textBox1->Name = L"textBox1";
 			this->textBox1->Size = System::Drawing::Size(63, 22);
 			this->textBox1->TabIndex = 18;
+			this->textBox1->Text = "90";
 			// 
 			// label1
 			// 
