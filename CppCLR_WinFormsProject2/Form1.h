@@ -65,7 +65,7 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::RadioButton^ radioButton6;
 	private: System::Windows::Forms::RadioButton^ radioButton7;
 	private: System::Windows::Forms::RadioButton^ radioButton8;
-	private: System::Windows::Forms::TextBox^ textBox10;
+	private: System::Windows::Forms::TextBox^ textBox1;
 
 	private: System::Windows::Forms::Label^ label1;
 	private: System::Windows::Forms::Label^ label2;
@@ -112,7 +112,7 @@ namespace CppCLRWinFormsProject {
 			this->numericUpDown3 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
 			this->panel2 = (gcnew System::Windows::Forms::Panel());
-			this->textBox10 = (gcnew System::Windows::Forms::TextBox());
+			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->BeginInit();
@@ -331,10 +331,10 @@ namespace CppCLRWinFormsProject {
 			// 
 			// textBox10
 			// 
-			this->textBox10->Location = System::Drawing::Point(390, 188);
-			this->textBox10->Name = L"textBox10";
-			this->textBox10->Size = System::Drawing::Size(209, 22);
-			this->textBox10->TabIndex = 20;
+			this->textBox1->Location = System::Drawing::Point(390, 188);
+			this->textBox1->Name = L"textBox10";
+			this->textBox1->Size = System::Drawing::Size(209, 22);
+			this->textBox1->TabIndex = 20;
 			// 
 			// Form1
 			// 
@@ -352,7 +352,7 @@ namespace CppCLRWinFormsProject {
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->panel2);
 			this->Controls->Add(this->panel1);
-			this->Controls->Add(this->textBox10);
+			this->Controls->Add(this->textBox1);
 			this->Name = L"Form1";
 			this->Text = L"Form1";
 			this->Load += gcnew System::EventHandler(this, &Form1::Form1_Load);
@@ -371,26 +371,25 @@ namespace CppCLRWinFormsProject {
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
 		detectionThreshold = int((numericUpDown1->Value));
 		int k = ReadImages();
-		textBox10->Clear();
-		textBox10->AppendText("Milliseconds: " + k.ToString());
+		textBox1->Clear();
+		textBox1->AppendText("Milliseconds: " + k.ToString());
 	}
 	
 	private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) {
 		topMatches = int((numericUpDown2->Value));
 		discardPercentage = int((numericUpDown3->Value));
 		int k = ComputeOffsets();
-		textBox10->Clear();
-		textBox10->AppendText("Milliseconds: " + k.ToString());
+		textBox1->Clear();
+		textBox1->AppendText("Milliseconds: " + k.ToString());
 	}
 
 	private: System::Void button3_Click(System::Object^ sender, System::EventArgs^ e) {
 		int k = Stack();
-		textBox10->Clear();
-		textBox10->AppendText("Milliseconds: " + k.ToString());
+		textBox1->Clear();
+		textBox1->AppendText("Milliseconds: " + k.ToString());
 	}
 
 	private: System::Void Form1_Load(System::Object^ sender, System::EventArgs^ e) {
-
 	}
 
 	private: System::Void textBox1_TextChanged(System::Object^ sender, System::EventArgs^ e) {
