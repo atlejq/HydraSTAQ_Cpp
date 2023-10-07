@@ -468,6 +468,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             std::vector<std::string> darkFrameArray = getFrames(path + darkDir, ext);
             if (!darkFrameArray.empty())
             {
+                #pragma omp parallel for num_threads(8)
                 for (int n = 0; n < darkFrameArray.size(); n++)
                 {
                     cv::Mat darkFrame = cv::imread(darkFrameArray[n], cv::IMREAD_GRAYSCALE);
