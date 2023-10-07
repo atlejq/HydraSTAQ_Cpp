@@ -72,6 +72,7 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::Label^ label1;
 	private: System::Windows::Forms::Panel^ panel1;
 	private: System::Windows::Forms::Panel^ panel2;
+	private: System::Windows::Forms::NumericUpDown^ numericUpDown1;
 
 	protected:
 
@@ -105,9 +106,11 @@ namespace CppCLRWinFormsProject {
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
 			this->panel2 = (gcnew System::Windows::Forms::Panel());
+			this->numericUpDown1 = (gcnew System::Windows::Forms::NumericUpDown());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->trackBar1))->BeginInit();
 			this->panel1->SuspendLayout();
 			this->panel2->SuspendLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// button1
@@ -262,7 +265,7 @@ namespace CppCLRWinFormsProject {
 			this->textBox1->Name = L"textBox1";
 			this->textBox1->Size = System::Drawing::Size(63, 22);
 			this->textBox1->TabIndex = 18;
-			this->textBox1->Text = "90";
+			this->textBox1->Text = L"90";
 			// 
 			// label1
 			// 
@@ -295,11 +298,22 @@ namespace CppCLRWinFormsProject {
 			this->panel2->Size = System::Drawing::Size(131, 156);
 			this->panel2->TabIndex = 22;
 			// 
+			// numericUpDown1
+			// 
+			this->numericUpDown1->Location = System::Drawing::Point(137, 96);
+			this->numericUpDown1->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 12, 0, 0, 0 });
+			this->numericUpDown1->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 6, 0, 0, 0 });
+			this->numericUpDown1->Name = L"numericUpDown1";
+			this->numericUpDown1->Size = System::Drawing::Size(120, 22);
+			this->numericUpDown1->TabIndex = 23;
+			this->numericUpDown1->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 6, 0, 0, 0 });
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(600, 300);
+			this->Controls->Add(this->numericUpDown1);
 			this->Controls->Add(this->panel2);
 			this->Controls->Add(this->panel1);
 			this->Controls->Add(this->label1);
@@ -317,6 +331,7 @@ namespace CppCLRWinFormsProject {
 			this->panel1->PerformLayout();
 			this->panel2->ResumeLayout(false);
 			this->panel2->PerformLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -329,6 +344,7 @@ namespace CppCLRWinFormsProject {
 	}
 	
 	private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) {
+		topMatches = int((numericUpDown1->Value));
 		int k = ComputeOffsets();
 		textBox10->Clear();
 		textBox10->AppendText("Milliseconds: " + k.ToString());
