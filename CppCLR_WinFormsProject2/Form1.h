@@ -7,7 +7,7 @@ extern std::string parameterDir;
 extern std::string outDir;
 extern std::string lightDir;
 extern std::string ext;
-extern float detectionThreshold;
+extern int detectionThreshold;
 extern float discardPercentage;
 extern int maxStars;
 extern int topMatches;
@@ -67,12 +67,16 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::RadioButton^ radioButton8;
 	private: System::Windows::Forms::TextBox^ textBox10;
 
-	private: System::Windows::Forms::TrackBar^ trackBar1;
-	private: System::Windows::Forms::TextBox^ textBox1;
 	private: System::Windows::Forms::Label^ label1;
+	private: System::Windows::Forms::Label^ label2;
+	private: System::Windows::Forms::Label^ label3;
+
+	private: System::Windows::Forms::NumericUpDown^ numericUpDown1;
+	private: System::Windows::Forms::NumericUpDown^ numericUpDown2;
+	private: System::Windows::Forms::NumericUpDown^ numericUpDown3;
+
 	private: System::Windows::Forms::Panel^ panel1;
 	private: System::Windows::Forms::Panel^ panel2;
-	private: System::Windows::Forms::NumericUpDown^ numericUpDown1;
 
 	protected:
 
@@ -100,17 +104,20 @@ namespace CppCLRWinFormsProject {
 			this->radioButton6 = (gcnew System::Windows::Forms::RadioButton());
 			this->radioButton7 = (gcnew System::Windows::Forms::RadioButton());
 			this->radioButton8 = (gcnew System::Windows::Forms::RadioButton());
-			this->textBox10 = (gcnew System::Windows::Forms::TextBox());
-			this->trackBar1 = (gcnew System::Windows::Forms::TrackBar());
-			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->label2 = (gcnew System::Windows::Forms::Label());
+			this->label3 = (gcnew System::Windows::Forms::Label());
+			this->numericUpDown1 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numericUpDown2 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numericUpDown3 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
 			this->panel2 = (gcnew System::Windows::Forms::Panel());
-			this->numericUpDown1 = (gcnew System::Windows::Forms::NumericUpDown());
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->trackBar1))->BeginInit();
+			this->textBox10 = (gcnew System::Windows::Forms::TextBox());
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->BeginInit();
 			this->panel1->SuspendLayout();
 			this->panel2->SuspendLayout();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// button1
@@ -241,40 +248,64 @@ namespace CppCLRWinFormsProject {
 			this->radioButton8->UseVisualStyleBackColor = true;
 			this->radioButton8->CheckedChanged += gcnew System::EventHandler(this, &Form1::radioButton8_CheckedChanged);
 			// 
-			// textBox10
-			// 
-			this->textBox10->Location = System::Drawing::Point(339, 188);
-			this->textBox10->Name = L"textBox10";
-			this->textBox10->Size = System::Drawing::Size(209, 22);
-			this->textBox10->TabIndex = 20;
-			// 
-			// trackBar1
-			// 
-			this->trackBar1->Location = System::Drawing::Point(117, 23);
-			this->trackBar1->Maximum = 99;
-			this->trackBar1->Minimum = 1;
-			this->trackBar1->Name = L"trackBar1";
-			this->trackBar1->Size = System::Drawing::Size(104, 56);
-			this->trackBar1->TabIndex = 17;
-			this->trackBar1->Value = 90;
-			this->trackBar1->ValueChanged += gcnew System::EventHandler(this, &Form1::trackbar1_changed);
-			// 
-			// textBox1
-			// 
-			this->textBox1->Location = System::Drawing::Point(218, 34);
-			this->textBox1->Name = L"textBox1";
-			this->textBox1->Size = System::Drawing::Size(63, 22);
-			this->textBox1->TabIndex = 18;
-			this->textBox1->Text = L"90";
-			// 
 			// label1
 			// 
 			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(134, 59);
+			this->label1->Location = System::Drawing::Point(219, 19);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(147, 16);
 			this->label1->TabIndex = 19;
 			this->label1->Text = L"Star detection threshold";
+			// 
+			// label2
+			// 
+			this->label2->AutoSize = true;
+			this->label2->Location = System::Drawing::Point(219, 63);
+			this->label2->Name = L"label2";
+			this->label2->Size = System::Drawing::Size(69, 16);
+			this->label2->TabIndex = 24;
+			this->label2->Text = L"Align stars";
+			this->label2->Click += gcnew System::EventHandler(this, &Form1::label2_Click);
+			// 
+			// label3
+			// 
+			this->label3->AutoSize = true;
+			this->label3->Location = System::Drawing::Point(219, 103);
+			this->label3->Name = L"label3";
+			this->label3->Size = System::Drawing::Size(126, 16);
+			this->label3->TabIndex = 27;
+			this->label3->Text = L"Discard percentage";
+			this->label3->Click += gcnew System::EventHandler(this, &Form1::label3_Click);
+			// 
+			// numericUpDown1
+			// 
+			this->numericUpDown1->Location = System::Drawing::Point(137, 17);
+			this->numericUpDown1->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 99, 0, 0, 0 });
+			this->numericUpDown1->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 2, 0, 0, 0 });
+			this->numericUpDown1->Name = L"numericUpDown1";
+			this->numericUpDown1->Size = System::Drawing::Size(66, 22);
+			this->numericUpDown1->TabIndex = 23;
+			this->numericUpDown1->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 50, 0, 0, 0 });
+			// 
+			// numericUpDown2
+			// 
+			this->numericUpDown2->Location = System::Drawing::Point(137, 61);
+			this->numericUpDown2->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 12, 0, 0, 0 });
+			this->numericUpDown2->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 6, 0, 0, 0 });
+			this->numericUpDown2->Name = L"numericUpDown2";
+			this->numericUpDown2->Size = System::Drawing::Size(66, 22);
+			this->numericUpDown2->TabIndex = 25;
+			this->numericUpDown2->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 6, 0, 0, 0 });
+			// 
+			// numericUpDown3
+			// 
+			this->numericUpDown3->Location = System::Drawing::Point(137, 101);
+			this->numericUpDown3->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 99, 0, 0, 0 });
+			this->numericUpDown3->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 0 });
+			this->numericUpDown3->Name = L"numericUpDown3";
+			this->numericUpDown3->Size = System::Drawing::Size(66, 22);
+			this->numericUpDown3->TabIndex = 26;
+			this->numericUpDown3->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 10, 0, 0, 0 });
 			// 
 			// panel1
 			// 
@@ -282,7 +313,7 @@ namespace CppCLRWinFormsProject {
 			this->panel1->Controls->Add(this->radioButton3);
 			this->panel1->Controls->Add(this->radioButton2);
 			this->panel1->Controls->Add(this->radioButton1);
-			this->panel1->Location = System::Drawing::Point(339, 10);
+			this->panel1->Location = System::Drawing::Point(390, 10);
 			this->panel1->Name = L"panel1";
 			this->panel1->Size = System::Drawing::Size(100, 157);
 			this->panel1->TabIndex = 21;
@@ -293,58 +324,60 @@ namespace CppCLRWinFormsProject {
 			this->panel2->Controls->Add(this->radioButton7);
 			this->panel2->Controls->Add(this->radioButton6);
 			this->panel2->Controls->Add(this->radioButton5);
-			this->panel2->Location = System::Drawing::Point(459, 10);
+			this->panel2->Location = System::Drawing::Point(510, 10);
 			this->panel2->Name = L"panel2";
 			this->panel2->Size = System::Drawing::Size(131, 156);
 			this->panel2->TabIndex = 22;
 			// 
-			// numericUpDown1
+			// textBox10
 			// 
-			this->numericUpDown1->Location = System::Drawing::Point(137, 96);
-			this->numericUpDown1->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 12, 0, 0, 0 });
-			this->numericUpDown1->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 6, 0, 0, 0 });
-			this->numericUpDown1->Name = L"numericUpDown1";
-			this->numericUpDown1->Size = System::Drawing::Size(120, 22);
-			this->numericUpDown1->TabIndex = 23;
-			this->numericUpDown1->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 6, 0, 0, 0 });
+			this->textBox10->Location = System::Drawing::Point(390, 188);
+			this->textBox10->Name = L"textBox10";
+			this->textBox10->Size = System::Drawing::Size(209, 22);
+			this->textBox10->TabIndex = 20;
 			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(600, 300);
+			this->ClientSize = System::Drawing::Size(677, 300);
+			this->Controls->Add(this->numericUpDown3);
+			this->Controls->Add(this->numericUpDown2);
 			this->Controls->Add(this->numericUpDown1);
-			this->Controls->Add(this->panel2);
-			this->Controls->Add(this->panel1);
+			this->Controls->Add(this->label3);
+			this->Controls->Add(this->label2);
 			this->Controls->Add(this->label1);
-			this->Controls->Add(this->trackBar1);
 			this->Controls->Add(this->button3);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->button1);
+			this->Controls->Add(this->panel2);
+			this->Controls->Add(this->panel1);
 			this->Controls->Add(this->textBox10);
-			this->Controls->Add(this->textBox1);
 			this->Name = L"Form1";
 			this->Text = L"Form1";
 			this->Load += gcnew System::EventHandler(this, &Form1::Form1_Load);
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->trackBar1))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->EndInit();
 			this->panel1->ResumeLayout(false);
 			this->panel1->PerformLayout();
 			this->panel2->ResumeLayout(false);
 			this->panel2->PerformLayout();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
 		}
 #pragma endregion
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
+		detectionThreshold = int((numericUpDown1->Value));
 		int k = ReadImages();
 		textBox10->Clear();
 		textBox10->AppendText("Milliseconds: " + k.ToString());
 	}
 	
 	private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) {
-		topMatches = int((numericUpDown1->Value));
+		topMatches = int((numericUpDown2->Value));
+		discardPercentage = int((numericUpDown3->Value));
 		int k = ComputeOffsets();
 		textBox10->Clear();
 		textBox10->AppendText("Milliseconds: " + k.ToString());
@@ -394,11 +427,10 @@ namespace CppCLRWinFormsProject {
 	private: System::Void radioButton8_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 		align = "L";
 	}
-	private: System::Void trackbar1_changed(System::Object^ sender, System::EventArgs^ e) {
-		textBox1->Clear();
-		int k = (trackBar1->Value);
-		textBox1->Text = String::Concat("", k);
-		detectionThreshold = float(k)/100;
-	}
+
+private: System::Void label2_Click(System::Object^ sender, System::EventArgs^ e) {
+}
+private: System::Void label3_Click(System::Object^ sender, System::EventArgs^ e) {
+}
 };
 }

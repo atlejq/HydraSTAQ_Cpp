@@ -6,7 +6,7 @@ std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
 std::string ext = ".png";
-float detectionThreshold = 0.9;
+int detectionThreshold = 0.9;
 float discardPercentage = 10;
 int maxStars = 15;
 int topMatches = 6;
@@ -278,7 +278,7 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
     for (int n = 0; n < lightFrames.size(); n++) {
         cv::Mat lightFrame = cv::imread(lightFrames[n], cv::IMREAD_GRAYSCALE);
         if (lightFrame.data != NULL) {
-            std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, detectionThreshold);
+            std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold)/100);
 
             qualVec[n][0] = starMatrix.size();
             qualVec[n][1] = cv::sum(lightFrame)[0];
