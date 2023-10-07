@@ -269,51 +269,56 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
 int CppCLRWinFormsProject::Form1::ReadImages() {
     std::vector<std::string> lightFrames = getFrames(path + lightDir + filter, ext);
     
-    auto t1 = std::chrono::high_resolution_clock::now();
+    int elapsedTime;
 
-    std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(2));
-    std::vector<std::vector<float>> xvec(lightFrames.size(), std::vector<float>(maxStars));
-    std::vector<std::vector<float>> yvec(lightFrames.size(), std::vector<float>(maxStars));
+    if (!lightFrames.empty())
+    {
+        auto t1 = std::chrono::high_resolution_clock::now();
 
-#pragma omp parallel for num_threads(8)
-    for (int n = 0; n < lightFrames.size(); n++) {
-        cv::Mat lightFrame = cv::imread(lightFrames[n], cv::IMREAD_GRAYSCALE);
-        if (lightFrame.data != NULL) {
-            std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold)/100);
+        std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(2));
+        std::vector<std::vector<float>> xvec(lightFrames.size(), std::vector<float>(maxStars));
+        std::vector<std::vector<float>> yvec(lightFrames.size(), std::vector<float>(maxStars));
 
-            qualVec[n][0] = starMatrix.size();
-            qualVec[n][1] = cv::sum(lightFrame)[0];
+        #pragma omp parallel for num_threads(8)
+        for (int n = 0; n < lightFrames.size(); n++) {
+            cv::Mat lightFrame = cv::imread(lightFrames[n], cv::IMREAD_GRAYSCALE);
+            if (lightFrame.data != NULL) {
+                std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
 
-            for (int i = 0; i < maxStars; i++) {
-                xvec[n][i] = -1;
-                yvec[n][i] = -1;
-            }
+                qualVec[n][0] = starMatrix.size();
+                qualVec[n][1] = cv::sum(lightFrame)[0];
 
-            int max = maxStars;
-            if (starMatrix.size() < maxStars) {
-                max = starMatrix.size();
-            }
+                for (int i = 0; i < maxStars; i++) {
+                    xvec[n][i] = -1;
+                    yvec[n][i] = -1;
+                }
 
-            if (starMatrix.size() > 3) {
+                int max = maxStars;
+                if (starMatrix.size() < maxStars) {
+                    max = starMatrix.size();
+                }
 
-                SortByColumn(starMatrix, 4);
+                if (starMatrix.size() > 3) {
 
-                for (int i = 0; i < max; i++) {
-                    xvec[n][i] = starMatrix[i][0];
-                    yvec[n][i] = starMatrix[i][1];
+                    SortByColumn(starMatrix, 4);
+
+                    for (int i = 0; i < max; i++) {
+                        xvec[n][i] = starMatrix[i][0];
+                        yvec[n][i] = starMatrix[i][1];
+                    }
                 }
             }
         }
+        auto t2 = std::chrono::high_resolution_clock::now();
+        auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
+        elapsedTime = ms_int.count();
+
+        writeStrings(path + parameterDir + "lightFrameArray" + filter + ".csv", lightFrames);
+        writeCSV(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
+        writeCSV(path + parameterDir + "xvec" + filter + ".csv", xvec);
+        writeCSV(path + parameterDir + "yvec" + filter + ".csv", yvec);
     }
-    auto t2 = std::chrono::high_resolution_clock::now();
-    auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-
-    writeStrings(path + parameterDir + "lightFrameArray" + filter + ".csv", lightFrames);
-    writeCSV(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
-    writeCSV(path + parameterDir + "xvec" + filter + ".csv", xvec);
-    writeCSV(path + parameterDir + "yvec" + filter + ".csv", yvec);
-
-    return ms_int.count();
+    return elapsedTime;
 }
 
 int CppCLRWinFormsProject::Form1::ComputeOffsets() {
@@ -450,11 +455,13 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
 
         cv::Mat masterDarkFrame(2822, 4144, CV_32FC1, cv::Scalar(0));
-        bool masterDarkExists = std::filesystem::exists(path + darkDir + "masterDarkFrame" + filter + ".tif");
+
+        std::string masterDarkPath = (path + darkDir + "masterDarkFrame" + filter + ".tif");
+        bool masterDarkExists = std::filesystem::exists(masterDarkPath);
 
         if(masterDarkExists)
         {
-            masterDarkFrame = cv::imread(path + darkDir + "masterDarkFrame" + filter + ".tif", cv::IMREAD_ANYDEPTH);
+            masterDarkFrame = cv::imread(masterDarkPath, cv::IMREAD_ANYDEPTH);
         }
         else
         {
@@ -467,7 +474,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
                     darkFrame.convertTo(darkFrame, CV_32FC1, 1.0 / pow(255, darkFrame.elemSize()));
                     addWeighted(masterDarkFrame, 1, darkFrame, 1 / float(darkFrameArray.size()), 0.0, masterDarkFrame);
                 }
-                imwrite(path + darkDir + "masterDarkFrame" + filter + ".tif", masterDarkFrame);
+                imwrite(masterDarkPath, masterDarkFrame);
             }
         }
 
