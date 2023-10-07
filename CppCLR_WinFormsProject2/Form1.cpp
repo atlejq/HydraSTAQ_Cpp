@@ -401,7 +401,7 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
             
             int scaling = 4;
 
-            cv::Mat maxQualFrame = cv::imread(lightFrameArray[argmax(qualVec, 0)], cv::IMREAD_GRAYSCALE);
+            cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[argmax(qualVecAlign, 0)], cv::IMREAD_GRAYSCALE);
             cv::Mat small;
 
             cv::resize(maxQualFrame, small, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
