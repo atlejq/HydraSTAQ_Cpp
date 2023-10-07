@@ -479,20 +479,16 @@ int CppCLRWinFormsProject::Form1::Stack() {
         unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
         shuffle(m.begin(), m.end(), std::default_random_engine(seed));
 
-        while ((k < offsets.size())) {
+        for (k = 0; k<offsets.size(); k++) {           
             i = m[k];
             cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_GRAYSCALE);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
-
             lightFrame *= mean_background / background[i];
             //lightFrame -= darkFrame;
-            //lightFrame /= flatFrame;
-         
+            //lightFrame /= flatFrame; 
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
-            addWeighted(stackFrame, 1, lightFrame, 1/float(offsets.size()), 0.0, stackFrame);
-
-            k++;
+            addWeighted(stackFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, stackFrame);                
         } 
 
         imwrite(path + outDir + "out" + filter + ".tif", stackFrame);
