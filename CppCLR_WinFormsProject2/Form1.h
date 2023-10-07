@@ -55,8 +55,8 @@ namespace CppCLRWinFormsProject {
 			}
 		}
 	private: System::Windows::Forms::Button^ button1;
-	private: System::Windows::Forms::Button^ button2;
-	private: System::Windows::Forms::Button^ button3;
+
+
 	private: System::Windows::Forms::RadioButton^ radioButton1;
 	private: System::Windows::Forms::RadioButton^ radioButton2;
 	private: System::Windows::Forms::RadioButton^ radioButton3;
@@ -65,6 +65,10 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::RadioButton^ radioButton6;
 	private: System::Windows::Forms::RadioButton^ radioButton7;
 	private: System::Windows::Forms::RadioButton^ radioButton8;
+	private: System::Windows::Forms::RadioButton^ radioButton9;
+	private: System::Windows::Forms::RadioButton^ radioButton10;
+	private: System::Windows::Forms::RadioButton^ radioButton11;
+
 	private: System::Windows::Forms::TextBox^ textBox1;
 
 	private: System::Windows::Forms::Label^ label1;
@@ -77,6 +81,7 @@ namespace CppCLRWinFormsProject {
 
 	private: System::Windows::Forms::Panel^ panel1;
 	private: System::Windows::Forms::Panel^ panel2;
+	private: System::Windows::Forms::Panel^ panel3;
 
 	protected:
 
@@ -84,7 +89,7 @@ namespace CppCLRWinFormsProject {
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		System::ComponentModel::Container ^components;
+		System::ComponentModel::Container^ components;
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -94,8 +99,6 @@ namespace CppCLRWinFormsProject {
 		void InitializeComponent(void)
 		{
 			this->button1 = (gcnew System::Windows::Forms::Button());
-			this->button2 = (gcnew System::Windows::Forms::Button());
-			this->button3 = (gcnew System::Windows::Forms::Button());
 			this->radioButton1 = (gcnew System::Windows::Forms::RadioButton());
 			this->radioButton2 = (gcnew System::Windows::Forms::RadioButton());
 			this->radioButton3 = (gcnew System::Windows::Forms::RadioButton());
@@ -104,6 +107,9 @@ namespace CppCLRWinFormsProject {
 			this->radioButton6 = (gcnew System::Windows::Forms::RadioButton());
 			this->radioButton7 = (gcnew System::Windows::Forms::RadioButton());
 			this->radioButton8 = (gcnew System::Windows::Forms::RadioButton());
+			this->radioButton9 = (gcnew System::Windows::Forms::RadioButton());
+			this->radioButton10 = (gcnew System::Windows::Forms::RadioButton());
+			this->radioButton11 = (gcnew System::Windows::Forms::RadioButton());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->label3 = (gcnew System::Windows::Forms::Label());
@@ -112,43 +118,25 @@ namespace CppCLRWinFormsProject {
 			this->numericUpDown3 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
 			this->panel2 = (gcnew System::Windows::Forms::Panel());
+			this->panel3 = (gcnew System::Windows::Forms::Panel());
 			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->BeginInit();
 			this->panel1->SuspendLayout();
 			this->panel2->SuspendLayout();
+			this->panel3->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// button1
 			// 
-			this->button1->Location = System::Drawing::Point(10, 20);
+			this->button1->Location = System::Drawing::Point(20, 146);
 			this->button1->Name = L"button1";
 			this->button1->Size = System::Drawing::Size(74, 23);
 			this->button1->TabIndex = 0;
-			this->button1->Text = L"Read";
+			this->button1->Text = L"Execute";
 			this->button1->UseVisualStyleBackColor = true;
 			this->button1->Click += gcnew System::EventHandler(this, &Form1::button1_Click);
-			// 
-			// button2
-			// 
-			this->button2->Location = System::Drawing::Point(10, 60);
-			this->button2->Name = L"button2";
-			this->button2->Size = System::Drawing::Size(74, 23);
-			this->button2->TabIndex = 7;
-			this->button2->Text = L"Offsets";
-			this->button2->UseVisualStyleBackColor = true;
-			this->button2->Click += gcnew System::EventHandler(this, &Form1::button2_Click);
-			// 
-			// button3
-			// 
-			this->button3->Location = System::Drawing::Point(10, 100);
-			this->button3->Name = L"button3";
-			this->button3->Size = System::Drawing::Size(74, 23);
-			this->button3->TabIndex = 8;
-			this->button3->Text = L"Stack";
-			this->button3->UseVisualStyleBackColor = true;
-			this->button3->Click += gcnew System::EventHandler(this, &Form1::button3_Click);
 			// 
 			// radioButton1
 			// 
@@ -248,6 +236,40 @@ namespace CppCLRWinFormsProject {
 			this->radioButton8->UseVisualStyleBackColor = true;
 			this->radioButton8->CheckedChanged += gcnew System::EventHandler(this, &Form1::radioButton8_CheckedChanged);
 			// 
+			// radioButton9
+			// 
+			this->radioButton9->AutoSize = true;
+			this->radioButton9->Location = System::Drawing::Point(8, 9);
+			this->radioButton9->Name = L"radioButton9";
+			this->radioButton9->Size = System::Drawing::Size(62, 20);
+			this->radioButton9->TabIndex = 28;
+			this->radioButton9->TabStop = true;
+			this->radioButton9->Text = L"Read";
+			this->radioButton9->Checked = true;
+			this->radioButton9->UseVisualStyleBackColor = true;
+			// 
+			// radioButton10
+			// 
+			this->radioButton10->AutoSize = true;
+			this->radioButton10->Location = System::Drawing::Point(8, 49);
+			this->radioButton10->Name = L"radioButton10";
+			this->radioButton10->Size = System::Drawing::Size(69, 20);
+			this->radioButton10->TabIndex = 29;
+			this->radioButton10->TabStop = true;
+			this->radioButton10->Text = L"Offsets";
+			this->radioButton10->UseVisualStyleBackColor = true;
+			// 
+			// radioButton11
+			// 
+			this->radioButton11->AutoSize = true;
+			this->radioButton11->Location = System::Drawing::Point(8, 91);
+			this->radioButton11->Name = L"radioButton11";
+			this->radioButton11->Size = System::Drawing::Size(62, 20);
+			this->radioButton11->TabIndex = 30;
+			this->radioButton11->TabStop = true;
+			this->radioButton11->Text = L"Stack";
+			this->radioButton11->UseVisualStyleBackColor = true;
+			// 
 			// label1
 			// 
 			this->label1->AutoSize = true;
@@ -329,12 +351,22 @@ namespace CppCLRWinFormsProject {
 			this->panel2->Size = System::Drawing::Size(131, 156);
 			this->panel2->TabIndex = 22;
 			// 
-			// textBox10
+			// textBox1
 			// 
 			this->textBox1->Location = System::Drawing::Point(390, 188);
-			this->textBox1->Name = L"textBox10";
+			this->textBox1->Name = L"textBox1";
 			this->textBox1->Size = System::Drawing::Size(209, 22);
 			this->textBox1->TabIndex = 20;
+			// 
+			// panel3
+			// 
+			this->panel3->Controls->Add(this->radioButton9);
+			this->panel3->Controls->Add(this->radioButton11);
+			this->panel3->Controls->Add(this->radioButton10);
+			this->panel3->Location = System::Drawing::Point(12, 10);
+			this->panel3->Name = L"panel3";
+			this->panel3->Size = System::Drawing::Size(92, 130);
+			this->panel3->TabIndex = 31;
 			// 
 			// Form1
 			// 
@@ -347,11 +379,10 @@ namespace CppCLRWinFormsProject {
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->label2);
 			this->Controls->Add(this->label1);
-			this->Controls->Add(this->button3);
-			this->Controls->Add(this->button2);
-			this->Controls->Add(this->button1);
+			this->Controls->Add(this->panel3);
 			this->Controls->Add(this->panel2);
 			this->Controls->Add(this->panel1);
+			this->Controls->Add(this->button1);
 			this->Controls->Add(this->textBox1);
 			this->Name = L"Form1";
 			this->Text = L"Form1";
@@ -363,30 +394,44 @@ namespace CppCLRWinFormsProject {
 			this->panel1->PerformLayout();
 			this->panel2->ResumeLayout(false);
 			this->panel2->PerformLayout();
+			this->panel3->ResumeLayout(false);
+			this->panel3->PerformLayout();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
 		}
 #pragma endregion
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
-		detectionThreshold = int((numericUpDown1->Value));
-		int k = ReadImages();
-		textBox1->Clear();
-		textBox1->AppendText("Milliseconds: " + k.ToString());
-	}
-	
-	private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) {
-		topMatches = int((numericUpDown2->Value));
-		discardPercentage = int((numericUpDown3->Value));
-		int k = ComputeOffsets();
+		int k = 0;
+
+		if((radioButton9->Checked))
+		{
+			detectionThreshold = int((numericUpDown1->Value));
+			k = ReadImages();
+		}
+
+		if ((radioButton10->Checked))
+		{
+			topMatches = int((numericUpDown2->Value));
+			discardPercentage = int((numericUpDown3->Value));
+		    k = ComputeOffsets();
+		}
+
+		if ((radioButton11->Checked))
+		{
+		    k = Stack();
+		}
+
 		textBox1->Clear();
 		textBox1->AppendText("Milliseconds: " + k.ToString());
 	}
 
+	private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) {
+
+	}
+
 	private: System::Void button3_Click(System::Object^ sender, System::EventArgs^ e) {
-		int k = Stack();
-		textBox1->Clear();
-		textBox1->AppendText("Milliseconds: " + k.ToString());
+
 	}
 
 	private: System::Void Form1_Load(System::Object^ sender, System::EventArgs^ e) {
@@ -394,7 +439,7 @@ namespace CppCLRWinFormsProject {
 
 	private: System::Void textBox1_TextChanged(System::Object^ sender, System::EventArgs^ e) {
 	}
-	
+
 	private: System::Void radioButton1_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 		filter = "R";
 	}
@@ -427,9 +472,10 @@ namespace CppCLRWinFormsProject {
 		align = "L";
 	}
 
-private: System::Void label2_Click(System::Object^ sender, System::EventArgs^ e) {
-}
-private: System::Void label3_Click(System::Object^ sender, System::EventArgs^ e) {
-}
-};
+	private: System::Void label2_Click(System::Object^ sender, System::EventArgs^ e) {
+	}
+	private: System::Void label3_Click(System::Object^ sender, System::EventArgs^ e) {
+	}
+
+	};
 }
