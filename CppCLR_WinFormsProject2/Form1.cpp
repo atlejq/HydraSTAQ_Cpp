@@ -5,6 +5,7 @@ std::string path = "C:/F/astro/matlab/m1test/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
+std::string darkDir = "/darks/";
 std::string ext = ".png";
 int detectionThreshold = 0.9;
 float discardPercentage = 10;
@@ -447,6 +448,29 @@ int CppCLRWinFormsProject::Form1::Stack() {
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
+
+        cv::Mat masterDarkFrame(2822, 4144, CV_32FC1, cv::Scalar(0));
+        bool masterDarkExists = std::filesystem::exists(path + darkDir + "masterDarkFrame" + filter + ".tif");
+
+        if(masterDarkExists)
+        {
+            masterDarkFrame = cv::imread(path + darkDir + "masterDarkFrame" + filter + ".tif", cv::IMREAD_ANYDEPTH);
+        }
+        else
+        {
+            std::vector<std::string> darkFrameArray = getFrames(path + darkDir, ext);
+            if (!darkFrameArray.empty())
+            {
+                for (int n = 0; n < darkFrameArray.size(); n++)
+                {
+                    cv::Mat darkFrame = cv::imread(darkFrameArray[n], cv::IMREAD_GRAYSCALE);
+                    darkFrame.convertTo(darkFrame, CV_32FC1, 1.0 / pow(255, darkFrame.elemSize()));
+                    addWeighted(masterDarkFrame, 1, darkFrame, 1 / float(darkFrameArray.size()), 0.0, masterDarkFrame);
+                }
+                imwrite(path + darkDir + "masterDarkFrame" + filter + ".tif", masterDarkFrame);
+            }
+        }
+
         std::vector<std::string> stackArray = readStrings(stackArrayPath);
         std::vector<std::vector<float>> offsets = readCSV(offsetsPath, size(stackArray), 4);
 
@@ -484,7 +508,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_GRAYSCALE);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame *= mean_background / background[i];
-            //lightFrame -= darkFrame;
+            lightFrame -= masterDarkFrame;
             //lightFrame /= flatFrame; 
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);

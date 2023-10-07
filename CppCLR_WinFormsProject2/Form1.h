@@ -6,6 +6,7 @@ extern std::string path;
 extern std::string parameterDir;
 extern std::string outDir;
 extern std::string lightDir;
+extern std::string darkDir;
 extern std::string ext;
 extern int detectionThreshold;
 extern float discardPercentage;
