@@ -239,14 +239,15 @@ namespace CppCLRWinFormsProject {
 			// radioButton9
 			// 
 			this->radioButton9->AutoSize = true;
+			this->radioButton9->Checked = true;
 			this->radioButton9->Location = System::Drawing::Point(8, 9);
 			this->radioButton9->Name = L"radioButton9";
 			this->radioButton9->Size = System::Drawing::Size(62, 20);
 			this->radioButton9->TabIndex = 28;
 			this->radioButton9->TabStop = true;
 			this->radioButton9->Text = L"Read";
-			this->radioButton9->Checked = true;
 			this->radioButton9->UseVisualStyleBackColor = true;
+			this->radioButton9->CheckedChanged += gcnew System::EventHandler(this, &Form1::radioButton9_CheckedChanged);
 			// 
 			// radioButton10
 			// 
@@ -258,6 +259,8 @@ namespace CppCLRWinFormsProject {
 			this->radioButton10->TabStop = true;
 			this->radioButton10->Text = L"Offsets";
 			this->radioButton10->UseVisualStyleBackColor = true;
+			this->radioButton10->CheckedChanged += gcnew System::EventHandler(this, &Form1::radioButton10_CheckedChanged);
+
 			// 
 			// radioButton11
 			// 
@@ -269,6 +272,7 @@ namespace CppCLRWinFormsProject {
 			this->radioButton11->TabStop = true;
 			this->radioButton11->Text = L"Stack";
 			this->radioButton11->UseVisualStyleBackColor = true;
+			this->radioButton11->CheckedChanged += gcnew System::EventHandler(this, &Form1::radioButton11_CheckedChanged);
 			// 
 			// label1
 			// 
@@ -311,6 +315,7 @@ namespace CppCLRWinFormsProject {
 			// 
 			// numericUpDown2
 			// 
+			this->numericUpDown2->Enabled = false;
 			this->numericUpDown2->Location = System::Drawing::Point(137, 61);
 			this->numericUpDown2->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 12, 0, 0, 0 });
 			this->numericUpDown2->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 6, 0, 0, 0 });
@@ -321,6 +326,7 @@ namespace CppCLRWinFormsProject {
 			// 
 			// numericUpDown3
 			// 
+			this->numericUpDown3->Enabled = false;
 			this->numericUpDown3->Location = System::Drawing::Point(137, 101);
 			this->numericUpDown3->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 99, 0, 0, 0 });
 			this->numericUpDown3->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 0 });
@@ -351,13 +357,6 @@ namespace CppCLRWinFormsProject {
 			this->panel2->Size = System::Drawing::Size(131, 156);
 			this->panel2->TabIndex = 22;
 			// 
-			// textBox1
-			// 
-			this->textBox1->Location = System::Drawing::Point(390, 188);
-			this->textBox1->Name = L"textBox1";
-			this->textBox1->Size = System::Drawing::Size(209, 22);
-			this->textBox1->TabIndex = 20;
-			// 
 			// panel3
 			// 
 			this->panel3->Controls->Add(this->radioButton9);
@@ -367,6 +366,13 @@ namespace CppCLRWinFormsProject {
 			this->panel3->Name = L"panel3";
 			this->panel3->Size = System::Drawing::Size(92, 130);
 			this->panel3->TabIndex = 31;
+			// 
+			// textBox1
+			// 
+			this->textBox1->Location = System::Drawing::Point(390, 188);
+			this->textBox1->Name = L"textBox1";
+			this->textBox1->Size = System::Drawing::Size(209, 22);
+			this->textBox1->TabIndex = 20;
 			// 
 			// Form1
 			// 
@@ -470,6 +476,24 @@ namespace CppCLRWinFormsProject {
 
 	private: System::Void radioButton8_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 		align = "L";
+	}
+
+	private: System::Void radioButton9_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
+		numericUpDown1->Enabled = true;
+		numericUpDown2->Enabled = false;
+		numericUpDown3->Enabled = false;
+	}
+
+	private: System::Void radioButton10_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
+		numericUpDown1->Enabled = false;
+		numericUpDown2->Enabled = true;
+		numericUpDown3->Enabled = true;
+	}
+
+	private: System::Void radioButton11_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
+		numericUpDown1->Enabled = false;
+		numericUpDown2->Enabled = false;
+		numericUpDown3->Enabled = false;
 	}
 
 	private: System::Void label2_Click(System::Object^ sender, System::EventArgs^ e) {
