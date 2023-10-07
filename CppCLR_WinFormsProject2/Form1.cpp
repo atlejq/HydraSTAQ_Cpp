@@ -265,12 +265,41 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
     return starMatrix;
 }
 
+//Function to fetch a dark frame
+cv::Mat getDarkFrame()
+{
+    cv::Mat masterDarkFrame(2822, 4144, CV_32FC1, cv::Scalar(0));
+    std::string darkPath = path + darkDir;
+    bool masterDarkExists = std::filesystem::exists(darkPath + "masterFrame" + filter + ".tif");
+
+    if (masterDarkExists)
+    {
+        masterDarkFrame = cv::imread(darkPath + "masterFrame" + filter + ".tif", cv::IMREAD_ANYDEPTH);
+    }
+    else
+    {
+        std::vector<std::string> darkFrameArray = getFrames(darkPath, ext);
+        if (!darkFrameArray.empty())
+        {
+            #pragma omp parallel for num_threads(8)
+            for (int n = 0; n < darkFrameArray.size(); n++)
+            {
+                cv::Mat darkFrame = cv::imread(darkFrameArray[n], cv::IMREAD_GRAYSCALE);
+                darkFrame.convertTo(darkFrame, CV_32FC1, 1.0 / pow(255, darkFrame.elemSize()));
+                addWeighted(masterDarkFrame, 1, darkFrame, 1 / float(darkFrameArray.size()), 0.0, masterDarkFrame);
+            }
+            imwrite(darkPath + "masterFrame" + filter + ".tif", masterDarkFrame);
+        }
+    }
+    return masterDarkFrame;
+}
+
 //Function to read images
 int CppCLRWinFormsProject::Form1::ReadImages() {
+    int elapsedTime = 0;
+
     std::vector<std::string> lightFrames = getFrames(path + lightDir + filter, ext);
     
-    int elapsedTime;
-
     if (!lightFrames.empty())
     {
         auto t1 = std::chrono::high_resolution_clock::now();
@@ -452,32 +481,8 @@ int CppCLRWinFormsProject::Form1::Stack() {
     if (filesExist)
     {
         auto t1 = std::chrono::high_resolution_clock::now();
-
-
-        cv::Mat masterDarkFrame(2822, 4144, CV_32FC1, cv::Scalar(0));
-
-        std::string masterDarkPath = (path + darkDir + "masterDarkFrame" + filter + ".tif");
-        bool masterDarkExists = std::filesystem::exists(masterDarkPath);
-
-        if(masterDarkExists)
-        {
-            masterDarkFrame = cv::imread(masterDarkPath, cv::IMREAD_ANYDEPTH);
-        }
-        else
-        {
-            std::vector<std::string> darkFrameArray = getFrames(path + darkDir, ext);
-            if (!darkFrameArray.empty())
-            {
-                #pragma omp parallel for num_threads(8)
-                for (int n = 0; n < darkFrameArray.size(); n++)
-                {
-                    cv::Mat darkFrame = cv::imread(darkFrameArray[n], cv::IMREAD_GRAYSCALE);
-                    darkFrame.convertTo(darkFrame, CV_32FC1, 1.0 / pow(255, darkFrame.elemSize()));
-                    addWeighted(masterDarkFrame, 1, darkFrame, 1 / float(darkFrameArray.size()), 0.0, masterDarkFrame);
-                }
-                imwrite(masterDarkPath, masterDarkFrame);
-            }
-        }
+      
+        cv::Mat masterDarkFrame = getDarkFrame();
 
         std::vector<std::string> stackArray = readStrings(stackArrayPath);
         std::vector<std::vector<float>> offsets = readCSV(offsetsPath, size(stackArray), 4);
