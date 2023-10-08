@@ -56,7 +56,8 @@ namespace CppCLRWinFormsProject {
 			}
 		}
 	private: System::Windows::Forms::Button^ button1;
-
+	private: System::Windows::Forms::Button^ button2;
+	private: System::Windows::Forms::FolderBrowserDialog^ folderBrowserDialog1;
 
 	private: System::Windows::Forms::RadioButton^ radioButton1;
 	private: System::Windows::Forms::RadioButton^ radioButton2;
@@ -83,8 +84,6 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::Panel^ panel1;
 	private: System::Windows::Forms::Panel^ panel2;
 	private: System::Windows::Forms::Panel^ panel3;
-	private: System::Windows::Forms::FolderBrowserDialog^ folderBrowserDialog1;
-	private: System::Windows::Forms::Button^ button2;
 
 	protected:
 
@@ -102,6 +101,8 @@ namespace CppCLRWinFormsProject {
 		void InitializeComponent(void)
 		{
 			this->button1 = (gcnew System::Windows::Forms::Button());
+			this->button2 = (gcnew System::Windows::Forms::Button());
+			this->folderBrowserDialog1 = (gcnew System::Windows::Forms::FolderBrowserDialog());
 			this->radioButton1 = (gcnew System::Windows::Forms::RadioButton());
 			this->radioButton2 = (gcnew System::Windows::Forms::RadioButton());
 			this->radioButton3 = (gcnew System::Windows::Forms::RadioButton());
@@ -123,8 +124,6 @@ namespace CppCLRWinFormsProject {
 			this->panel2 = (gcnew System::Windows::Forms::Panel());
 			this->panel3 = (gcnew System::Windows::Forms::Panel());
 			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
-			this->folderBrowserDialog1 = (gcnew System::Windows::Forms::FolderBrowserDialog());
-			this->button2 = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->BeginInit();
@@ -142,6 +141,16 @@ namespace CppCLRWinFormsProject {
 			this->button1->Text = L"Execute";
 			this->button1->UseVisualStyleBackColor = true;
 			this->button1->Click += gcnew System::EventHandler(this, &Form1::button1_Click);
+			// 
+			// button2
+			// 
+			this->button2->Location = System::Drawing::Point(20, 188);
+			this->button2->Name = L"button2";
+			this->button2->Size = System::Drawing::Size(75, 23);
+			this->button2->TabIndex = 32;
+			this->button2->Text = L"Folder";
+			this->button2->UseVisualStyleBackColor = true;
+			this->button2->Click += gcnew System::EventHandler(this, &Form1::button2_Click);
 			// 
 			// radioButton1
 			// 
@@ -376,21 +385,12 @@ namespace CppCLRWinFormsProject {
 			this->textBox1->Size = System::Drawing::Size(209, 22);
 			this->textBox1->TabIndex = 20;
 			// 
-			// button2
-			// 
-			this->button2->Location = System::Drawing::Point(20, 188);
-			this->button2->Name = L"button2";
-			this->button2->Size = System::Drawing::Size(75, 23);
-			this->button2->TabIndex = 32;
-			this->button2->Text = L"Folder";
-			this->button2->UseVisualStyleBackColor = true;
-			this->button2->Click += gcnew System::EventHandler(this, &Form1::button2_Click_1);
-			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(677, 300);
+			this->Controls->Add(this->button1);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->numericUpDown3);
 			this->Controls->Add(this->numericUpDown2);
@@ -401,7 +401,6 @@ namespace CppCLRWinFormsProject {
 			this->Controls->Add(this->panel3);
 			this->Controls->Add(this->panel2);
 			this->Controls->Add(this->panel1);
-			this->Controls->Add(this->button1);
 			this->Controls->Add(this->textBox1);
 			this->Name = L"Form1";
 			this->Text = L"Form1";
@@ -443,14 +442,6 @@ namespace CppCLRWinFormsProject {
 
 		textBox1->Clear();
 		textBox1->AppendText("Milliseconds: " + k.ToString());
-	}
-
-	private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) {
-
-	}
-
-	private: System::Void button3_Click(System::Object^ sender, System::EventArgs^ e) {
-
 	}
 
 	private: System::Void Form1_Load(System::Object^ sender, System::EventArgs^ e) {
@@ -509,7 +500,7 @@ namespace CppCLRWinFormsProject {
 		numericUpDown3->Enabled = false;
 	}
 
-	private: System::Void button2_Click_1(System::Object^ sender, System::EventArgs^ e) {
+	private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) {
 		if (folderBrowserDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
 		{
 			textBox1->Text = folderBrowserDialog1->SelectedPath;
@@ -517,7 +508,6 @@ namespace CppCLRWinFormsProject {
 			MarshalString((folderBrowserDialog1->SelectedPath), os);
 			path = os;
 
-			//path = msclr::interop::marshal_as<std::string>(folderBrowserDialog1->SelectedPath);
 		}
 	}
 
