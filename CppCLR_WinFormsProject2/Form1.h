@@ -83,6 +83,8 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::Panel^ panel1;
 	private: System::Windows::Forms::Panel^ panel2;
 	private: System::Windows::Forms::Panel^ panel3;
+	private: System::Windows::Forms::FolderBrowserDialog^ folderBrowserDialog1;
+	private: System::Windows::Forms::Button^ button2;
 
 	protected:
 
@@ -121,6 +123,8 @@ namespace CppCLRWinFormsProject {
 			this->panel2 = (gcnew System::Windows::Forms::Panel());
 			this->panel3 = (gcnew System::Windows::Forms::Panel());
 			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
+			this->folderBrowserDialog1 = (gcnew System::Windows::Forms::FolderBrowserDialog());
+			this->button2 = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->BeginInit();
@@ -261,7 +265,6 @@ namespace CppCLRWinFormsProject {
 			this->radioButton10->Text = L"Offsets";
 			this->radioButton10->UseVisualStyleBackColor = true;
 			this->radioButton10->CheckedChanged += gcnew System::EventHandler(this, &Form1::radioButton10_CheckedChanged);
-
 			// 
 			// radioButton11
 			// 
@@ -292,7 +295,6 @@ namespace CppCLRWinFormsProject {
 			this->label2->Size = System::Drawing::Size(69, 16);
 			this->label2->TabIndex = 24;
 			this->label2->Text = L"Align stars";
-			this->label2->Click += gcnew System::EventHandler(this, &Form1::label2_Click);
 			// 
 			// label3
 			// 
@@ -302,7 +304,6 @@ namespace CppCLRWinFormsProject {
 			this->label3->Size = System::Drawing::Size(126, 16);
 			this->label3->TabIndex = 27;
 			this->label3->Text = L"Discard percentage";
-			this->label3->Click += gcnew System::EventHandler(this, &Form1::label3_Click);
 			// 
 			// numericUpDown1
 			// 
@@ -375,11 +376,22 @@ namespace CppCLRWinFormsProject {
 			this->textBox1->Size = System::Drawing::Size(209, 22);
 			this->textBox1->TabIndex = 20;
 			// 
+			// button2
+			// 
+			this->button2->Location = System::Drawing::Point(20, 188);
+			this->button2->Name = L"button2";
+			this->button2->Size = System::Drawing::Size(75, 23);
+			this->button2->TabIndex = 32;
+			this->button2->Text = L"Folder";
+			this->button2->UseVisualStyleBackColor = true;
+			this->button2->Click += gcnew System::EventHandler(this, &Form1::button2_Click_1);
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(677, 300);
+			this->Controls->Add(this->button2);
 			this->Controls->Add(this->numericUpDown3);
 			this->Controls->Add(this->numericUpDown2);
 			this->Controls->Add(this->numericUpDown1);
@@ -497,10 +509,23 @@ namespace CppCLRWinFormsProject {
 		numericUpDown3->Enabled = false;
 	}
 
-	private: System::Void label2_Click(System::Object^ sender, System::EventArgs^ e) {
-	}
-	private: System::Void label3_Click(System::Object^ sender, System::EventArgs^ e) {
+	private: System::Void button2_Click_1(System::Object^ sender, System::EventArgs^ e) {
+		if (folderBrowserDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+		{
+			textBox1->Text = folderBrowserDialog1->SelectedPath;
+			std::string os;
+			MarshalString((folderBrowserDialog1->SelectedPath), os);
+			path = os;
+
+			//path = msclr::interop::marshal_as<std::string>(folderBrowserDialog1->SelectedPath);
+		}
 	}
 
-	};
+	void MarshalString(String^ s, std::string& os) {
+		using namespace Runtime::InteropServices;
+		const char* chars =	(const char*)(Marshal::StringToHGlobalAnsi(s)).ToPointer();
+		os = chars;
+		Marshal::FreeHGlobal(IntPtr((void*)chars));
+	}
+};
 }
