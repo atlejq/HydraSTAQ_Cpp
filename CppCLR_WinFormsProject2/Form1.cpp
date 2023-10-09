@@ -547,8 +547,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
                     {
                         for (int f = 0; f < medianOver; f++)
                         {                      
-                            cv::Mat l = tempArray[f];
-                            tmpVec[f] = l.at<float>(h, j);                            
+                            tmpVec[f] = tempArray[f].at<float>(h, j);
                         }
                         std::sort(tmpVec.begin(), tmpVec.end());
                         int m = tmpVec.size() / 2;
