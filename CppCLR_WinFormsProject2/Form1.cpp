@@ -508,15 +508,18 @@ int CppCLRWinFormsProject::Form1::Stack() {
         }
 
         cv::Mat stackFrame(rows, cols, CV_32FC1, cv::Scalar(0));
+        cv::Mat tempFrame(rows, cols, CV_32FC1, cv::Scalar(0));
         std::vector<cv::Mat> tempArray(medianOver, cv::Mat(rows, cols, CV_32F));
 
-        int tempcount = 1;
+        int iterations = medianOver * (offsets.size() / medianOver);
+
+        int tempcount = 0;
 
         int k = 0;
         int i = 0;
-        std::vector<int> m(offsets.size());
+        std::vector<int> m(iterations);
 
-        for (int j = 0; j < offsets.size(); j++)
+        for (int j = 0; j < iterations; j++)
         {
             m[j] = j;
         }
@@ -524,9 +527,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
         unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
         shuffle(m.begin(), m.end(), std::default_random_engine(seed));
 
-
-        //for (k = 0; k<offsets.size(); k++) {           
-        for (k = 0; k<medianOver; k++) {
+        for (k = 0; k<iterations; k++) {
             i = m[k];
             cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_GRAYSCALE);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
@@ -536,26 +537,29 @@ int CppCLRWinFormsProject::Form1::Stack() {
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
             //addWeighted(stackFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, stackFrame);
-            tempArray[k] = lightFrame;
+            tempArray[tempcount] = lightFrame;
             tempcount++;
             if (((k + 1) % medianOver) == 0) {
     
                 std::vector<float> tmpVec(medianOver);
+
                 for (int j = 0; j < lightFrame.cols; j++)
                 {
                     for (int h = 0; h < lightFrame.rows; h++)
                     {
                         for (int f = 0; f < medianOver; f++)
-                        {                      
+                        {                    
                             tmpVec[f] = tempArray[f].at<float>(h, j);
                         }
                         std::sort(tmpVec.begin(), tmpVec.end());
                         int m = tmpVec.size() / 2;
                         float median = ((tmpVec[m] + tmpVec[tmpVec.size() - m - 1]) / 2);
-                        stackFrame.at<float>(h, j) = median;
+                        tempFrame.at<float>(h, j) = median;
+                        
                     }
                 }              
                 tempcount = 0;
+                addWeighted(stackFrame, 1, tempFrame, 1/float(offsets.size() / medianOver), 0.0, stackFrame);
             }
         } 
 
