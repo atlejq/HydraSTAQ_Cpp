@@ -475,7 +475,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
     int rows = 2822;
     int cols = 4144;
-    int medianOver
+    int medianOver = 30;
     int scaling = 4;
 
     std::string stackArrayPath =  path + parameterDir + "stackArray" +  filter + ".csv";
@@ -508,6 +508,9 @@ int CppCLRWinFormsProject::Form1::Stack() {
         }
 
         cv::Mat stackFrame(rows, cols, CV_32FC1, cv::Scalar(0));
+        std::vector<cv::Mat> tempArray(medianOver, cv::Mat(rows, cols, CV_32F));
+
+        int tempcount = 1;
 
         int k = 0;
         int i = 0;
@@ -521,9 +524,9 @@ int CppCLRWinFormsProject::Form1::Stack() {
         unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
         shuffle(m.begin(), m.end(), std::default_random_engine(seed));
 
-        std::vector<std::vector<std::vector<float>>> temparray(rows, std::vector<std::vector<float>>(cols, std::vector<float>(medianOver, 0.0)));
 
-        for (k = 0; k<offsets.size(); k++) {           
+        //for (k = 0; k<offsets.size(); k++) {           
+        for (k = 0; k<30; k++) {           
             i = m[k];
             cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_GRAYSCALE);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
@@ -532,7 +535,13 @@ int CppCLRWinFormsProject::Form1::Stack() {
             //lightFrame /= flatFrame; 
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
-            addWeighted(stackFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, stackFrame);                
+            //addWeighted(stackFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, stackFrame);
+            tempArray[k] = lightFrame;
+            tempcount++;
+            if (((k + 1) % medianOver) == 0) {
+    
+                tempcount = 1;
+            }
         } 
 
         imwrite(path + outDir + "out" + filter + ".tif", stackFrame);
