@@ -475,7 +475,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
     int rows = 2822;
     int cols = 4144;
-    int medianOver = 30;
+    int medianOver = 10;
     int scaling = 4;
 
     std::string stackArrayPath =  path + parameterDir + "stackArray" +  filter + ".csv";
@@ -526,7 +526,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
 
         //for (k = 0; k<offsets.size(); k++) {           
-        for (k = 0; k<30; k++) {           
+        for (k = 0; k<10; k++) {           
             i = m[k];
             cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_GRAYSCALE);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
@@ -540,7 +540,25 @@ int CppCLRWinFormsProject::Form1::Stack() {
             tempcount++;
             if (((k + 1) % medianOver) == 0) {
     
-                tempcount = 1;
+                std::vector<float> tmpVec(medianOver);
+                for (int j = 0; j < lightFrame.cols; j++)
+                {
+                    for (int h = 0; h < lightFrame.rows; h++)
+                    {
+                        for (int f = 0; f < medianOver; f++)
+                        {                      
+                            cv::Mat l = tempArray[f];
+                            tmpVec[f] = l.at<float>(h, j);
+
+                            
+                        }
+                        std::sort(tmpVec.begin(), tmpVec.end());
+                        int m = tmpVec.size() / 2;
+                        float median = ((tmpVec[m] + tmpVec[tmpVec.size() - m - 1]) / 2);
+                        stackFrame.at<float>(h, j) = median;
+                    }
+                }              
+                tempcount = 0;
             }
         } 
 
