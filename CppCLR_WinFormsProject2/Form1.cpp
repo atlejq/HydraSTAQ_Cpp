@@ -473,6 +473,11 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
 int CppCLRWinFormsProject::Form1::Stack() {
     int elapsedTime = 0;
 
+    int rows = 2822;
+    int cols = 4144;
+    int medianOver
+    int scaling = 4;
+
     std::string stackArrayPath =  path + parameterDir + "stackArray" +  filter + ".csv";
     std::string offsetsPath =  path + parameterDir + "offsets" +  filter + ".csv";
 
@@ -502,7 +507,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             mean_background = mean_background + background[i]/float(offsets.size());
         }
 
-        cv::Mat stackFrame(2822, 4144, CV_32FC1, cv::Scalar(0));
+        cv::Mat stackFrame(rows, cols, CV_32FC1, cv::Scalar(0));
 
         int k = 0;
         int i = 0;
@@ -515,6 +520,8 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
         unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
         shuffle(m.begin(), m.end(), std::default_random_engine(seed));
+
+        std::vector<std::vector<std::vector<float>>> temparray(rows, std::vector<std::vector<float>>(cols, std::vector<float>(medianOver, 0.0)));
 
         for (k = 0; k<offsets.size(); k++) {           
             i = m[k];
@@ -534,7 +541,6 @@ int CppCLRWinFormsProject::Form1::Stack() {
         auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
         elapsedTime = ms_int.count();
 
-        int scaling = 4;
         cv::Mat small;
         cv::resize(stackFrame, small, cv::Size(stackFrame.cols / scaling, stackFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
 
