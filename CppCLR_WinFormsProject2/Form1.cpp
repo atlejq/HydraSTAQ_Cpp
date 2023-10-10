@@ -592,7 +592,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
                     {
                         lightFrame.at<float>(h, j) = medianFrame.at<float>(h, j);
                     }
-                    if (lightFrame.at<float>(h, j) > (medianFrame.at<float>(h, j) + 0.5 * sqrt(medianFrame.at<float>(h, j))))
+                    if (lightFrame.at<float>(h, j) < (medianFrame.at<float>(h, j) - 0.5 * sqrt(medianFrame.at<float>(h, j))))
                     {
                         lightFrame.at<float>(h, j) = medianFrame.at<float>(h, j);
                     }
