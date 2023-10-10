@@ -507,7 +507,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             mean_background = mean_background + background[i]/float(offsets.size());
         }
 
-        cv::Mat stackFrame(rows, cols, CV_32FC1, cv::Scalar(0));
+        cv::Mat medianFrame(rows, cols, CV_32FC1, cv::Scalar(0));
         cv::Mat tempFrame(rows, cols, CV_32FC1, cv::Scalar(0));
         std::vector<cv::Mat> tempArray(medianOver, cv::Mat(rows, cols, CV_32F));
 
@@ -518,10 +518,16 @@ int CppCLRWinFormsProject::Form1::Stack() {
         int k = 0;
         int i = 0;
         std::vector<int> m(iterations);
-
+        std::vector<int> m2(offsets.size());
+        
         for (int j = 0; j < iterations; j++)
         {
             m[j] = j;
+        }
+
+        for (int j = 0; j < offsets.size(); j++)
+        {
+            m2[j] = j;
         }
 
         unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -554,16 +560,17 @@ int CppCLRWinFormsProject::Form1::Stack() {
                         std::sort(tmpVec.begin(), tmpVec.end());
                         int m = tmpVec.size() / 2;
                         float median = ((tmpVec[m] + tmpVec[tmpVec.size() - m - 1]) / 2);
-                        tempFrame.at<float>(h, j) = median;
-                        
+                        tempFrame.at<float>(h, j) = median;                       
                     }
                 }              
                 tempcount = 0;
-                addWeighted(stackFrame, 1, tempFrame, 1/float(offsets.size() / medianOver), 0.0, stackFrame);
+                addWeighted(medianFrame, 1, tempFrame, 1/float(offsets.size() / medianOver), 0.0, medianFrame);
             }
         } 
 
-        imwrite(path + outDir + "out" + filter + ".tif", stackFrame);
+
+
+        imwrite(path + outDir + "out" + filter + ".tif", medianFrame);
 
         auto t2 = std::chrono::high_resolution_clock::now();
         auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
