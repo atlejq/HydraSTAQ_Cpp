@@ -507,6 +507,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             mean_background = mean_background + background[i]/float(offsets.size());
         }
 
+        cv::Mat meanFrame(rows, cols, CV_32FC1, cv::Scalar(0));
         cv::Mat medianFrame(rows, cols, CV_32FC1, cv::Scalar(0));
         cv::Mat stackFrame(rows, cols, CV_32FC1, cv::Scalar(0));
         cv::Mat tempFrame(rows, cols, CV_32FC1, cv::Scalar(0));
@@ -569,6 +570,8 @@ int CppCLRWinFormsProject::Form1::Stack() {
             }
         } 
 
+        imwrite(path + outDir + "outMedian" + filter + ".tif", medianFrame);
+
         for (k = 0; k < offsets.size(); k++) {
             i = m2[k];
             cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_GRAYSCALE);
@@ -577,16 +580,19 @@ int CppCLRWinFormsProject::Form1::Stack() {
             lightFrame -= masterDarkFrame;
             //lightFrame /= flatFrame; 
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
-            warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);         
+            warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);   
+
+            addWeighted(meanFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, meanFrame);
+
             for (int j = 0; j < lightFrame.cols; j++)
             {
                 for (int h = 0; h < lightFrame.rows; h++)
                 {
-                    if (lightFrame.at<float>(h, j) > (medianFrame.at<float>(h, j) + 2 * sqrt(medianFrame.at<float>(h, j))))
+                    if (lightFrame.at<float>(h, j) > (medianFrame.at<float>(h, j) + 0.5 * sqrt(medianFrame.at<float>(h, j))))
                     {
                         lightFrame.at<float>(h, j) = medianFrame.at<float>(h, j);
                     }
-                    if (lightFrame.at<float>(h, j) > (medianFrame.at<float>(h, j) + 2 * sqrt(medianFrame.at<float>(h, j))))
+                    if (lightFrame.at<float>(h, j) > (medianFrame.at<float>(h, j) + 0.5 * sqrt(medianFrame.at<float>(h, j))))
                     {
                         lightFrame.at<float>(h, j) = medianFrame.at<float>(h, j);
                     }
@@ -596,7 +602,8 @@ int CppCLRWinFormsProject::Form1::Stack() {
             addWeighted(stackFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, stackFrame);
         }
 
-        imwrite(path + outDir + "out" + filter + ".tif", stackFrame);
+        imwrite(path + outDir + "outMean" + filter + ".tif", meanFrame);
+        imwrite(path + outDir + "outStack" + filter + ".tif", stackFrame);
 
         auto t2 = std::chrono::high_resolution_clock::now();
         auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
