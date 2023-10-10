@@ -508,6 +508,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
         }
 
         cv::Mat medianFrame(rows, cols, CV_32FC1, cv::Scalar(0));
+        cv::Mat stackFrame(rows, cols, CV_32FC1, cv::Scalar(0));
         cv::Mat tempFrame(rows, cols, CV_32FC1, cv::Scalar(0));
         std::vector<cv::Mat> tempArray(medianOver, cv::Mat(rows, cols, CV_32F));
 
@@ -533,7 +534,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
         unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
         shuffle(m.begin(), m.end(), std::default_random_engine(seed));
 
-        for (k = 0; k<iterations; k++) {
+        for (k = 0; k < iterations; k++) {
             i = m[k];
             cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_GRAYSCALE);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
@@ -568,9 +569,34 @@ int CppCLRWinFormsProject::Form1::Stack() {
             }
         } 
 
+        for (k = 0; k < offsets.size(); k++) {
+            i = m2[k];
+            cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_GRAYSCALE);
+            lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
+            lightFrame *= mean_background / background[i];
+            lightFrame -= masterDarkFrame;
+            //lightFrame /= flatFrame; 
+            cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
+            warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);         
+            for (int j = 0; j < lightFrame.cols; j++)
+            {
+                for (int h = 0; h < lightFrame.rows; h++)
+                {
+                    if (lightFrame.at<float>(h, j) > (medianFrame.at<float>(h, j) + 2 * sqrt(medianFrame.at<float>(h, j))))
+                    {
+                        lightFrame.at<float>(h, j) = medianFrame.at<float>(h, j);
+                    }
+                    if (lightFrame.at<float>(h, j) > (medianFrame.at<float>(h, j) + 2 * sqrt(medianFrame.at<float>(h, j))))
+                    {
+                        lightFrame.at<float>(h, j) = medianFrame.at<float>(h, j);
+                    }
+                }
+            }
+            tempcount = 0;
+            addWeighted(stackFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, stackFrame);
+        }
 
-
-        imwrite(path + outDir + "out" + filter + ".tif", medianFrame);
+        imwrite(path + outDir + "out" + filter + ".tif", stackFrame);
 
         auto t2 = std::chrono::high_resolution_clock::now();
         auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
