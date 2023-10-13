@@ -119,7 +119,7 @@ void SortByColumnI(std::vector<std::vector<int>>& data, size_t column) {
 }
 
 std::vector<std::vector<float>> triangles(std::vector<float> x, std::vector<float> y) {
-    std::vector<std::vector<float>> triangleParameters;
+    std::vector<std::vector<float>> triangleParameters((x.size() * (x.size() - 1) * (x.size() - 2)) / 6, std::vector<float>(5));
     float minEdge = 50;
     int count = 0;
     for (int i = 0; i < x.size() - 2; i++) {
@@ -128,10 +128,13 @@ std::vector<std::vector<float>> triangles(std::vector<float> x, std::vector<floa
                 std::vector<double> d = { sqrt(pow(x[i] - x[j], 2) + pow(y[i] - y[j], 2)), sqrt(pow(x[j] - x[k], 2) + pow(y[j] - y[k], 2)), sqrt(pow(x[i] - x[k], 2) + pow(y[i] - y[k], 2)) };
                 if (*std::min_element(d.begin(), d.end()) > minEdge) {
                     std::sort(d.begin(), d.end());
-                    int m = d.size() / 2;
-                    float u = ((d[m] + d[d.size() - m - 1]) / 2) / *std::max_element(d.begin(), d.end());
+                    float u = d[1] / *std::max_element(d.begin(), d.end());
                     float v = *std::min_element(d.begin(), d.end()) / *std::max_element(d.begin(), d.end());
-                    triangleParameters.push_back({ float(i), float(j), float(k), u, v });
+                    triangleParameters[count][0] = float(i);
+                    triangleParameters[count][1] = float(j);
+                    triangleParameters[count][2] = float(k);
+                    triangleParameters[count][3] = u;
+                    triangleParameters[count][4] = v;
                     count++;
                 }
             }
