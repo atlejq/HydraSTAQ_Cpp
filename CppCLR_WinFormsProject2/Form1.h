@@ -204,6 +204,7 @@ namespace CppCLRWinFormsProject {
 			// radioButton5
 			// 
 			this->radioButton5->AutoSize = true;
+			this->radioButton5->Enabled = false;
 			this->radioButton5->Checked = true;
 			this->radioButton5->Location = System::Drawing::Point(19, 9);
 			this->radioButton5->Name = L"radioButton5";
@@ -217,6 +218,7 @@ namespace CppCLRWinFormsProject {
 			// radioButton6
 			// 
 			this->radioButton6->AutoSize = true;
+			this->radioButton6->Enabled = false;
 			this->radioButton6->Location = System::Drawing::Point(19, 49);
 			this->radioButton6->Name = L"radioButton6";
 			this->radioButton6->Size = System::Drawing::Size(89, 20);
@@ -229,6 +231,7 @@ namespace CppCLRWinFormsProject {
 			// radioButton7
 			// 
 			this->radioButton7->AutoSize = true;
+			this->radioButton7->Enabled = false;
 			this->radioButton7->Location = System::Drawing::Point(19, 89);
 			this->radioButton7->Name = L"radioButton7";
 			this->radioButton7->Size = System::Drawing::Size(88, 20);
@@ -241,6 +244,7 @@ namespace CppCLRWinFormsProject {
 			// radioButton8
 			// 
 			this->radioButton8->AutoSize = true;
+			this->radioButton8->Enabled = false;
 			this->radioButton8->Location = System::Drawing::Point(19, 129);
 			this->radioButton8->Name = L"radioButton8";
 			this->radioButton8->Size = System::Drawing::Size(86, 20);
@@ -486,18 +490,30 @@ namespace CppCLRWinFormsProject {
 		numericUpDown1->Enabled = true;
 		numericUpDown2->Enabled = false;
 		numericUpDown3->Enabled = false;
+		radioButton5->Enabled = false;
+		radioButton6->Enabled = false;
+		radioButton7->Enabled = false;
+		radioButton8->Enabled = false;
 	}
 
 	private: System::Void radioButton10_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 		numericUpDown1->Enabled = false;
 		numericUpDown2->Enabled = true;
 		numericUpDown3->Enabled = true;
+		radioButton5->Enabled = true;
+		radioButton6->Enabled = true;
+		radioButton7->Enabled = true;
+		radioButton8->Enabled = true;
 	}
 
 	private: System::Void radioButton11_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 		numericUpDown1->Enabled = false;
 		numericUpDown2->Enabled = false;
 		numericUpDown3->Enabled = false;
+		radioButton5->Enabled = false;
+		radioButton6->Enabled = false;
+		radioButton7->Enabled = false;
+		radioButton8->Enabled = false;
 	}
 
 	private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) {
