@@ -11,6 +11,8 @@ int detectionThreshold = 0.9;
 float discardPercentage = 10;
 int maxStars = 15;
 int topMatches = 6;
+int xSize = 4144;
+int ySize = 2822;
 std::string filter = "R";
 std::string align = "R";
 
@@ -271,7 +273,7 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
 //Function to fetch a dark frame
 cv::Mat getDarkFrame()
 {
-    cv::Mat masterDarkFrame(2822, 4144, CV_32FC1, cv::Scalar(0));
+    cv::Mat masterDarkFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
     std::string darkPath = path + darkDir;
     bool masterDarkExists = std::filesystem::exists(darkPath + "masterFrame" + filter + ".tif");
 
@@ -475,9 +477,6 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
 
 int CppCLRWinFormsProject::Form1::Stack() {
     int elapsedTime = 0;
-
-    int rows = 2822;
-    int cols = 4144;
     int medianOver = 30;
     int scaling = 4;
 
@@ -510,11 +509,11 @@ int CppCLRWinFormsProject::Form1::Stack() {
             mean_background = mean_background + background[i]/float(offsets.size());
         }
 
-        cv::Mat meanFrame(rows, cols, CV_32FC1, cv::Scalar(0));
-        cv::Mat medianFrame(rows, cols, CV_32FC1, cv::Scalar(0));
-        cv::Mat stackFrame(rows, cols, CV_32FC1, cv::Scalar(0));
-        cv::Mat tempFrame(rows, cols, CV_32FC1, cv::Scalar(0));
-        std::vector<cv::Mat> tempArray(medianOver, cv::Mat(rows, cols, CV_32F));
+        cv::Mat meanFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+        cv::Mat medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+        cv::Mat stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+        cv::Mat tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+        std::vector<cv::Mat> tempArray(medianOver, cv::Mat(ySize, xSize, CV_32F));
 
         int iterations = medianOver * (offsets.size() / medianOver);
 

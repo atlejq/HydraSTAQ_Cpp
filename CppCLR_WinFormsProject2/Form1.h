@@ -12,6 +12,8 @@ extern int detectionThreshold;
 extern float discardPercentage;
 extern int maxStars;
 extern int topMatches;
+extern int xSize;
+extern int ySize;
 extern std::string filter;
 extern std::string align;
 
@@ -523,7 +525,6 @@ namespace CppCLRWinFormsProject {
 			std::string os;
 			MarshalString((folderBrowserDialog1->SelectedPath), os);
 			path = os;
-
 		}
 	}
 
