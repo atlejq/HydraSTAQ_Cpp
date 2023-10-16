@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m76/";
+std::string path = "C:/F/astro/matlab/m1test/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
@@ -246,32 +246,35 @@ std::vector<std::string> getFrames(std::string path, std::string ext) {
 
 // Function to analyze the star field in the given light frame.
 std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
-
-    if (lightFrame.elemSize() > 1)
-    {
-        lightFrame.convertTo(lightFrame, CV_8U);
-    }
-    cv::Mat filteredImage;
-    cv::medianBlur(lightFrame, filteredImage, 3);
-
-    cv::Mat thresh;
-    cv::threshold(filteredImage, thresh, t * 255, 255, 0);
-
-    std::vector<std::vector<cv::Point>> contours;
-    std::vector<cv::Vec4i> hierarchy;
-    cv::findContours(thresh, contours, hierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
-
     std::vector<std::vector<float>> starMatrix;
-    for (const auto& c : contours) {
-        cv::RotatedRect rect = cv::minAreaRect(c);
-        cv::Point2f center = rect.center;
-        float height = rect.size.height;
-        float width = rect.size.width;
-        std::vector<float> starVector = { center.x, center.y, width, height, std::sqrt(width * width + height * height) };
-        if (std::sqrt(width * width + height * height) < 25)
-            starMatrix.push_back(starVector);
-    }
 
+    if ((lightFrame.elemSize() == 1 || lightFrame.elemSize() == 2) && lightFrame.channels() == 1)
+    {
+        if (lightFrame.elemSize() == 2)
+        {
+            lightFrame = lightFrame / 255;
+            lightFrame.convertTo(lightFrame, CV_8U);
+        }
+        cv::Mat filteredImage;
+        cv::medianBlur(lightFrame, filteredImage, 3);
+
+        cv::Mat thresh;
+        cv::threshold(filteredImage, thresh, t * 255, 255, 0);
+
+        std::vector<std::vector<cv::Point>> contours;
+        std::vector<cv::Vec4i> hierarchy;
+        cv::findContours(thresh, contours, hierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
+
+        for (const auto& c : contours) {
+            cv::RotatedRect rect = cv::minAreaRect(c);
+            cv::Point2f center = rect.center;
+            float height = rect.size.height;
+            float width = rect.size.width;
+            std::vector<float> starVector = { center.x, center.y, width, height, std::sqrt(width * width + height * height) };
+            if (std::sqrt(width * width + height * height) < 25)
+                starMatrix.push_back(starVector);
+        }
+    }
     return starMatrix;
 }
 
@@ -324,12 +327,12 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
             if (lightFrame.data != NULL) {
 
                 std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
+                qualVec[n][0] = starMatrix.size();
                 qualVec[n][1] = cv::sum(lightFrame)[0];
                 qualVec[n][2] = lightFrame.cols;
                 qualVec[n][3] = lightFrame.rows;
                 qualVec[n][4] = lightFrame.channels();
                 qualVec[n][5] = lightFrame.elemSize();
-                qualVec[n][0] = starMatrix.size();
 
                 for (int i = 0; i < maxStars; i++) {
                     xvec[n][i] = -1;
