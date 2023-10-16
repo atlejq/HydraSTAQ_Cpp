@@ -317,7 +317,7 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
-        std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(6,0));
+        std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(5,0));
         std::vector<std::vector<float>> xvec(lightFrames.size(), std::vector<float>(maxStars, -1));
         std::vector<std::vector<float>> yvec(lightFrames.size(), std::vector<float>(maxStars, -1));
 
@@ -540,7 +540,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
         for (k = 0; k < iterations; k++) {
             i = m[k];
-            cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_GRAYSCALE);
+            cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame *= mean_background / background[i];
             lightFrame -= masterDarkFrame;
@@ -576,7 +576,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
         for (k = 0; k < offsets.size(); k++) {
             i = m2[k];
-            cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_GRAYSCALE);
+            cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame *= mean_background / background[i];
             lightFrame -= masterDarkFrame;
