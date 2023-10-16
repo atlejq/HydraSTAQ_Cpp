@@ -250,7 +250,7 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
     cv::medianBlur(lightFrame, filteredImage, 3);
 
     cv::Mat thresh;
-    cv::threshold(filteredImage, thresh, t * 255 * lightFrame.elemSize(), 255 * lightFrame.elemSize(), 0);
+    cv::threshold(filteredImage, thresh, t * pow(255, lightFrame.elemSize()), pow(255, lightFrame.elemSize()), 0);
 
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
@@ -309,7 +309,7 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
-        std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(2));
+        std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(5));
         std::vector<std::vector<float>> xvec(lightFrames.size(), std::vector<float>(maxStars));
         std::vector<std::vector<float>> yvec(lightFrames.size(), std::vector<float>(maxStars));
 
@@ -321,6 +321,9 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
 
                 qualVec[n][0] = starMatrix.size();
                 qualVec[n][1] = cv::sum(lightFrame)[0];
+                qualVec[n][2] = lightFrame.cols;
+                qualVec[n][3] = lightFrame.rows;
+                qualVec[n][4] = lightFrame.elemSize();
 
                 for (int i = 0; i < maxStars; i++) {
                     xvec[n][i] = -1;
@@ -385,8 +388,8 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
         std::vector<std::vector<float>> yvec = readCSV(yvecPath, size(lightFrameArray), maxStars);
         std::vector<std::vector<float>> yvecAlign = readCSV(yvecAlignPath, size(lightFrameArrayAlign), maxStars);
 
-        std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, size(lightFrameArray), 2);
-        std::vector<std::vector<float>> qualVecAlign = readCSV(qualVecAlignPath, size(lightFrameArrayAlign), 2);
+        std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, size(lightFrameArray), 5);
+        std::vector<std::vector<float>> qualVecAlign = readCSV(qualVecAlignPath, size(lightFrameArrayAlign), 5);
 
         std::vector xRef = clean(xvecAlign[argmax(qualVecAlign, 0)]);
         std::vector yRef = clean(yvecAlign[argmax(qualVecAlign, 0)]);
