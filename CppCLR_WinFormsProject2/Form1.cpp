@@ -11,8 +11,8 @@ int detectionThreshold = 0.9;
 float discardPercentage = 10;
 int maxStars = 15;
 int topMatches = 6;
-int xSize = 4144;
-int ySize = 2822;
+int xSize = 3008;
+int ySize = 3008;
 std::string filter = "R";
 std::string align = "R";
 
@@ -543,7 +543,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame *= mean_background / background[i];
-            //lightFrame -= masterDarkFrame;
+            lightFrame -= masterDarkFrame;
             //lightFrame /= flatFrame; 
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
