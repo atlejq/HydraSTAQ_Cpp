@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m1test/";
+std::string path = "C:/F/astro/matlab/m76/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
@@ -246,11 +246,16 @@ std::vector<std::string> getFrames(std::string path, std::string ext) {
 
 // Function to analyze the star field in the given light frame.
 std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
+
+    if (lightFrame.elemSize() > 1)
+    {
+        lightFrame.convertTo(lightFrame, CV_8U);
+    }
     cv::Mat filteredImage;
     cv::medianBlur(lightFrame, filteredImage, 3);
 
     cv::Mat thresh;
-    cv::threshold(filteredImage, thresh, t * pow(255, lightFrame.elemSize()), pow(255, lightFrame.elemSize()), 0);
+    cv::threshold(filteredImage, thresh, t * 255, 255, 0);
 
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
@@ -309,21 +314,22 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
-        std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(5));
+        std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(6));
         std::vector<std::vector<float>> xvec(lightFrames.size(), std::vector<float>(maxStars));
         std::vector<std::vector<float>> yvec(lightFrames.size(), std::vector<float>(maxStars));
 
         #pragma omp parallel for num_threads(8)
         for (int n = 0; n < lightFrames.size(); n++) {
-            cv::Mat lightFrame = cv::imread(lightFrames[n], cv::IMREAD_GRAYSCALE);
+            cv::Mat lightFrame = cv::imread(lightFrames[n], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
             if (lightFrame.data != NULL) {
-                std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
 
-                qualVec[n][0] = starMatrix.size();
+                std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
                 qualVec[n][1] = cv::sum(lightFrame)[0];
                 qualVec[n][2] = lightFrame.cols;
                 qualVec[n][3] = lightFrame.rows;
-                qualVec[n][4] = lightFrame.elemSize();
+                qualVec[n][4] = lightFrame.channels();
+                qualVec[n][5] = lightFrame.elemSize();
+                qualVec[n][0] = starMatrix.size();
 
                 for (int i = 0; i < maxStars; i++) {
                     xvec[n][i] = -1;
