@@ -547,7 +547,6 @@ int CppCLRWinFormsProject::Form1::Stack() {
             //lightFrame /= flatFrame; 
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
-            //addWeighted(stackFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, stackFrame);
             tempArray[tempcount] = lightFrame;
             tempcount++;
             if (((k + 1) % medianOver) == 0) { 
@@ -579,7 +578,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame *= mean_background / background[i];
-            //lightFrame -= masterDarkFrame;
+            lightFrame -= masterDarkFrame;
             //lightFrame /= flatFrame; 
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);   
