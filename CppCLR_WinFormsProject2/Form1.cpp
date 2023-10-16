@@ -325,19 +325,13 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
         for (int n = 0; n < lightFrames.size(); n++) {
             cv::Mat lightFrame = cv::imread(lightFrames[n], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
             if (lightFrame.data != NULL) {
-
                 std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
-
-                int max = maxStars;
-                if (starMatrix.size() < maxStars) {
-                    max = starMatrix.size();
-                }
 
                 if (starMatrix.size() > 3) {
 
                     SortByColumn(starMatrix, 4);
 
-                    for (int i = 0; i < max; i++) {
+                    for (int i = 0; i < std::min(maxStars, int(starMatrix.size())); i++) {
                         xvec[n][i] = starMatrix[i][0];
                         yvec[n][i] = starMatrix[i][1];
                     }
