@@ -317,9 +317,9 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
-        std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(6));
-        std::vector<std::vector<float>> xvec(lightFrames.size(), std::vector<float>(maxStars));
-        std::vector<std::vector<float>> yvec(lightFrames.size(), std::vector<float>(maxStars));
+        std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(6,0));
+        std::vector<std::vector<float>> xvec(lightFrames.size(), std::vector<float>(maxStars, -1));
+        std::vector<std::vector<float>> yvec(lightFrames.size(), std::vector<float>(maxStars, -1));
 
         #pragma omp parallel for num_threads(8)
         for (int n = 0; n < lightFrames.size(); n++) {
@@ -327,17 +327,6 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
             if (lightFrame.data != NULL) {
 
                 std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
-                qualVec[n][0] = starMatrix.size();
-                qualVec[n][1] = cv::sum(lightFrame)[0];
-                qualVec[n][2] = lightFrame.cols;
-                qualVec[n][3] = lightFrame.rows;
-                qualVec[n][4] = lightFrame.channels();
-                qualVec[n][5] = lightFrame.elemSize();
-
-                for (int i = 0; i < maxStars; i++) {
-                    xvec[n][i] = -1;
-                    yvec[n][i] = -1;
-                }
 
                 int max = maxStars;
                 if (starMatrix.size() < maxStars) {
@@ -352,6 +341,12 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
                         xvec[n][i] = starMatrix[i][0];
                         yvec[n][i] = starMatrix[i][1];
                     }
+
+                    qualVec[n][0] = starMatrix.size();
+                    qualVec[n][1] = cv::sum(lightFrame)[0];
+                    qualVec[n][2] = lightFrame.cols;
+                    qualVec[n][3] = lightFrame.rows;
+                    qualVec[n][4] = lightFrame.elemSize();
                 }
             }
         }
