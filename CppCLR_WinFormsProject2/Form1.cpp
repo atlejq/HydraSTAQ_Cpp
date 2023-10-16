@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m1test/";
+std::string path = "C:/F/astro/matlab/m76/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
@@ -297,7 +297,7 @@ cv::Mat getDarkFrame()
             #pragma omp parallel for num_threads(8)
             for (int n = 0; n < darkFrameArray.size(); n++)
             {
-                cv::Mat darkFrame = cv::imread(darkFrameArray[n], cv::IMREAD_GRAYSCALE);
+                cv::Mat darkFrame = cv::imread(darkFrameArray[n], cv::IMREAD_ANYDEPTH);
                 darkFrame.convertTo(darkFrame, CV_32FC1, 1.0 / pow(255, darkFrame.elemSize()));
                 addWeighted(masterDarkFrame, 1, darkFrame, 1 / float(darkFrameArray.size()), 0.0, masterDarkFrame);
             }
@@ -514,7 +514,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
         cv::Mat medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
         cv::Mat stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
         cv::Mat tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
-        std::vector<cv::Mat> tempArray(medianOver, cv::Mat(ySize, xSize, CV_32F));
+        std::vector<cv::Mat> tempArray(medianOver, cv::Mat(ySize, xSize, CV_32FC1));
 
         int iterations = medianOver * (offsets.size() / medianOver);
 
@@ -540,10 +540,10 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
         for (k = 0; k < iterations; k++) {
             i = m[k];
-            cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+            cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame *= mean_background / background[i];
-            lightFrame -= masterDarkFrame;
+            //lightFrame -= masterDarkFrame;
             //lightFrame /= flatFrame; 
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
@@ -576,10 +576,10 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
         for (k = 0; k < offsets.size(); k++) {
             i = m2[k];
-            cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+            cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame *= mean_background / background[i];
-            lightFrame -= masterDarkFrame;
+            //lightFrame -= masterDarkFrame;
             //lightFrame /= flatFrame; 
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);   
