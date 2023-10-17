@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m1test/";
+std::string path = "C:/F/astro/matlab/m76/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
-std::string darkDir = "/darks/";
+std::string darkDir = "/darks/RGB/";
 std::string ext = ".png";
 int detectionThreshold = 0.9;
 float discardPercentage = 10;
@@ -283,11 +283,11 @@ cv::Mat getDarkFrame(int ySize, int xSize)
 {
     cv::Mat masterDarkFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
     std::string darkPath = path + darkDir;
-    bool masterDarkExists = std::filesystem::exists(darkPath + "masterFrame" + filter + ".tif");
+    bool masterDarkExists = std::filesystem::exists(darkPath + "masterFrame.tif");
 
     if (masterDarkExists)
     {
-        cv::Mat tmpDarkFrame = cv::imread(darkPath + "masterFrame" + filter + ".tif", cv::IMREAD_ANYDEPTH);
+        cv::Mat tmpDarkFrame = cv::imread(darkPath + "masterFrame.tif", cv::IMREAD_ANYDEPTH);
         if (tmpDarkFrame.cols == masterDarkFrame.cols && tmpDarkFrame.rows == masterDarkFrame.rows)
         {
             tmpDarkFrame = masterDarkFrame;
