@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m76/";
+std::string path = "C:/F/astro/matlab/m1test/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
@@ -235,12 +235,14 @@ std::tuple<float, float, float> alignFrames(std::vector<std::vector<float>> corr
 std::vector<std::string> getFrames(std::string path, std::string ext) {
     std::vector<std::string> filenames;
 
-    for (auto& p : std::filesystem::recursive_directory_iterator(path))
+    if (std::filesystem::exists(path))
     {
-        if (p.path().extension() == ext)
-            filenames.push_back(p.path().string());
+        for (auto& p : std::filesystem::recursive_directory_iterator(path))
+        {
+            if (p.path().extension() == ext)
+                filenames.push_back(p.path().string());
+        }
     }
-
     return filenames;
 }
 
