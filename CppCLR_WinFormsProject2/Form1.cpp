@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m1test/";
+std::string path = "C:/F/astro/matlab/m76/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
@@ -314,7 +314,7 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
     int elapsedTime = 0;
 
     std::vector<std::string> lightFrames = getFrames(path + lightDir + filter, ext);
-    
+
     if (!lightFrames.empty())
     {
         auto t1 = std::chrono::high_resolution_clock::now();
@@ -391,87 +391,119 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
         std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, size(lightFrameArray), 5);
         std::vector<std::vector<float>> qualVecAlign = readCSV(qualVecAlignPath, size(lightFrameArrayAlign), 5);
 
-        std::vector xRef = clean(xvecAlign[argmax(qualVecAlign, 0)]);
-        std::vector yRef = clean(yvecAlign[argmax(qualVecAlign, 0)]);
+        bool xEq = true;
+        bool yEq = true;
 
-        if (!xRef.empty()&&xRef.size() >= topMatches)
+        std::ofstream outfile;
+        outfile.open(path + "dbug.txt");
+
+        int l = 0;
+
+        while (xEq == true && yEq == true && l<qualVec.size())
         {
-            std::vector<std::vector<float>> refTriangles = triangles(xRef, yRef);
-
-            std::vector<float> rankedQualVec(qualVec.size());
-
-            for (int i = 0; i < qualVec.size(); i++) {
-                rankedQualVec[i] = qualVec[i][0];
+            if (qualVec[l][2] != qualVec[0][2])
+            {
+                xEq = false;
+                outfile << l << " " << xEq << " " << yEq << "\n";
             }
 
-            std::sort(rankedQualVec.begin(), rankedQualVec.end());
+            if (qualVec[l][3] != qualVec[0][3])
+            {
+                yEq = false;
+                outfile << l << " " << xEq << " " << yEq << "\n";
+            }
+            l++;
+        }
 
-            float qualityThreshold = rankedQualVec[floor(rankedQualVec.size() * discardPercentage / 100)];
+        outfile.close();
 
-            std::vector<int> e;
-            for (int i = 0; i < qualVec.size(); i++) {
-                if (qualVec[i][0] > qualityThreshold) {
-                    e.push_back(i);
+
+        if (xEq && yEq)
+        {
+            std::vector xRef = clean(xvecAlign[argmax(qualVecAlign, 0)]);
+            std::vector yRef = clean(yvecAlign[argmax(qualVecAlign, 0)]);
+
+            if (!xRef.empty() && xRef.size() >= topMatches)
+            {
+                std::vector<std::vector<float>> refTriangles = triangles(xRef, yRef);
+
+                std::vector<float> rankedQualVec(qualVec.size());
+
+                for (int i = 0; i < qualVec.size(); i++) {
+                    rankedQualVec[i] = qualVec[i][0];
                 }
-            }
 
-            std::vector<std::vector<float>> offsets(e.size(), std::vector<float>(4));
-            std::vector<std::string> stackArray(size(e));
+                std::sort(rankedQualVec.begin(), rankedQualVec.end());
 
-            for (int k = 0; k < size(e); k++) {
-                if (!clean(xvec[e[k]]).empty() && clean(xvec[e[k]]).size() >= topMatches)
-                {
-                    std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[e[k]]), clean(yvec[e[k]]));
-                    std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvec[argmax(qualVec, 0)]));
-                    std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvecAlign[argmax(qualVecAlign, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
-                    offsets[k][0] = std::get<0>(tuple);
-                    offsets[k][1] = std::get<1>(tuple);
-                    offsets[k][2] = std::get<2>(tuple);
-                    offsets[k][3] = float(qualVec[e[k]][1]);
-                    stackArray[k] = lightFrameArray[e[k]];
+                float qualityThreshold = rankedQualVec[floor(rankedQualVec.size() * discardPercentage / 100)];
+
+                std::vector<int> e;
+                for (int i = 0; i < qualVec.size(); i++) {
+                    if (qualVec[i][0] > qualityThreshold) {
+                        e.push_back(i);
+                    }
                 }
-            }
 
-            auto t2 = std::chrono::high_resolution_clock::now();
-            auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-            elapsedTime = ms_int.count();
+                std::vector<std::vector<float>> offsets(e.size(), std::vector<float>(6));
+                std::vector<std::string> stackArray(size(e));
 
-            writeCSV(path + parameterDir + "offsets" + filter + ".csv", offsets);
-            writeStrings(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
-
-            std::vector<float> xDeb(maxStars);
-            std::vector<float> yDeb(maxStars);
-            
-            int scaling = 4;
-
-            cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[argmax(qualVecAlign, 0)], cv::IMREAD_GRAYSCALE);
-            cv::Mat small;
-
-            cv::resize(maxQualFrame, small, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
-            cv::Mat img_rgb(small.size(), CV_8UC3);
-            cv::cvtColor(small, img_rgb, cv::COLOR_GRAY2BGR);
-
-            for (int i = 0; i < xRef.size(); i++) {
-                cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(0, 0, 255));
-            }
-
-            for (int i = 0; i < offsets.size(); i++) {
-                float R[2][2] = { {cos(offsets[i][0]), -sin(offsets[i][0])}, {sin(offsets[i][0]), cos(offsets[i][0])} };
-                float t[2] = { offsets[i][1], offsets[i][2] };
-
-                for (int j = 0; j < xvec[e[i]].size(); j++) {
-                    xDeb[j] = R[0][0] * xvec[e[i]][j] + R[0][1] * yvec[e[i]][j] + t[0];
-                    yDeb[j] = R[1][0] * xvec[e[i]][j] + R[1][1] * yvec[e[i]][j] + t[1];
+                for (int k = 0; k < size(e); k++) {
+                    if (!clean(xvec[e[k]]).empty() && clean(xvec[e[k]]).size() >= topMatches)
+                    {
+                        std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[e[k]]), clean(yvec[e[k]]));
+                        std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvec[argmax(qualVec, 0)]));
+                        std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvecAlign[argmax(qualVecAlign, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
+                        offsets[k][0] = std::get<0>(tuple);
+                        offsets[k][1] = std::get<1>(tuple);
+                        offsets[k][2] = std::get<2>(tuple);
+                        offsets[k][3] = float(qualVec[e[k]][1]);
+                        offsets[k][4] = float(qualVec[e[k]][2]);
+                        offsets[k][5] = float(qualVec[e[k]][3]);
+                        stackArray[k] = lightFrameArray[e[k]];
+                    }
                 }
-                xDeb = clean(xDeb);
-                yDeb = clean(yDeb);
-                for (int i = 0; i < xDeb.size(); i++) {
-                    cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 6, cv::Scalar(0, 255, 0));
+
+                auto t2 = std::chrono::high_resolution_clock::now();
+                auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
+                elapsedTime = ms_int.count();
+
+                writeCSV(path + parameterDir + "offsets" + filter + ".csv", offsets);
+                writeStrings(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
+
+                std::vector<float> xDeb(maxStars);
+                std::vector<float> yDeb(maxStars);
+
+                int scaling = 4;
+
+                cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[argmax(qualVecAlign, 0)], cv::IMREAD_GRAYSCALE);
+                cv::Mat small;
+
+                cv::resize(maxQualFrame, small, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
+                cv::Mat img_rgb(small.size(), CV_8UC3);
+                cv::cvtColor(small, img_rgb, cv::COLOR_GRAY2BGR);
+
+                for (int i = 0; i < xRef.size(); i++) {
+                    cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(0, 0, 255));
                 }
+
+                for (int i = 0; i < offsets.size(); i++) {
+                    float R[2][2] = { {cos(offsets[i][0]), -sin(offsets[i][0])}, {sin(offsets[i][0]), cos(offsets[i][0])} };
+                    float t[2] = { offsets[i][1], offsets[i][2] };
+
+                    for (int j = 0; j < xvec[e[i]].size(); j++) {
+                        xDeb[j] = R[0][0] * xvec[e[i]][j] + R[0][1] * yvec[e[i]][j] + t[0];
+                        yDeb[j] = R[1][0] * xvec[e[i]][j] + R[1][1] * yvec[e[i]][j] + t[1];
+                    }
+                    xDeb = clean(xDeb);
+                    yDeb = clean(yDeb);
+                    for (int i = 0; i < xDeb.size(); i++) {
+                        cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 6, cv::Scalar(0, 255, 0));
+                    }
+                }
+                cv::imshow("Debug", img_rgb);
+                cv::waitKey(0);
+                cv::destroyAllWindows();
             }
-            cv::imshow("Debug", img_rgb);
-            cv::waitKey(0);
-            cv::destroyAllWindows();
         }
     }
 
@@ -511,6 +543,9 @@ int CppCLRWinFormsProject::Form1::Stack() {
             background[i] = offsets[i][3];
             mean_background = mean_background + background[i]/float(offsets.size());
         }
+
+        xSize = offsets[0][4];
+        ySize = offsets[0][5];
 
         cv::Mat meanFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
         cv::Mat medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));

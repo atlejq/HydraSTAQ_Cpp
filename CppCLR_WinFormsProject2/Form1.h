@@ -12,8 +12,6 @@ extern int detectionThreshold;
 extern float discardPercentage;
 extern int maxStars;
 extern int topMatches;
-extern int xSize;
-extern int ySize;
 extern std::string filter;
 extern std::string align;
 
