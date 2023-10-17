@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m76/";
+std::string path = "C:/F/astro/matlab/m1test/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
@@ -396,34 +396,25 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
         std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, size(lightFrameArray), 5);
         std::vector<std::vector<float>> qualVecAlign = readCSV(qualVecAlignPath, size(lightFrameArrayAlign), 5);
 
-        bool xEq = true;
-        bool yEq = true;
-
-        std::ofstream outfile;
-        outfile.open(path + "dbug.txt");
+        bool sizesEqual = true;
 
         int l = 0;
 
-        while (xEq == true && yEq == true && l<qualVec.size())
+        while (sizesEqual == true && l<qualVec.size())
         {
             if (qualVec[l][2] != qualVec[0][2])
             {
-                xEq = false;
-                outfile << l << " " << xEq << " " << yEq << "\n";
+                sizesEqual = false;
             }
 
             if (qualVec[l][3] != qualVec[0][3])
             {
-                yEq = false;
-                outfile << l << " " << xEq << " " << yEq << "\n";
+                sizesEqual = false;
             }
             l++;
         }
 
-        outfile.close();
-
-
-        if (xEq && yEq)
+        if (sizesEqual)
         {
             std::vector xRef = clean(xvecAlign[argmax(qualVecAlign, 0)]);
             std::vector yRef = clean(yvecAlign[argmax(qualVecAlign, 0)]);
