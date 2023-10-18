@@ -334,6 +334,12 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
             if (lightFrame.data != NULL) {
                 std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
 
+                qualVec[n][0] = starMatrix.size();
+                qualVec[n][1] = cv::sum(lightFrame)[0];
+                qualVec[n][2] = lightFrame.cols;
+                qualVec[n][3] = lightFrame.rows;
+                qualVec[n][4] = lightFrame.elemSize();
+
                 if (starMatrix.size() > 3) {
 
                     SortByColumn(starMatrix, 4);
@@ -342,12 +348,6 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
                         xvec[n][i] = starMatrix[i][0];
                         yvec[n][i] = starMatrix[i][1];
                     }
-
-                    qualVec[n][0] = starMatrix.size();
-                    qualVec[n][1] = cv::sum(lightFrame)[0];
-                    qualVec[n][2] = lightFrame.cols;
-                    qualVec[n][3] = lightFrame.rows;
-                    qualVec[n][4] = lightFrame.elemSize();
                 }
             }
         }
