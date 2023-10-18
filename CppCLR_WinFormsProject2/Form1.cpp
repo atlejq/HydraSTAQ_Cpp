@@ -280,9 +280,9 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
 }
 
 //Function to fetch a dark frame
-cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath)
+cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, float defaultValue)
 {
-    cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+    cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(defaultValue));
     bool masterFrameExists = std::filesystem::exists(calibrationPath + "masterFrame.tif");
 
     if (masterFrameExists)
@@ -547,8 +547,8 @@ int CppCLRWinFormsProject::Form1::Stack() {
         cv::Mat tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
         std::vector<cv::Mat> tempArray(medianOver, cv::Mat(ySize, xSize, CV_32FC1));
 
-        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir);
-        cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir);
+        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir, 0);
+        cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir, 1);
 
         int iterations = medianOver * (offsets.size() / medianOver);
 
