@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m1test/";
+std::string path = "C:/F/astro/matlab/m76/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
-std::string darkDir = "/darks/RGB/";
+std::string darkDir = "/darks/L/";
+std::string flatDir = "/flats/L/";
 std::string ext = ".png";
 int detectionThreshold = 0.9;
 float discardPercentage = 10;
@@ -279,39 +280,38 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
 }
 
 //Function to fetch a dark frame
-cv::Mat getDarkFrame(int ySize, int xSize)
+cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath)
 {
-    cv::Mat masterDarkFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
-    std::string darkPath = path + darkDir;
-    bool masterDarkExists = std::filesystem::exists(darkPath + "masterFrame.tif");
+    cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+    bool masterFrameExists = std::filesystem::exists(calibrationPath + "masterFrame.tif");
 
-    if (masterDarkExists)
+    if (masterFrameExists)
     {
-        cv::Mat tmpDarkFrame = cv::imread(darkPath + "masterFrame.tif", cv::IMREAD_ANYDEPTH);
-        if (tmpDarkFrame.cols == masterDarkFrame.cols && tmpDarkFrame.rows == masterDarkFrame.rows)
+        cv::Mat tmpCalibrationFrame = cv::imread(calibrationPath + "masterFrame.tif", cv::IMREAD_ANYDEPTH);
+        if (tmpCalibrationFrame.cols == masterFrame.cols && tmpCalibrationFrame.rows == masterFrame.rows)
         {
-            tmpDarkFrame = masterDarkFrame;
+            tmpCalibrationFrame = masterFrame;
         }
     }
     else
     {
-        std::vector<std::string> darkFrameArray = getFrames(darkPath, ext);
-        if (!darkFrameArray.empty())
+        std::vector<std::string> calibrationFrameArray = getFrames(calibrationPath, ext);
+        if (!calibrationFrameArray.empty())
         {
             #pragma omp parallel for num_threads(8)
-            for (int n = 0; n < darkFrameArray.size(); n++)
+            for (int n = 0; n < calibrationFrameArray.size(); n++)
             {
-                cv::Mat darkFrame = cv::imread(darkFrameArray[n], cv::IMREAD_ANYDEPTH);
-                if (darkFrame.cols == masterDarkFrame.cols && darkFrame.rows == masterDarkFrame.rows)
+                cv::Mat calibrationFrame = cv::imread(calibrationFrameArray[n], cv::IMREAD_ANYDEPTH);
+                if (calibrationFrame.cols == masterFrame.cols && calibrationFrame.rows == masterFrame.rows)
                 {
-                    darkFrame.convertTo(darkFrame, CV_32FC1, 1.0 / pow(255, darkFrame.elemSize()));
-                    addWeighted(masterDarkFrame, 1, darkFrame, 1 / float(darkFrameArray.size()), 0.0, masterDarkFrame);
+                    calibrationFrame.convertTo(calibrationFrame, CV_32FC1, 1.0 / pow(255, calibrationFrame.elemSize()));
+                    addWeighted(masterFrame, 1, calibrationFrame, 1 / float(calibrationFrameArray.size()), 0.0, masterFrame);
                 }
             }
-            imwrite(darkPath + "masterFrame" + filter + ".tif", masterDarkFrame);
+            imwrite(calibrationPath + "masterFrame" + filter + ".tif", masterFrame);
         }
     }
-    return masterDarkFrame;
+    return masterFrame;
 }
 
 //Function to read images
@@ -546,7 +546,9 @@ int CppCLRWinFormsProject::Form1::Stack() {
         cv::Mat stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
         cv::Mat tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
         std::vector<cv::Mat> tempArray(medianOver, cv::Mat(ySize, xSize, CV_32FC1));
-        cv::Mat masterDarkFrame = getDarkFrame(ySize, xSize);
+
+        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir);
+        cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir);
 
         int iterations = medianOver * (offsets.size() / medianOver);
 
@@ -576,7 +578,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame *= mean_background / background[i];
             lightFrame -= masterDarkFrame;
-            //lightFrame /= flatFrame; 
+            lightFrame /= masterFlatFrame; 
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
             tempArray[tempcount] = lightFrame;
@@ -611,7 +613,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame *= mean_background / background[i];
             lightFrame -= masterDarkFrame;
-            //lightFrame /= flatFrame; 
+            lightFrame /= masterFlatFrame; 
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);   
             addWeighted(meanFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, meanFrame);
