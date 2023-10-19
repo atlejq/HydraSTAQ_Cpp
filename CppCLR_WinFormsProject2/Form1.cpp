@@ -5,8 +5,8 @@ std::string path = "C:/F/astro/matlab/m76/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
-std::string darkDir = "/darks/L/";
-std::string flatDir = "/flats/L/";
+std::string darkDir = "/darks/RGB/";
+std::string flatDir = "/flats/R/";
 std::string ext = ".png";
 int detectionThreshold = 0.9;
 float discardPercentage = 10;
@@ -282,7 +282,7 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
 //Function to fetch a dark frame
 cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, float defaultValue)
 {
-    cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(defaultValue));
+    cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
     bool masterFrameExists = std::filesystem::exists(calibrationPath + "masterFrame.tif");
 
     if (masterFrameExists)
@@ -309,6 +309,10 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
                 }
             }
             imwrite(calibrationPath + "masterFrame" + filter + ".tif", masterFrame);
+        }
+        else
+        {
+             masterFrame = cv::Mat(ySize, xSize, CV_32FC1, cv::Scalar(defaultValue));
         }
     }
     return masterFrame;
@@ -548,7 +552,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
         std::vector<cv::Mat> tempArray(medianOver, cv::Mat(ySize, xSize, CV_32FC1));
 
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir, 0);
-        cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir, 1);
+        cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1);
 
         int iterations = medianOver * (offsets.size() / medianOver);
 
