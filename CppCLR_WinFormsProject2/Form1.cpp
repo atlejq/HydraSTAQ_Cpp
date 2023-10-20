@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m1test/";
+std::string path = "C:/F/astro/matlab/m76/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
-std::string darkDir = "/darks/";
+std::string darkDir = "/darks/RGB/";
+std::string flatDir = "/flats/R/";
 std::string ext = ".png";
 int detectionThreshold = 0.9;
 float discardPercentage = 10;
@@ -119,7 +120,7 @@ void SortByColumnI(std::vector<std::vector<int>>& data, size_t column) {
 }
 
 std::vector<std::vector<float>> triangles(std::vector<float> x, std::vector<float> y) {
-    std::vector<std::vector<float>> triangleParameters;
+    std::vector<std::vector<float>> triangleParameters((x.size() * (x.size() - 1) * (x.size() - 2)) / 6, std::vector<float>(5));
     float minEdge = 50;
     int count = 0;
     for (int i = 0; i < x.size() - 2; i++) {
@@ -128,10 +129,13 @@ std::vector<std::vector<float>> triangles(std::vector<float> x, std::vector<floa
                 std::vector<double> d = { sqrt(pow(x[i] - x[j], 2) + pow(y[i] - y[j], 2)), sqrt(pow(x[j] - x[k], 2) + pow(y[j] - y[k], 2)), sqrt(pow(x[i] - x[k], 2) + pow(y[i] - y[k], 2)) };
                 if (*std::min_element(d.begin(), d.end()) > minEdge) {
                     std::sort(d.begin(), d.end());
-                    int m = d.size() / 2;
-                    float u = ((d[m] + d[d.size() - m - 1]) / 2) / *std::max_element(d.begin(), d.end());
+                    float u = d[1] / *std::max_element(d.begin(), d.end());
                     float v = *std::min_element(d.begin(), d.end()) / *std::max_element(d.begin(), d.end());
-                    triangleParameters.push_back({ float(i), float(j), float(k), u, v });
+                    triangleParameters[count][0] = float(i);
+                    triangleParameters[count][1] = float(j);
+                    triangleParameters[count][2] = float(k);
+                    triangleParameters[count][3] = u;
+                    triangleParameters[count][4] = v;
                     count++;
                 }
             }
@@ -230,68 +234,88 @@ std::tuple<float, float, float> alignFrames(std::vector<std::vector<float>> corr
 std::vector<std::string> getFrames(std::string path, std::string ext) {
     std::vector<std::string> filenames;
 
-    for (auto& p : std::filesystem::recursive_directory_iterator(path))
+    if (std::filesystem::exists(path))
     {
-        if (p.path().extension() == ext)
-            filenames.push_back(p.path().string());
+        for (auto& p : std::filesystem::recursive_directory_iterator(path))
+        {
+            if (p.path().extension() == ext)
+                filenames.push_back(p.path().string());
+        }
     }
-
     return filenames;
 }
 
 // Function to analyze the star field in the given light frame.
 std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
-    cv::Mat filteredImage;
-    cv::medianBlur(lightFrame, filteredImage, 3);
-
-    cv::Mat thresh;
-    cv::threshold(filteredImage, thresh, t * 255 * lightFrame.elemSize(), 255 * lightFrame.elemSize(), 0);
-
-    std::vector<std::vector<cv::Point>> contours;
-    std::vector<cv::Vec4i> hierarchy;
-    cv::findContours(thresh, contours, hierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
-
     std::vector<std::vector<float>> starMatrix;
-    for (const auto& c : contours) {
-        cv::RotatedRect rect = cv::minAreaRect(c);
-        cv::Point2f center = rect.center;
-        float height = rect.size.height;
-        float width = rect.size.width;
-        std::vector<float> starVector = { center.x, center.y, width, height, std::sqrt(width * width + height * height) };
-        if (std::sqrt(width * width + height * height) < 25)
-            starMatrix.push_back(starVector);
-    }
 
+    if ((lightFrame.elemSize() == 1 || lightFrame.elemSize() == 2) && lightFrame.channels() == 1)
+    {
+        if (lightFrame.elemSize() == 2)
+        {
+            lightFrame = lightFrame / 255;
+            lightFrame.convertTo(lightFrame, CV_8U);
+        }
+        cv::Mat filteredImage;
+        cv::medianBlur(lightFrame, filteredImage, 3);
+
+        cv::Mat thresh;
+        cv::threshold(filteredImage, thresh, t * 255, 255, 0);
+
+        std::vector<std::vector<cv::Point>> contours;
+        std::vector<cv::Vec4i> hierarchy;
+        cv::findContours(thresh, contours, hierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
+
+        for (const auto& c : contours) {
+            cv::RotatedRect rect = cv::minAreaRect(c);
+            cv::Point2f center = rect.center;
+            float height = rect.size.height;
+            float width = rect.size.width;
+            std::vector<float> starVector = { center.x, center.y, width, height, std::sqrt(width * width + height * height) };
+            if (std::sqrt(width * width + height * height) < 25)
+                starMatrix.push_back(starVector);
+        }
+    }
     return starMatrix;
 }
 
 //Function to fetch a dark frame
-cv::Mat getDarkFrame()
+cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, float defaultValue)
 {
-    cv::Mat masterDarkFrame(2822, 4144, CV_32FC1, cv::Scalar(0));
-    std::string darkPath = path + darkDir;
-    bool masterDarkExists = std::filesystem::exists(darkPath + "masterFrame" + filter + ".tif");
+    cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+    bool masterFrameExists = std::filesystem::exists(calibrationPath + "masterFrame.tif");
 
-    if (masterDarkExists)
+    if (masterFrameExists)
     {
-        masterDarkFrame = cv::imread(darkPath + "masterFrame" + filter + ".tif", cv::IMREAD_ANYDEPTH);
+        cv::Mat tmpCalibrationFrame = cv::imread(calibrationPath + "masterFrame.tif", cv::IMREAD_ANYDEPTH);
+        if (tmpCalibrationFrame.cols == masterFrame.cols && tmpCalibrationFrame.rows == masterFrame.rows)
+        {
+            tmpCalibrationFrame = masterFrame;
+        }
     }
     else
     {
-        std::vector<std::string> darkFrameArray = getFrames(darkPath, ext);
-        if (!darkFrameArray.empty())
+        std::vector<std::string> calibrationFrameArray = getFrames(calibrationPath, ext);
+        if (!calibrationFrameArray.empty())
         {
             #pragma omp parallel for num_threads(8)
-            for (int n = 0; n < darkFrameArray.size(); n++)
+            for (int n = 0; n < calibrationFrameArray.size(); n++)
             {
-                cv::Mat darkFrame = cv::imread(darkFrameArray[n], cv::IMREAD_GRAYSCALE);
-                darkFrame.convertTo(darkFrame, CV_32FC1, 1.0 / pow(255, darkFrame.elemSize()));
-                addWeighted(masterDarkFrame, 1, darkFrame, 1 / float(darkFrameArray.size()), 0.0, masterDarkFrame);
+                cv::Mat calibrationFrame = cv::imread(calibrationFrameArray[n], cv::IMREAD_ANYDEPTH);
+                if (calibrationFrame.cols == masterFrame.cols && calibrationFrame.rows == masterFrame.rows)
+                {
+                    calibrationFrame.convertTo(calibrationFrame, CV_32FC1, 1.0 / pow(255, calibrationFrame.elemSize()));
+                    addWeighted(masterFrame, 1, calibrationFrame, 1 / float(calibrationFrameArray.size()), 0.0, masterFrame);
+                }
             }
-            imwrite(darkPath + "masterFrame" + filter + ".tif", masterDarkFrame);
+            imwrite(calibrationPath + "masterFrame" + filter + ".tif", masterFrame);
+        }
+        else
+        {
+             masterFrame = cv::Mat(ySize, xSize, CV_32FC1, cv::Scalar(defaultValue));
         }
     }
-    return masterDarkFrame;
+    return masterFrame;
 }
 
 //Function to read images
@@ -299,39 +323,32 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
     int elapsedTime = 0;
 
     std::vector<std::string> lightFrames = getFrames(path + lightDir + filter, ext);
-    
+
     if (!lightFrames.empty())
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
-        std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(2));
-        std::vector<std::vector<float>> xvec(lightFrames.size(), std::vector<float>(maxStars));
-        std::vector<std::vector<float>> yvec(lightFrames.size(), std::vector<float>(maxStars));
+        std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(5,0));
+        std::vector<std::vector<float>> xvec(lightFrames.size(), std::vector<float>(maxStars, -1));
+        std::vector<std::vector<float>> yvec(lightFrames.size(), std::vector<float>(maxStars, -1));
 
         #pragma omp parallel for num_threads(8)
         for (int n = 0; n < lightFrames.size(); n++) {
-            cv::Mat lightFrame = cv::imread(lightFrames[n], cv::IMREAD_GRAYSCALE);
+            cv::Mat lightFrame = cv::imread(lightFrames[n], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
             if (lightFrame.data != NULL) {
                 std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
 
                 qualVec[n][0] = starMatrix.size();
                 qualVec[n][1] = cv::sum(lightFrame)[0];
-
-                for (int i = 0; i < maxStars; i++) {
-                    xvec[n][i] = -1;
-                    yvec[n][i] = -1;
-                }
-
-                int max = maxStars;
-                if (starMatrix.size() < maxStars) {
-                    max = starMatrix.size();
-                }
+                qualVec[n][2] = lightFrame.cols;
+                qualVec[n][3] = lightFrame.rows;
+                qualVec[n][4] = lightFrame.elemSize();
 
                 if (starMatrix.size() > 3) {
 
                     SortByColumn(starMatrix, 4);
 
-                    for (int i = 0; i < max; i++) {
+                    for (int i = 0; i < std::min(maxStars, int(starMatrix.size())); i++) {
                         xvec[n][i] = starMatrix[i][0];
                         yvec[n][i] = starMatrix[i][1];
                     }
@@ -380,90 +397,113 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
         std::vector<std::vector<float>> yvec = readCSV(yvecPath, size(lightFrameArray), maxStars);
         std::vector<std::vector<float>> yvecAlign = readCSV(yvecAlignPath, size(lightFrameArrayAlign), maxStars);
 
-        std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, size(lightFrameArray), 2);
-        std::vector<std::vector<float>> qualVecAlign = readCSV(qualVecAlignPath, size(lightFrameArrayAlign), 2);
+        std::vector<std::vector<float>> qualVec = readCSV(qualVecPath, size(lightFrameArray), 5);
+        std::vector<std::vector<float>> qualVecAlign = readCSV(qualVecAlignPath, size(lightFrameArrayAlign), 5);
 
-        std::vector xRef = clean(xvecAlign[argmax(qualVecAlign, 0)]);
-        std::vector yRef = clean(yvecAlign[argmax(qualVecAlign, 0)]);
+        bool sizesEqual = true;
 
-        if (!xRef.empty()&&xRef.size() >= topMatches)
+        int l = 0;
+
+        while (sizesEqual == true && l<qualVec.size())
         {
-            std::vector<std::vector<float>> refTriangles = triangles(xRef, yRef);
-
-            std::vector<float> rankedQualVec(qualVec.size());
-
-            for (int i = 0; i < qualVec.size(); i++) {
-                rankedQualVec[i] = qualVec[i][0];
+            if (qualVec[l][2] != qualVec[0][2])
+            {
+                sizesEqual = false;
             }
 
-            std::sort(rankedQualVec.begin(), rankedQualVec.end());
+            if (qualVec[l][3] != qualVec[0][3])
+            {
+                sizesEqual = false;
+            }
+            l++;
+        }
 
-            float qualityThreshold = rankedQualVec[floor(rankedQualVec.size() * discardPercentage / 100)];
+        if (sizesEqual)
+        {
+            std::vector xRef = clean(xvecAlign[argmax(qualVecAlign, 0)]);
+            std::vector yRef = clean(yvecAlign[argmax(qualVecAlign, 0)]);
 
-            std::vector<int> e;
-            for (int i = 0; i < qualVec.size(); i++) {
-                if (qualVec[i][0] > qualityThreshold) {
-                    e.push_back(i);
+            if (!xRef.empty() && xRef.size() >= topMatches)
+            {
+                std::vector<std::vector<float>> refTriangles = triangles(xRef, yRef);
+
+                std::vector<float> rankedQualVec(qualVec.size());
+
+                for (int i = 0; i < qualVec.size(); i++) {
+                    rankedQualVec[i] = qualVec[i][0];
                 }
-            }
 
-            std::vector<std::vector<float>> offsets(e.size(), std::vector<float>(4));
-            std::vector<std::string> stackArray(size(e));
+                std::sort(rankedQualVec.begin(), rankedQualVec.end());
 
-            for (int k = 0; k < size(e); k++) {
-                if (!clean(xvec[e[k]]).empty() && clean(xvec[e[k]]).size() >= topMatches)
-                {
-                    std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[e[k]]), clean(yvec[e[k]]));
-                    std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvec[argmax(qualVec, 0)]));
-                    std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvecAlign[argmax(qualVecAlign, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
-                    offsets[k][0] = std::get<0>(tuple);
-                    offsets[k][1] = std::get<1>(tuple);
-                    offsets[k][2] = std::get<2>(tuple);
-                    offsets[k][3] = float(qualVec[e[k]][1]);
-                    stackArray[k] = lightFrameArray[e[k]];
+                float qualityThreshold = rankedQualVec[floor(rankedQualVec.size() * discardPercentage / 100)];
+
+                std::vector<int> e;
+                for (int i = 0; i < qualVec.size(); i++) {
+                    if (qualVec[i][0] > qualityThreshold) {
+                        e.push_back(i);
+                    }
                 }
-            }
 
-            auto t2 = std::chrono::high_resolution_clock::now();
-            auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-            elapsedTime = ms_int.count();
+                std::vector<std::vector<float>> offsets(e.size(), std::vector<float>(6));
+                std::vector<std::string> stackArray(size(e));
 
-            writeCSV(path + parameterDir + "offsets" + filter + ".csv", offsets);
-            writeStrings(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
-
-            std::vector<float> xDeb(maxStars);
-            std::vector<float> yDeb(maxStars);
-            
-            int scaling = 4;
-
-            cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[argmax(qualVecAlign, 0)], cv::IMREAD_GRAYSCALE);
-            cv::Mat small;
-
-            cv::resize(maxQualFrame, small, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
-            cv::Mat img_rgb(small.size(), CV_8UC3);
-            cv::cvtColor(small, img_rgb, cv::COLOR_GRAY2BGR);
-
-            for (int i = 0; i < xRef.size(); i++) {
-                cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(0, 0, 255));
-            }
-
-            for (int i = 0; i < offsets.size(); i++) {
-                float R[2][2] = { {cos(offsets[i][0]), -sin(offsets[i][0])}, {sin(offsets[i][0]), cos(offsets[i][0])} };
-                float t[2] = { offsets[i][1], offsets[i][2] };
-
-                for (int j = 0; j < xvec[e[i]].size(); j++) {
-                    xDeb[j] = R[0][0] * xvec[e[i]][j] + R[0][1] * yvec[e[i]][j] + t[0];
-                    yDeb[j] = R[1][0] * xvec[e[i]][j] + R[1][1] * yvec[e[i]][j] + t[1];
+                for (int k = 0; k < size(e); k++) {
+                    if (!clean(xvec[e[k]]).empty() && clean(xvec[e[k]]).size() >= topMatches)
+                    {
+                        std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[e[k]]), clean(yvec[e[k]]));
+                        std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvec[argmax(qualVec, 0)]));
+                        std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvecAlign[argmax(qualVecAlign, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
+                        offsets[k][0] = std::get<0>(tuple);
+                        offsets[k][1] = std::get<1>(tuple);
+                        offsets[k][2] = std::get<2>(tuple);
+                        offsets[k][3] = float(qualVec[e[k]][1]);
+                        offsets[k][4] = float(qualVec[e[k]][2]);
+                        offsets[k][5] = float(qualVec[e[k]][3]);
+                        stackArray[k] = lightFrameArray[e[k]];
+                    }
                 }
-                xDeb = clean(xDeb);
-                yDeb = clean(yDeb);
-                for (int i = 0; i < xDeb.size(); i++) {
-                    cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 6, cv::Scalar(0, 255, 0));
+
+                auto t2 = std::chrono::high_resolution_clock::now();
+                auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
+                elapsedTime = ms_int.count();
+
+                writeCSV(path + parameterDir + "offsets" + filter + ".csv", offsets);
+                writeStrings(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
+
+                std::vector<float> xDeb(maxStars);
+                std::vector<float> yDeb(maxStars);
+
+                int scaling = 4;
+
+                cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[argmax(qualVecAlign, 0)], cv::IMREAD_GRAYSCALE);
+                cv::Mat small;
+
+                cv::resize(maxQualFrame, small, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
+                cv::Mat img_rgb(small.size(), CV_8UC3);
+                cv::cvtColor(small, img_rgb, cv::COLOR_GRAY2BGR);
+
+                for (int i = 0; i < xRef.size(); i++) {
+                    cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(0, 0, 255));
                 }
+
+                for (int i = 0; i < offsets.size(); i++) {
+                    float R[2][2] = { {cos(offsets[i][0]), -sin(offsets[i][0])}, {sin(offsets[i][0]), cos(offsets[i][0])} };
+                    float t[2] = { offsets[i][1], offsets[i][2] };
+
+                    for (int j = 0; j < xvec[e[i]].size(); j++) {
+                        xDeb[j] = R[0][0] * xvec[e[i]][j] + R[0][1] * yvec[e[i]][j] + t[0];
+                        yDeb[j] = R[1][0] * xvec[e[i]][j] + R[1][1] * yvec[e[i]][j] + t[1];
+                    }
+                    xDeb = clean(xDeb);
+                    yDeb = clean(yDeb);
+                    for (int i = 0; i < xDeb.size(); i++) {
+                        cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 6, cv::Scalar(0, 255, 0));
+                    }
+                }
+                cv::imshow("Debug", img_rgb);
+                cv::waitKey(0);
+                cv::destroyAllWindows();
             }
-            cv::imshow("Debug", img_rgb);
-            cv::waitKey(0);
-            cv::destroyAllWindows();
         }
     }
 
@@ -472,6 +512,8 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
 
 int CppCLRWinFormsProject::Form1::Stack() {
     int elapsedTime = 0;
+    int medianOver = 30;
+    int scaling = 4;
 
     std::string stackArrayPath =  path + parameterDir + "stackArray" +  filter + ".csv";
     std::string offsetsPath =  path + parameterDir + "offsets" +  filter + ".csv";
@@ -482,8 +524,6 @@ int CppCLRWinFormsProject::Form1::Stack() {
     {
         auto t1 = std::chrono::high_resolution_clock::now();
       
-        cv::Mat masterDarkFrame = getDarkFrame();
-
         std::vector<std::string> stackArray = readStrings(stackArrayPath);
         std::vector<std::vector<float>> offsets = readCSV(offsetsPath, size(stackArray), 4);
 
@@ -502,39 +542,111 @@ int CppCLRWinFormsProject::Form1::Stack() {
             mean_background = mean_background + background[i]/float(offsets.size());
         }
 
-        cv::Mat stackFrame(2822, 4144, CV_32FC1, cv::Scalar(0));
+        int xSize = offsets[0][4];
+        int ySize = offsets[0][5];
+
+        cv::Mat meanFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+        cv::Mat medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+        cv::Mat stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+        cv::Mat tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+        std::vector<cv::Mat> tempArray(medianOver, cv::Mat(ySize, xSize, CV_32FC1));
+
+        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir, 0);
+        cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1);
+
+        int iterations = medianOver * (offsets.size() / medianOver);
+
+        int tempcount = 0;
 
         int k = 0;
         int i = 0;
-        std::vector<int> m(offsets.size());
+        std::vector<int> m(iterations);
+        std::vector<int> m2(offsets.size());
+        
+        for (int j = 0; j < iterations; j++)
+        {
+            m[j] = j;
+        }
 
         for (int j = 0; j < offsets.size(); j++)
         {
-            m[j] = j;
+            m2[j] = j;
         }
 
         unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
         shuffle(m.begin(), m.end(), std::default_random_engine(seed));
 
-        for (k = 0; k<offsets.size(); k++) {           
+        for (k = 0; k < iterations; k++) {
             i = m[k];
-            cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_GRAYSCALE);
+            cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame *= mean_background / background[i];
             lightFrame -= masterDarkFrame;
-            //lightFrame /= flatFrame; 
+            lightFrame /= masterFlatFrame; 
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
-            addWeighted(stackFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, stackFrame);                
+            tempArray[tempcount] = lightFrame;
+            tempcount++;
+            if (((k + 1) % medianOver) == 0) { 
+                std::vector<float> tmpVec(medianOver);
+
+                for (int j = 0; j < lightFrame.cols; j++)
+                {
+                    for (int h = 0; h < lightFrame.rows; h++)
+                    {
+                        for (int f = 0; f < medianOver; f++)
+                        {                    
+                            tmpVec[f] = tempArray[f].at<float>(h, j);
+                        }
+                        std::sort(tmpVec.begin(), tmpVec.end());
+                        int m = tmpVec.size() / 2;
+                        float median = ((tmpVec[m] + tmpVec[tmpVec.size() - m - 1]) / 2);
+                        tempFrame.at<float>(h, j) = median;                       
+                    }
+                }              
+                tempcount = 0;
+                addWeighted(medianFrame, 1, tempFrame, 1/float(offsets.size() / medianOver), 0.0, medianFrame);
+            }
         } 
 
-        imwrite(path + outDir + "out" + filter + ".tif", stackFrame);
+        imwrite(path + outDir + "outMedian" + filter + ".tif", medianFrame);
+
+        for (k = 0; k < offsets.size(); k++) {
+            i = m2[k];
+            cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
+            lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
+            lightFrame *= mean_background / background[i];
+            lightFrame -= masterDarkFrame;
+            lightFrame /= masterFlatFrame; 
+            cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
+            warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);   
+            addWeighted(meanFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, meanFrame);
+
+            for (int j = 0; j < lightFrame.cols; j++)
+            {
+                for (int h = 0; h < lightFrame.rows; h++)
+                {
+                    if (lightFrame.at<float>(h, j) > (medianFrame.at<float>(h, j) + 0.5 * sqrt(medianFrame.at<float>(h, j))))
+                    {
+                        lightFrame.at<float>(h, j) = medianFrame.at<float>(h, j);
+                    }
+                    if (lightFrame.at<float>(h, j) < (medianFrame.at<float>(h, j) - 0.5 * sqrt(medianFrame.at<float>(h, j))))
+                    {
+                        lightFrame.at<float>(h, j) = medianFrame.at<float>(h, j);
+                    }
+                }
+            }
+            tempcount = 0;
+            addWeighted(stackFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, stackFrame);
+        }
+
+        imwrite(path + outDir + "outMean" + filter + ".tif", meanFrame);
+        imwrite(path + outDir + "outStack" + filter + ".tif", stackFrame);
 
         auto t2 = std::chrono::high_resolution_clock::now();
         auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
         elapsedTime = ms_int.count();
 
-        int scaling = 4;
         cv::Mat small;
         cv::resize(stackFrame, small, cv::Size(stackFrame.cols / scaling, stackFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
 
