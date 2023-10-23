@@ -572,9 +572,9 @@ int CppCLRWinFormsProject::Form1::Stack() {
             darkDir = darkDir + darkGroup;
         }
 
-        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir, 0);
+        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup, 0);
         cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1);
-        cv::Mat masterBiasFrame = getCalibrationFrame(ySize, xSize, path + biasDir, 0);
+        cv::Mat masterBiasFrame = getCalibrationFrame(ySize, xSize, path + biasDir + biasGroup, 0);
 
         int iterations = medianOver * (offsets.size() / medianOver);
 
