@@ -5,8 +5,10 @@ std::string path = "C:/F/astro/matlab/m76/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
-std::string darkDir = "/darks/RGB/";
-std::string flatDir = "/flats/R/";
+std::string darkDir = "/darks/";
+std::string flatDir = "/flats/";
+std::string biasDir = "/bias/";
+std::string darkGroup = "";
 std::string ext = ".png";
 int detectionThreshold = 0.9;
 float discardPercentage = 10;
@@ -551,8 +553,20 @@ int CppCLRWinFormsProject::Form1::Stack() {
         cv::Mat tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
         std::vector<cv::Mat> tempArray(medianOver, cv::Mat(ySize, xSize, CV_32FC1));
 
+        biasDir = biasDir + "LRGB";
+
+        if (darkGroup == "")
+        {
+            darkDir = darkDir + filter;
+        }
+        else
+        {
+            darkDir = darkDir + darkGroup;
+        }
+
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir, 0);
         cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1);
+        cv::Mat masterBiasFrame = getCalibrationFrame(ySize, xSize, path + biasDir, 0);
 
         int iterations = medianOver * (offsets.size() / medianOver);
 
@@ -582,7 +596,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame *= mean_background / background[i];
             lightFrame -= masterDarkFrame;
-            lightFrame /= masterFlatFrame; 
+            lightFrame /= (masterFlatFrame-masterBiasFrame); 
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
             tempArray[tempcount] = lightFrame;
@@ -617,7 +631,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame *= mean_background / background[i];
             lightFrame -= masterDarkFrame;
-            lightFrame /= masterFlatFrame; 
+            lightFrame /= (masterFlatFrame - masterBiasFrame);
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);   
             addWeighted(meanFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, meanFrame);
