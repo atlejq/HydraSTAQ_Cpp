@@ -311,7 +311,7 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
                     addWeighted(masterFrame, 1, calibrationFrame, 1 / float(calibrationFrameArray.size()), 0.0, masterFrame);
                 }
             }
-            imwrite(calibrationPath + "masterFrame" + filter + ".tif", masterFrame);
+            imwrite(calibrationPath + "masterFrame" + ".tif", masterFrame);
         }
         else
         {
@@ -602,9 +602,9 @@ int CppCLRWinFormsProject::Form1::Stack() {
             i = m[k];
             cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
-            lightFrame *= mean_background / background[i];
             lightFrame -= masterDarkFrame;
             lightFrame /= (masterFlatFrame-masterBiasFrame); 
+            lightFrame *= mean_background / background[i];
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
             tempArray[tempcount] = lightFrame;
@@ -637,9 +637,9 @@ int CppCLRWinFormsProject::Form1::Stack() {
             i = m2[k];
             cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
-            lightFrame *= mean_background / background[i];
             lightFrame -= masterDarkFrame;
             lightFrame /= (masterFlatFrame - masterBiasFrame);
+            lightFrame *= mean_background / background[i];
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);   
             addWeighted(meanFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, meanFrame);
