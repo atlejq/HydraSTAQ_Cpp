@@ -9,6 +9,7 @@ std::string darkDir = "/darks/";
 std::string flatDir = "/flats/";
 std::string biasDir = "/bias/";
 std::string darkGroup = "";
+std::string biasGroup = "";
 std::string ext = ".png";
 int detectionThreshold = 0.9;
 float discardPercentage = 10;
@@ -553,7 +554,14 @@ int CppCLRWinFormsProject::Form1::Stack() {
         cv::Mat tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
         std::vector<cv::Mat> tempArray(medianOver, cv::Mat(ySize, xSize, CV_32FC1));
 
-        biasDir = biasDir + "LRGB";
+        if (biasGroup == "")
+        {
+            biasDir = biasDir + filter;
+        }
+        else
+        {
+            biasDir = biasDir + biasGroup;
+        }
 
         if (darkGroup == "")
         {
