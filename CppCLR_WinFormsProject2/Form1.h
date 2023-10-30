@@ -356,40 +356,40 @@ namespace CppCLRWinFormsProject {
 			this->radioButton14->UseVisualStyleBackColor = true;
 			this->radioButton14->CheckedChanged += gcnew System::EventHandler(this, &Form1::radioButton14_CheckedChanged);
 			// 
+			// radioButton15
+			// 
+			this->radioButton15->AutoSize = true;
+			this->radioButton15->Checked = true;
+			this->radioButton15->Enabled = false;
+			this->radioButton15->Location = System::Drawing::Point(13, 13);
+			this->radioButton15->Name = L"radioButton16";
+			this->radioButton15->Size = System::Drawing::Size(67, 20);
+			this->radioButton15->TabIndex = 33;
+			this->radioButton15->TabStop = true;
+			this->radioButton15->Text = L"LRGB ";
+			this->radioButton15->UseVisualStyleBackColor = true;
+			// 
 			// radioButton16
 			// 
 			this->radioButton16->AutoSize = true;
-			this->radioButton16->Checked = true;
 			this->radioButton16->Enabled = false;
-			this->radioButton16->Location = System::Drawing::Point(13, 13);
-			this->radioButton16->Name = L"radioButton16";
-			this->radioButton16->Size = System::Drawing::Size(67, 20);
-			this->radioButton16->TabIndex = 33;
-			this->radioButton16->TabStop = true;
-			this->radioButton16->Text = L"LRGB ";
+			this->radioButton16->Location = System::Drawing::Point(13, 55);
+			this->radioButton16->Name = L"radioButton17";
+			this->radioButton16->Size = System::Drawing::Size(77, 20);
+			this->radioButton16->TabIndex = 34;
+			this->radioButton16->Text = L"L + RGB";
 			this->radioButton16->UseVisualStyleBackColor = true;
 			// 
 			// radioButton17
 			// 
 			this->radioButton17->AutoSize = true;
 			this->radioButton17->Enabled = false;
-			this->radioButton17->Location = System::Drawing::Point(13, 55);
-			this->radioButton17->Name = L"radioButton17";
-			this->radioButton17->Size = System::Drawing::Size(77, 20);
-			this->radioButton17->TabIndex = 34;
-			this->radioButton17->Text = L"L + RGB";
+			this->radioButton17->Location = System::Drawing::Point(13, 92);
+			this->radioButton17->Name = L"radioButton15";
+			this->radioButton17->Size = System::Drawing::Size(68, 20);
+			this->radioButton17->TabIndex = 35;
+			this->radioButton17->Text = L"Pr filter";
 			this->radioButton17->UseVisualStyleBackColor = true;
-			// 
-			// radioButton15
-			// 
-			this->radioButton15->AutoSize = true;
-			this->radioButton15->Enabled = false;
-			this->radioButton15->Location = System::Drawing::Point(13, 92);
-			this->radioButton15->Name = L"radioButton15";
-			this->radioButton15->Size = System::Drawing::Size(68, 20);
-			this->radioButton15->TabIndex = 35;
-			this->radioButton15->Text = L"Pr filter";
-			this->radioButton15->UseVisualStyleBackColor = true;
 			// 
 			// label1
 			// 
