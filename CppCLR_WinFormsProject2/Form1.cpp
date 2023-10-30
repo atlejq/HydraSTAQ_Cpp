@@ -8,8 +8,8 @@ std::string lightDir = "/lights/";
 std::string darkDir = "/darks/";
 std::string flatDir = "/flats/";
 std::string biasDir = "/bias/";
-std::string darkGroup = "";
-std::string biasGroup = "";
+std::string darkGroup = "RGB";
+std::string biasGroup = "LRGB";
 std::string ext = ".png";
 int detectionThreshold = 0.9;
 float discardPercentage = 10;
@@ -556,25 +556,25 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
         if (biasGroup == "")
         {
-            biasDir = biasDir + filter;
+            biasDir = biasDir + filter + "/";
         }
         else
         {
-            biasDir = biasDir + biasGroup;
+            biasDir = biasDir + biasGroup + "/";
         }
 
         if (darkGroup == "")
         {
-            darkDir = darkDir + filter;
+            darkDir = darkDir + filter + "/";
         }
         else
         {
-            darkDir = darkDir + darkGroup;
+            darkDir = darkDir + darkGroup + "/";
         }
 
-        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup, 0);
-        cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1);
-        cv::Mat masterBiasFrame = getCalibrationFrame(ySize, xSize, path + biasDir + biasGroup, 0);
+        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir, 0);
+        cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter + "/", 1);
+        cv::Mat masterBiasFrame = getCalibrationFrame(ySize, xSize, path + biasDir, 0);
 
         int iterations = medianOver * (offsets.size() / medianOver);
 
