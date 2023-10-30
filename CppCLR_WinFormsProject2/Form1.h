@@ -461,7 +461,7 @@ namespace CppCLRWinFormsProject {
 			this->numericUpDown3->Enabled = false;
 			this->numericUpDown3->Location = System::Drawing::Point(137, 101);
 			this->numericUpDown3->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 99, 0, 0, 0 });
-			this->numericUpDown3->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 0 });
+			this->numericUpDown3->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 0, 0, 0, 0 });
 			this->numericUpDown3->Name = L"numericUpDown3";
 			this->numericUpDown3->Size = System::Drawing::Size(66, 22);
 			this->numericUpDown3->TabIndex = 26;
