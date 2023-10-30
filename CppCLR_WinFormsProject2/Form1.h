@@ -320,7 +320,7 @@ namespace CppCLRWinFormsProject {
 			// radioButton12
 			// 
 			this->radioButton12->AutoSize = true;
-			this->radioButton12->Checked = true;
+			this->radioButton12->Checked = false;
 			this->radioButton12->Enabled = false;
 			this->radioButton12->Location = System::Drawing::Point(13, 13);
 			this->radioButton12->Name = L"radioButton12";
@@ -334,6 +334,7 @@ namespace CppCLRWinFormsProject {
 			// radioButton13
 			// 
 			this->radioButton13->AutoSize = true;
+			this->radioButton13->Checked = true;
 			this->radioButton13->Enabled = false;
 			this->radioButton13->Location = System::Drawing::Point(13, 55);
 			this->radioButton13->Name = L"radioButton13";
@@ -685,7 +686,7 @@ namespace CppCLRWinFormsProject {
 		darkGroup = "RGB";
 	}
 	private: System::Void radioButton14_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-		darkGroup = "";
+		darkGroup = filter;
 	}
 	private: System::Void radioButton15_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 		biasGroup = "LRGB";
@@ -694,7 +695,7 @@ namespace CppCLRWinFormsProject {
 		biasGroup = "RGB";
 	}
 	private: System::Void radioButton17_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-		biasGroup = "";
+		biasGroup = filter;
 	}
 
 	private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) {

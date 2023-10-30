@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m76/";
+std::string path = "C:/F/astro/matlab/m1test/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
@@ -554,27 +554,9 @@ int CppCLRWinFormsProject::Form1::Stack() {
         cv::Mat tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
         std::vector<cv::Mat> tempArray(medianOver, cv::Mat(ySize, xSize, CV_32FC1));
 
-        if (biasGroup == "")
-        {
-            biasDir = biasDir + filter + "/";
-        }
-        else
-        {
-            biasDir = biasDir + biasGroup + "/";
-        }
-
-        if (darkGroup == "")
-        {
-            darkDir = darkDir + filter + "/";
-        }
-        else
-        {
-            darkDir = darkDir + darkGroup + "/";
-        }
-
-        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir, 0);
+        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup + "/", 0);
         cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter + "/", 1);
-        cv::Mat masterBiasFrame = getCalibrationFrame(ySize, xSize, path + biasDir, 0);
+        cv::Mat masterBiasFrame = getCalibrationFrame(ySize, xSize, path + biasDir + biasGroup + "/", 0);
 
         int iterations = medianOver * (offsets.size() / medianOver);
 
