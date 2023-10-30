@@ -286,11 +286,11 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
 cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, float defaultValue)
 {
     cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
-    bool masterFrameExists = std::filesystem::exists(calibrationPath + "masterFrame.tif");
+    bool masterFrameExists = std::filesystem::exists(calibrationPath + "/" + "masterFrame.tif");
 
     if (masterFrameExists)
     {
-        cv::Mat tmpCalibrationFrame = cv::imread(calibrationPath + "masterFrame.tif", cv::IMREAD_ANYDEPTH);
+        cv::Mat tmpCalibrationFrame = cv::imread(calibrationPath + "/" + "masterFrame.tif", cv::IMREAD_ANYDEPTH);
         if (tmpCalibrationFrame.cols == masterFrame.cols && tmpCalibrationFrame.rows == masterFrame.rows)
         {
             tmpCalibrationFrame = masterFrame;
@@ -298,7 +298,7 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
     }
     else
     {
-        std::vector<std::string> calibrationFrameArray = getFrames(calibrationPath, ext);
+        std::vector<std::string> calibrationFrameArray = getFrames(calibrationPath + "/" , ext);
         if (!calibrationFrameArray.empty())
         {
             #pragma omp parallel for num_threads(8)
@@ -311,7 +311,7 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
                     addWeighted(masterFrame, 1, calibrationFrame, 1 / float(calibrationFrameArray.size()), 0.0, masterFrame);
                 }
             }
-            imwrite(calibrationPath + "masterFrame" + ".tif", masterFrame);
+            imwrite(calibrationPath + "/" + "masterFrame" + ".tif", masterFrame);
         }
         else
         {
@@ -554,9 +554,9 @@ int CppCLRWinFormsProject::Form1::Stack() {
         cv::Mat tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
         std::vector<cv::Mat> tempArray(medianOver, cv::Mat(ySize, xSize, CV_32FC1));
 
-        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup + "/", 0);
-        cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter + "/", 1);
-        cv::Mat masterBiasFrame = getCalibrationFrame(ySize, xSize, path + biasDir + biasGroup + "/", 0);
+        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup, 0);
+        cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1);
+        cv::Mat masterBiasFrame = getCalibrationFrame(ySize, xSize, path + biasDir + biasGroup, 0);
 
         int iterations = medianOver * (offsets.size() / medianOver);
 

@@ -356,17 +356,6 @@ namespace CppCLRWinFormsProject {
 			this->radioButton14->UseVisualStyleBackColor = true;
 			this->radioButton14->CheckedChanged += gcnew System::EventHandler(this, &Form1::radioButton14_CheckedChanged);
 			// 
-			// radioButton15
-			// 
-			this->radioButton15->AutoSize = true;
-			this->radioButton15->Enabled = false;
-			this->radioButton15->Location = System::Drawing::Point(13, 92);
-			this->radioButton15->Name = L"radioButton15";
-			this->radioButton15->Size = System::Drawing::Size(68, 20);
-			this->radioButton15->TabIndex = 35;
-			this->radioButton15->Text = L"Pr filter";
-			this->radioButton15->UseVisualStyleBackColor = true;
-			// 
 			// radioButton16
 			// 
 			this->radioButton16->AutoSize = true;
@@ -390,6 +379,17 @@ namespace CppCLRWinFormsProject {
 			this->radioButton17->TabIndex = 34;
 			this->radioButton17->Text = L"L + RGB";
 			this->radioButton17->UseVisualStyleBackColor = true;
+			// 
+			// radioButton15
+			// 
+			this->radioButton15->AutoSize = true;
+			this->radioButton15->Enabled = false;
+			this->radioButton15->Location = System::Drawing::Point(13, 92);
+			this->radioButton15->Name = L"radioButton15";
+			this->radioButton15->Size = System::Drawing::Size(68, 20);
+			this->radioButton15->TabIndex = 35;
+			this->radioButton15->Text = L"Pr filter";
+			this->radioButton15->UseVisualStyleBackColor = true;
 			// 
 			// label1
 			// 
