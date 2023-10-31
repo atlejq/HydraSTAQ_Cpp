@@ -553,6 +553,11 @@ int CppCLRWinFormsProject::Form1::Stack() {
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup, 0);
         cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + flatDarksGroup, 0);
 
+        if (offsets.size() < medianBatchSize)
+        {
+            medianBatchSize = offsets.size();
+        }
+
         int iterations = medianBatchSize * (offsets.size() / medianBatchSize);
 
         int tempcount = 0;
@@ -586,11 +591,6 @@ int CppCLRWinFormsProject::Form1::Stack() {
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
             tempArray[tempcount] = lightFrame;
             tempcount++;
-            if (offsets.size() < medianBatchSize)
-            {
-                medianBatchSize = offsets.size();
-            }
-
             if (((k + 1) % medianBatchSize) == 0) {
                 std::vector<float> tmpVec(medianBatchSize);
 
