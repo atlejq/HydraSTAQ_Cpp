@@ -8,9 +8,9 @@ extern std::string outDir;
 extern std::string lightDir;
 extern std::string darkDir;
 extern std::string flatDir;
-extern std::string biasDir;
+extern std::string flatDarksDir;
 extern std::string darkGroup;
-extern std::string biasGroup;
+extern std::string flatDarksGroup;
 extern std::string ext;
 extern int detectionThreshold;
 extern float discardPercentage;
@@ -434,7 +434,7 @@ namespace CppCLRWinFormsProject {
 			this->label5->Name = L"label5";
 			this->label5->Size = System::Drawing::Size(73, 16);
 			this->label5->TabIndex = 38;
-			this->label5->Text = L"Group bias";
+			this->label5->Text = L"Group flatdarks";
 			// 
 			// numericUpDown1
 			// 
@@ -689,13 +689,13 @@ namespace CppCLRWinFormsProject {
 		darkGroup = filter;
 	}
 	private: System::Void radioButton15_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-		biasGroup = "LRGB";
+		flatDarksGroup = "LRGB";
 	}
 	private: System::Void radioButton16_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-		biasGroup = "RGB";
+		flatDarksGroup = "RGB";
 	}
 	private: System::Void radioButton17_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-		biasGroup = filter;
+		flatDarksGroup = filter;
 	}
 
 	private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) {

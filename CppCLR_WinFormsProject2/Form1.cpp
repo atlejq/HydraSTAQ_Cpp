@@ -7,9 +7,9 @@ std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
 std::string darkDir = "/darks/";
 std::string flatDir = "/flats/";
-std::string biasDir = "/bias/";
+std::string flatDarksDir = "/flatDarks/";
 std::string darkGroup = "RGB";
-std::string biasGroup = "LRGB";
+std::string flatDarksGroup = "LRGB";
 std::string ext = ".png";
 int detectionThreshold = 0.9;
 float discardPercentage = 10;
@@ -551,7 +551,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
         std::vector<cv::Mat> tempArray(medianOver, cv::Mat(ySize, xSize, CV_32FC1));
 
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup, 0);
-        cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + biasDir + biasGroup, 0);
+        cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + flatDarksGroup, 0);
 
         int iterations = medianOver * (offsets.size() / medianOver);
 
