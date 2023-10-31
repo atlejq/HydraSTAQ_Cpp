@@ -581,6 +581,7 @@ namespace CppCLRWinFormsProject {
 			// 
 			this->radioButton20->AutoSize = true;
 			this->radioButton20->Checked = true;
+			this->radioButton20->Enabled = true;
 			this->radioButton20->Location = System::Drawing::Point(139, 13);
 			this->radioButton20->Name = L"radioButton20";
 			this->radioButton20->Size = System::Drawing::Size(72, 20);
@@ -592,6 +593,7 @@ namespace CppCLRWinFormsProject {
 			// radioButton19
 			// 
 			this->radioButton19->AutoSize = true;
+			this->radioButton19->Enabled = false;
 			this->radioButton19->Location = System::Drawing::Point(60, 13);
 			this->radioButton19->Name = L"radioButton19";
 			this->radioButton19->Size = System::Drawing::Size(73, 20);
@@ -603,6 +605,7 @@ namespace CppCLRWinFormsProject {
 			// radioButton18
 			// 
 			this->radioButton18->AutoSize = true;
+			this->radioButton18->Enabled = false;
 			this->radioButton18->Location = System::Drawing::Point(6, 13);
 			this->radioButton18->Name = L"radioButton18";
 			this->radioButton18->Size = System::Drawing::Size(48, 20);
@@ -749,6 +752,9 @@ namespace CppCLRWinFormsProject {
 		radioButton15->Enabled = false;
 		radioButton16->Enabled = false;
 		radioButton17->Enabled = false;
+		radioButton18->Enabled = false;
+		radioButton19->Enabled = false;
+		radioButton20->Enabled = false;
 	}
 
 	private: System::Void radioButton10_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
@@ -766,6 +772,9 @@ namespace CppCLRWinFormsProject {
 		radioButton15->Enabled = false;
 		radioButton16->Enabled = false;
 		radioButton17->Enabled = false;
+		radioButton18->Enabled = false;
+		radioButton19->Enabled = false;
+		radioButton20->Enabled = false;
 	}
 
 	private: System::Void radioButton11_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
@@ -783,6 +792,9 @@ namespace CppCLRWinFormsProject {
 		radioButton15->Enabled = true;
 		radioButton16->Enabled = true;
 		radioButton17->Enabled = true;
+		radioButton18->Enabled = true;
+		radioButton19->Enabled = true;
+		radioButton20->Enabled = true;
 	}	
 	private: System::Void radioButton12_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 		darkGroup = "LRGB";
