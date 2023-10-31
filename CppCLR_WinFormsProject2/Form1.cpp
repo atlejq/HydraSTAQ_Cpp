@@ -437,11 +437,22 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
 
                 float qualityThreshold = rankedQualVec[floor(rankedQualVec.size() * discardPercentage / 100)];
 
-                std::vector<int> e;
+                std::vector<std::vector<int>> q;
                 for (int i = 0; i < qualVec.size(); i++) {
                     if (qualVec[i][0] > qualityThreshold) {
-                        e.push_back(i);
+                        std::vector<int> f = {0, 0};
+                        f[0] = i;
+                        f[1] = qualVec[i][0];
+                        q.push_back(f);
                     }
+                }
+
+                SortByColumnI(q, 1);
+
+                std::vector<int> e(q.size(),0);
+
+                for (int i = 0; i < q.size(); i++) {
+                    e[i] = q[i][0];
                 }
 
                 std::vector<std::vector<float>> offsets(e.size(), std::vector<float>(7));

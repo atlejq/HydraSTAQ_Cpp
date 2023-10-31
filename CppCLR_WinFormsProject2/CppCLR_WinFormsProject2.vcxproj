@@ -180,6 +180,7 @@
       <AdditionalIncludeDirectories>C:\opencv\build\include\; C:\eigen\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <OpenMPSupport>Yes</OpenMPSupport>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opencv_world480.lib</AdditionalDependencies>
