@@ -156,12 +156,12 @@ namespace CppCLRWinFormsProject {
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->BeginInit();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown4))->BeginInit();
 			this->panel1->SuspendLayout();
 			this->panel2->SuspendLayout();
 			this->panel3->SuspendLayout();
 			this->panel4->SuspendLayout();
 			this->panel5->SuspendLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown4))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// button1
@@ -427,7 +427,7 @@ namespace CppCLRWinFormsProject {
 			// label4
 			// 
 			this->label4->AutoSize = true;
-			this->label4->Location = System::Drawing::Point(134, 195);
+			this->label4->Location = System::Drawing::Point(394, 195);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(81, 16);
 			this->label4->TabIndex = 36;
@@ -436,20 +436,11 @@ namespace CppCLRWinFormsProject {
 			// label5
 			// 
 			this->label5->AutoSize = true;
-			this->label5->Location = System::Drawing::Point(247, 195);
+			this->label5->Location = System::Drawing::Point(526, 195);
 			this->label5->Name = L"label5";
 			this->label5->Size = System::Drawing::Size(98, 16);
 			this->label5->TabIndex = 38;
 			this->label5->Text = L"Group flatdarks";
-			// 
-			// label6
-			// 
-			this->label6->AutoSize = true;
-			this->label6->Location = System::Drawing::Point(219, 143);
-			this->label6->Name = L"label6";
-			this->label6->Size = System::Drawing::Size(126, 16);
-			this->label6->TabIndex = 40;
-			this->label6->Text = L"Median batch size";
 			// 
 			// numericUpDown1
 			// 
@@ -482,17 +473,6 @@ namespace CppCLRWinFormsProject {
 			this->numericUpDown3->Size = System::Drawing::Size(66, 22);
 			this->numericUpDown3->TabIndex = 26;
 			this->numericUpDown3->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 10, 0, 0, 0 });
-			// 
-			// numericUpDown4
-			// 
-			this->numericUpDown4->Enabled = false;
-			this->numericUpDown4->Location = System::Drawing::Point(137, 141);
-			this->numericUpDown4->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 50, 0, 0, 0 });
-			this->numericUpDown4->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 10, 0, 0, 0 });
-			this->numericUpDown4->Name = L"numericUpDown4";
-			this->numericUpDown4->Size = System::Drawing::Size(66, 22);
-			this->numericUpDown4->TabIndex = 39;
-			this->numericUpDown4->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 30, 0, 0, 0 });
 			// 
 			// panel1
 			// 
@@ -531,7 +511,7 @@ namespace CppCLRWinFormsProject {
 			this->panel4->Controls->Add(this->radioButton14);
 			this->panel4->Controls->Add(this->radioButton12);
 			this->panel4->Controls->Add(this->radioButton13);
-			this->panel4->Location = System::Drawing::Point(132, 222);
+			this->panel4->Location = System::Drawing::Point(392, 222);
 			this->panel4->Name = L"panel4";
 			this->panel4->Size = System::Drawing::Size(96, 126);
 			this->panel4->TabIndex = 35;
@@ -541,17 +521,37 @@ namespace CppCLRWinFormsProject {
 			this->panel5->Controls->Add(this->radioButton15);
 			this->panel5->Controls->Add(this->radioButton16);
 			this->panel5->Controls->Add(this->radioButton17);
-			this->panel5->Location = System::Drawing::Point(245, 222);
+			this->panel5->Location = System::Drawing::Point(529, 222);
 			this->panel5->Name = L"panel5";
 			this->panel5->Size = System::Drawing::Size(96, 126);
 			this->panel5->TabIndex = 37;
 			// 
 			// textBox1
 			// 
-			this->textBox1->Location = System::Drawing::Point(390, 189);
+			this->textBox1->Location = System::Drawing::Point(137, 188);
 			this->textBox1->Name = L"textBox1";
 			this->textBox1->Size = System::Drawing::Size(209, 22);
 			this->textBox1->TabIndex = 20;
+			// 
+			// numericUpDown4
+			// 
+			this->numericUpDown4->Enabled = false;
+			this->numericUpDown4->Location = System::Drawing::Point(137, 141);
+			this->numericUpDown4->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 50, 0, 0, 0 });
+			this->numericUpDown4->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 10, 0, 0, 0 });
+			this->numericUpDown4->Name = L"numericUpDown4";
+			this->numericUpDown4->Size = System::Drawing::Size(66, 22);
+			this->numericUpDown4->TabIndex = 39;
+			this->numericUpDown4->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 30, 0, 0, 0 });
+			// 
+			// label6
+			// 
+			this->label6->AutoSize = true;
+			this->label6->Location = System::Drawing::Point(219, 143);
+			this->label6->Name = L"label6";
+			this->label6->Size = System::Drawing::Size(115, 16);
+			this->label6->TabIndex = 40;
+			this->label6->Text = L"Median batch size";
 			// 
 			// Form1
 			// 
