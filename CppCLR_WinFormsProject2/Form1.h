@@ -14,6 +14,7 @@ extern std::string flatDarksGroup;
 extern std::string ext;
 extern int detectionThreshold;
 extern float discardPercentage;
+extern int medianBatchSize;
 extern int maxStars;
 extern int topMatches;
 extern std::string filter;
@@ -88,10 +89,12 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::Label^ label3;
 	private: System::Windows::Forms::Label^ label4;
 	private: System::Windows::Forms::Label^ label5;
+	private: System::Windows::Forms::Label^ label6;
 
 	private: System::Windows::Forms::NumericUpDown^ numericUpDown1;
 	private: System::Windows::Forms::NumericUpDown^ numericUpDown2;
 	private: System::Windows::Forms::NumericUpDown^ numericUpDown3;
+	private: System::Windows::Forms::NumericUpDown^ numericUpDown4;
 
 	private: System::Windows::Forms::Panel^ panel1;
 	private: System::Windows::Forms::Panel^ panel2;
@@ -148,9 +151,12 @@ namespace CppCLRWinFormsProject {
 			this->panel4 = (gcnew System::Windows::Forms::Panel());
 			this->panel5 = (gcnew System::Windows::Forms::Panel());
 			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
+			this->numericUpDown4 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->label6 = (gcnew System::Windows::Forms::Label());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown4))->BeginInit();
 			this->panel1->SuspendLayout();
 			this->panel2->SuspendLayout();
 			this->panel3->SuspendLayout();
@@ -320,7 +326,6 @@ namespace CppCLRWinFormsProject {
 			// radioButton12
 			// 
 			this->radioButton12->AutoSize = true;
-			this->radioButton12->Checked = false;
 			this->radioButton12->Enabled = false;
 			this->radioButton12->Location = System::Drawing::Point(13, 13);
 			this->radioButton12->Name = L"radioButton12";
@@ -340,6 +345,7 @@ namespace CppCLRWinFormsProject {
 			this->radioButton13->Name = L"radioButton13";
 			this->radioButton13->Size = System::Drawing::Size(77, 20);
 			this->radioButton13->TabIndex = 34;
+			this->radioButton13->TabStop = true;
 			this->radioButton13->Text = L"L + RGB";
 			this->radioButton13->UseVisualStyleBackColor = true;
 			this->radioButton13->CheckedChanged += gcnew System::EventHandler(this, &Form1::radioButton13_CheckedChanged);
@@ -362,7 +368,7 @@ namespace CppCLRWinFormsProject {
 			this->radioButton15->Checked = true;
 			this->radioButton15->Enabled = false;
 			this->radioButton15->Location = System::Drawing::Point(13, 13);
-			this->radioButton15->Name = L"radioButton16";
+			this->radioButton15->Name = L"radioButton15";
 			this->radioButton15->Size = System::Drawing::Size(67, 20);
 			this->radioButton15->TabIndex = 33;
 			this->radioButton15->TabStop = true;
@@ -374,7 +380,7 @@ namespace CppCLRWinFormsProject {
 			this->radioButton16->AutoSize = true;
 			this->radioButton16->Enabled = false;
 			this->radioButton16->Location = System::Drawing::Point(13, 55);
-			this->radioButton16->Name = L"radioButton17";
+			this->radioButton16->Name = L"radioButton16";
 			this->radioButton16->Size = System::Drawing::Size(77, 20);
 			this->radioButton16->TabIndex = 34;
 			this->radioButton16->Text = L"L + RGB";
@@ -385,7 +391,7 @@ namespace CppCLRWinFormsProject {
 			this->radioButton17->AutoSize = true;
 			this->radioButton17->Enabled = false;
 			this->radioButton17->Location = System::Drawing::Point(13, 92);
-			this->radioButton17->Name = L"radioButton15";
+			this->radioButton17->Name = L"radioButton17";
 			this->radioButton17->Size = System::Drawing::Size(68, 20);
 			this->radioButton17->TabIndex = 35;
 			this->radioButton17->Text = L"Pr filter";
@@ -421,7 +427,7 @@ namespace CppCLRWinFormsProject {
 			// label4
 			// 
 			this->label4->AutoSize = true;
-			this->label4->Location = System::Drawing::Point(138, 147);
+			this->label4->Location = System::Drawing::Point(134, 195);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(81, 16);
 			this->label4->TabIndex = 36;
@@ -430,11 +436,20 @@ namespace CppCLRWinFormsProject {
 			// label5
 			// 
 			this->label5->AutoSize = true;
-			this->label5->Location = System::Drawing::Point(251, 147);
+			this->label5->Location = System::Drawing::Point(247, 195);
 			this->label5->Name = L"label5";
-			this->label5->Size = System::Drawing::Size(73, 16);
+			this->label5->Size = System::Drawing::Size(98, 16);
 			this->label5->TabIndex = 38;
 			this->label5->Text = L"Group flatdarks";
+			// 
+			// label6
+			// 
+			this->label6->AutoSize = true;
+			this->label6->Location = System::Drawing::Point(219, 143);
+			this->label6->Name = L"label6";
+			this->label6->Size = System::Drawing::Size(126, 16);
+			this->label6->TabIndex = 40;
+			this->label6->Text = L"Median batch size";
 			// 
 			// numericUpDown1
 			// 
@@ -462,11 +477,22 @@ namespace CppCLRWinFormsProject {
 			this->numericUpDown3->Enabled = false;
 			this->numericUpDown3->Location = System::Drawing::Point(137, 101);
 			this->numericUpDown3->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 99, 0, 0, 0 });
-			this->numericUpDown3->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 0, 0, 0, 0 });
+			this->numericUpDown3->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 0 });
 			this->numericUpDown3->Name = L"numericUpDown3";
 			this->numericUpDown3->Size = System::Drawing::Size(66, 22);
 			this->numericUpDown3->TabIndex = 26;
 			this->numericUpDown3->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 10, 0, 0, 0 });
+			// 
+			// numericUpDown4
+			// 
+			this->numericUpDown4->Enabled = false;
+			this->numericUpDown4->Location = System::Drawing::Point(137, 141);
+			this->numericUpDown4->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 50, 0, 0, 0 });
+			this->numericUpDown4->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 10, 0, 0, 0 });
+			this->numericUpDown4->Name = L"numericUpDown4";
+			this->numericUpDown4->Size = System::Drawing::Size(66, 22);
+			this->numericUpDown4->TabIndex = 39;
+			this->numericUpDown4->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 30, 0, 0, 0 });
 			// 
 			// panel1
 			// 
@@ -505,7 +531,7 @@ namespace CppCLRWinFormsProject {
 			this->panel4->Controls->Add(this->radioButton14);
 			this->panel4->Controls->Add(this->radioButton12);
 			this->panel4->Controls->Add(this->radioButton13);
-			this->panel4->Location = System::Drawing::Point(136, 174);
+			this->panel4->Location = System::Drawing::Point(132, 222);
 			this->panel4->Name = L"panel4";
 			this->panel4->Size = System::Drawing::Size(96, 126);
 			this->panel4->TabIndex = 35;
@@ -515,7 +541,7 @@ namespace CppCLRWinFormsProject {
 			this->panel5->Controls->Add(this->radioButton15);
 			this->panel5->Controls->Add(this->radioButton16);
 			this->panel5->Controls->Add(this->radioButton17);
-			this->panel5->Location = System::Drawing::Point(249, 174);
+			this->panel5->Location = System::Drawing::Point(245, 222);
 			this->panel5->Name = L"panel5";
 			this->panel5->Size = System::Drawing::Size(96, 126);
 			this->panel5->TabIndex = 37;
@@ -532,6 +558,8 @@ namespace CppCLRWinFormsProject {
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(689, 364);
+			this->Controls->Add(this->numericUpDown4);
+			this->Controls->Add(this->label6);
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->numericUpDown3);
@@ -564,6 +592,7 @@ namespace CppCLRWinFormsProject {
 			this->panel4->PerformLayout();
 			this->panel5->ResumeLayout(false);
 			this->panel5->PerformLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown4))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -587,6 +616,7 @@ namespace CppCLRWinFormsProject {
 
 		if ((radioButton11->Checked))
 		{
+			medianBatchSize = int((numericUpDown4->Value));
 		    k = Stack();
 		}
 
@@ -636,6 +666,7 @@ namespace CppCLRWinFormsProject {
 		numericUpDown1->Enabled = true;
 		numericUpDown2->Enabled = false;
 		numericUpDown3->Enabled = false;
+		numericUpDown4->Enabled = false;
 		radioButton5->Enabled = false;
 		radioButton6->Enabled = false;
 		radioButton7->Enabled = false;
@@ -652,6 +683,7 @@ namespace CppCLRWinFormsProject {
 		numericUpDown1->Enabled = false;
 		numericUpDown2->Enabled = true;
 		numericUpDown3->Enabled = true;
+		numericUpDown4->Enabled = false;
 		radioButton5->Enabled = true;
 		radioButton6->Enabled = true;
 		radioButton7->Enabled = true;
@@ -668,6 +700,7 @@ namespace CppCLRWinFormsProject {
 		numericUpDown1->Enabled = false;
 		numericUpDown2->Enabled = false;
 		numericUpDown3->Enabled = false;
+		numericUpDown4->Enabled = true;
 		radioButton5->Enabled = false;
 		radioButton6->Enabled = false;
 		radioButton7->Enabled = false;

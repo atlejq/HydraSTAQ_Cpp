@@ -11,8 +11,9 @@ std::string flatDarksDir = "/flatDarks/";
 std::string darkGroup = "RGB";
 std::string flatDarksGroup = "LRGB";
 std::string ext = ".png";
-int detectionThreshold = 0.9;
+int detectionThreshold = 0.5;
 float discardPercentage = 10;
+int medianBatchSize = 30;
 int maxStars = 15;
 int topMatches = 6;
 std::string filter = "R";
@@ -511,7 +512,7 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
 
 int CppCLRWinFormsProject::Form1::Stack() {
     int elapsedTime = 0;
-    int medianOver = 30;
+    int medianBatchSize = 30;
     int scaling = 4;
 
     std::string stackArrayPath =  path + parameterDir + "stackArray" +  filter + ".csv";
@@ -548,12 +549,12 @@ int CppCLRWinFormsProject::Form1::Stack() {
         cv::Mat medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
         cv::Mat stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
         cv::Mat tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
-        std::vector<cv::Mat> tempArray(medianOver, cv::Mat(ySize, xSize, CV_32FC1));
+        std::vector<cv::Mat> tempArray(medianBatchSize, cv::Mat(ySize, xSize, CV_32FC1));
 
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup, 0);
         cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + flatDarksGroup, 0);
 
-        int iterations = medianOver * (offsets.size() / medianOver);
+        int iterations = medianBatchSize * (offsets.size() / medianBatchSize);
 
         int tempcount = 0;
 
@@ -586,14 +587,14 @@ int CppCLRWinFormsProject::Form1::Stack() {
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
             tempArray[tempcount] = lightFrame;
             tempcount++;
-            if (((k + 1) % medianOver) == 0) { 
-                std::vector<float> tmpVec(medianOver);
+            if (((k + 1) % medianBatchSize) == 0) {
+                std::vector<float> tmpVec(medianBatchSize);
 
                 for (int j = 0; j < lightFrame.cols; j++)
                 {
                     for (int h = 0; h < lightFrame.rows; h++)
                     {
-                        for (int f = 0; f < medianOver; f++)
+                        for (int f = 0; f < medianBatchSize; f++)
                         {                    
                             tmpVec[f] = tempArray[f].at<float>(h, j);
                         }
@@ -604,7 +605,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
                     }
                 }              
                 tempcount = 0;
-                addWeighted(medianFrame, 1, tempFrame, 1/float(offsets.size() / medianOver), 0.0, medianFrame);
+                addWeighted(medianFrame, 1, tempFrame, 1/float(offsets.size() / medianBatchSize), 0.0, medianFrame);
             }
         } 
 
