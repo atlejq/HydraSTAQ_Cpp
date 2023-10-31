@@ -512,7 +512,6 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
 
 int CppCLRWinFormsProject::Form1::Stack() {
     int elapsedTime = 0;
-    int medianBatchSize = 30;
     int scaling = 4;
 
     std::string stackArrayPath =  path + parameterDir + "stackArray" +  filter + ".csv";
