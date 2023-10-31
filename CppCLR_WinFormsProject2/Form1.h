@@ -15,6 +15,7 @@ extern std::string ext;
 extern int detectionThreshold;
 extern float discardPercentage;
 extern int medianBatchSize;
+extern int interpolationFlag;
 extern int maxStars;
 extern int topMatches;
 extern std::string filter;
@@ -436,6 +437,7 @@ namespace CppCLRWinFormsProject {
 			// 
 			this->radioButton20->AutoSize = true;
 			this->radioButton20->Checked = true;
+			this->radioButton20->Enabled = false;
 			this->radioButton20->Location = System::Drawing::Point(139, 13);
 			this->radioButton20->Name = L"radioButton20";
 			this->radioButton20->Size = System::Drawing::Size(72, 20);
@@ -810,10 +812,13 @@ namespace CppCLRWinFormsProject {
 		flatDarksGroup = filter;
 	}
 	private: System::Void radioButton18_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
+		interpolationFlag = 0;
 	}
 	private: System::Void radioButton19_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
+		interpolationFlag = 1;
 	}
 	private: System::Void radioButton20_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
+		interpolationFlag = 2;
 	}
 
 	private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) {

@@ -14,6 +14,7 @@ std::string ext = ".png";
 int detectionThreshold = 0.5;
 float discardPercentage = 10;
 int medianBatchSize = 30;
+int interpolationFlag = 2;
 int maxStars = 15;
 int topMatches = 6;
 std::string filter = "R";
@@ -600,7 +601,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             lightFrame /= calibratedFlatFrame; 
             lightFrame *= mean_background / background[i];
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
-            warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
+            warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
             tempArray[tempcount] = lightFrame;
             tempcount++;
             if (((k + 1) % medianBatchSize) == 0) {
@@ -635,7 +636,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             lightFrame /= calibratedFlatFrame;
             lightFrame *= mean_background / background[i];
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
-            warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);   
+            warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
             addWeighted(meanFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, meanFrame);
 
             for (int j = 0; j < lightFrame.cols; j++)
