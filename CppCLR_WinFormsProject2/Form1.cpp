@@ -552,17 +552,6 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup, 0);
         cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1);
-
-        std::ofstream outfile;
-        outfile.open(path + "out.txt");
-
-        outfile << masterFlatFrame.at<float>(100, 200) << std::endl;
-        outfile << masterFlatFrame.at<float>(1000,2000) << std::endl;
-        outfile << masterFlatFrame.at<float>(2000, 3000) << std::endl;
-
-        outfile.close();
-
-
         cv::Mat masterBiasFrame = getCalibrationFrame(ySize, xSize, path + biasDir + biasGroup, 0);
 
         int iterations = medianOver * (offsets.size() / medianOver);
