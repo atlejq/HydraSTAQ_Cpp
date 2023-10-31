@@ -282,10 +282,10 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
     return starMatrix;
 }
 
-//Function to fetch a dark frame
+//Function to fetch a calibration frame
 cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, float defaultValue)
 {
-    cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+    cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(defaultValue));
     bool masterFrameExists = std::filesystem::exists(calibrationPath + "/" + "masterFrame.tif");
 
     if (masterFrameExists)
@@ -298,7 +298,7 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
     }
     else
     {
-        std::vector<std::string> calibrationFrameArray = getFrames(calibrationPath + "/" , ext);
+        std::vector<std::string> calibrationFrameArray = getFrames(calibrationPath + "/", ext);
         if (!calibrationFrameArray.empty())
         {
             #pragma omp parallel for num_threads(8)
@@ -312,10 +312,6 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
                 }
             }
             imwrite(calibrationPath + "/" + "masterFrame" + ".tif", masterFrame);
-        }
-        else
-        {
-             masterFrame = cv::Mat(ySize, xSize, CV_32FC1, cv::Scalar(defaultValue));
         }
     }
     return masterFrame;
@@ -556,6 +552,17 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup, 0);
         cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1);
+
+        std::ofstream outfile;
+        outfile.open(path + "out.txt");
+
+        outfile << masterFlatFrame.at<float>(100, 200) << std::endl;
+        outfile << masterFlatFrame.at<float>(1000,2000) << std::endl;
+        outfile << masterFlatFrame.at<float>(2000, 3000) << std::endl;
+
+        outfile.close();
+
+
         cv::Mat masterBiasFrame = getCalibrationFrame(ySize, xSize, path + biasDir + biasGroup, 0);
 
         int iterations = medianOver * (offsets.size() / medianOver);
@@ -585,6 +592,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame -= masterDarkFrame;
+            lightFrame /= (masterFlatFrame); 
             lightFrame /= (masterFlatFrame-masterBiasFrame); 
             lightFrame *= mean_background / background[i];
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
