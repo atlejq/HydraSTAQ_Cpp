@@ -562,7 +562,7 @@ namespace CppCLRWinFormsProject {
 			// 
 			// textBox1
 			// 
-			this->textBox1->Location = System::Drawing::Point(143, 326);
+			this->textBox1->Location = System::Drawing::Point(139, 289);
 			this->textBox1->Name = L"textBox1";
 			this->textBox1->Size = System::Drawing::Size(209, 22);
 			this->textBox1->TabIndex = 20;
@@ -581,7 +581,6 @@ namespace CppCLRWinFormsProject {
 			// 
 			this->radioButton20->AutoSize = true;
 			this->radioButton20->Checked = true;
-			this->radioButton20->Enabled = true;
 			this->radioButton20->Location = System::Drawing::Point(139, 13);
 			this->radioButton20->Name = L"radioButton20";
 			this->radioButton20->Size = System::Drawing::Size(72, 20);
