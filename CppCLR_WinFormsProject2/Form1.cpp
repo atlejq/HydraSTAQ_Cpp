@@ -551,8 +551,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
         std::vector<cv::Mat> tempArray(medianOver, cv::Mat(ySize, xSize, CV_32FC1));
 
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup, 0);
-        cv::Mat masterFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1);
-        cv::Mat masterBiasFrame = getCalibrationFrame(ySize, xSize, path + biasDir + biasGroup, 0);
+        cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + biasDir + biasGroup, 0);
 
         int iterations = medianOver * (offsets.size() / medianOver);
 
@@ -581,7 +580,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame -= masterDarkFrame;
-            lightFrame /= (masterFlatFrame-masterBiasFrame); 
+            lightFrame /= calibratedFlatFrame; 
             lightFrame *= mean_background / background[i];
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
@@ -616,7 +615,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
             cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame -= masterDarkFrame;
-            lightFrame /= (masterFlatFrame - masterBiasFrame);
+            lightFrame /= calibratedFlatFrame;
             lightFrame *= mean_background / background[i];
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);   
