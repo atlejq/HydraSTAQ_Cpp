@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m76/";
+std::string path = "C:/F/astro/matlab/m1test/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
@@ -444,7 +444,7 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
                     }
                 }
 
-                std::vector<std::vector<float>> offsets(e.size(), std::vector<float>(6));
+                std::vector<std::vector<float>> offsets(e.size(), std::vector<float>(7));
                 std::vector<std::string> stackArray(size(e));
 
                 for (int k = 0; k < size(e); k++) {
@@ -456,9 +456,10 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
                         offsets[k][0] = std::get<0>(tuple);
                         offsets[k][1] = std::get<1>(tuple);
                         offsets[k][2] = std::get<2>(tuple);
-                        offsets[k][3] = float(qualVec[e[k]][1]);
-                        offsets[k][4] = float(qualVec[e[k]][2]);
-                        offsets[k][5] = float(qualVec[e[k]][3]);
+                        offsets[k][3] = float(qualVec[e[k]][0]);
+                        offsets[k][4] = float(qualVec[e[k]][1]);
+                        offsets[k][5] = float(qualVec[e[k]][2]);
+                        offsets[k][6] = float(qualVec[e[k]][3]);
                         stackArray[k] = lightFrameArray[e[k]];
                     }
                 }
@@ -524,7 +525,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
         auto t1 = std::chrono::high_resolution_clock::now();
       
         std::vector<std::string> stackArray = readStrings(stackArrayPath);
-        std::vector<std::vector<float>> offsets = readCSV(offsetsPath, size(stackArray), 4);
+        std::vector<std::vector<float>> offsets = readCSV(offsetsPath, size(stackArray), 7);
 
         std::vector<float> th(offsets.size());
         std::vector<float> dx(offsets.size());
@@ -537,12 +538,12 @@ int CppCLRWinFormsProject::Form1::Stack() {
             th[i] = offsets[i][0];
             dx[i] = offsets[i][1];
             dy[i] = offsets[i][2];
-            background[i] = offsets[i][3];
+            background[i] = offsets[i][4];
             mean_background = mean_background + background[i]/float(offsets.size());
         }
 
-        int xSize = offsets[0][4];
-        int ySize = offsets[0][5];
+        int xSize = offsets[0][5];
+        int ySize = offsets[0][6];
 
         cv::Mat meanFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
         cv::Mat medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
