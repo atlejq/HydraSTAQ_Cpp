@@ -293,7 +293,7 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
         cv::Mat tmpCalibrationFrame = cv::imread(calibrationPath + "/" + "masterFrame.tif", cv::IMREAD_ANYDEPTH);
         if (tmpCalibrationFrame.cols == masterFrame.cols && tmpCalibrationFrame.rows == masterFrame.rows)
         {
-            tmpCalibrationFrame = masterFrame;
+            masterFrame = tmpCalibrationFrame;
         }
     }
     else
@@ -592,7 +592,6 @@ int CppCLRWinFormsProject::Form1::Stack() {
             cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame -= masterDarkFrame;
-            lightFrame /= (masterFlatFrame); 
             lightFrame /= (masterFlatFrame-masterBiasFrame); 
             lightFrame *= mean_background / background[i];
             cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
