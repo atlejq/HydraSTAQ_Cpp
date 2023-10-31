@@ -81,6 +81,9 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::RadioButton^ radioButton15;
 	private: System::Windows::Forms::RadioButton^ radioButton16;
 	private: System::Windows::Forms::RadioButton^ radioButton17;
+	private: System::Windows::Forms::RadioButton^ radioButton18;
+	private: System::Windows::Forms::RadioButton^ radioButton19;
+	private: System::Windows::Forms::RadioButton^ radioButton20;
 
 	private: System::Windows::Forms::TextBox^ textBox1;
 
@@ -90,6 +93,7 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::Label^ label4;
 	private: System::Windows::Forms::Label^ label5;
 	private: System::Windows::Forms::Label^ label6;
+	private: System::Windows::Forms::Label^ label7;
 
 	private: System::Windows::Forms::NumericUpDown^ numericUpDown1;
 	private: System::Windows::Forms::NumericUpDown^ numericUpDown2;
@@ -102,13 +106,6 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::Panel^ panel4;
 	private: System::Windows::Forms::Panel^ panel5;
 	private: System::Windows::Forms::Panel^ panel6;
-
-
-
-	private: System::Windows::Forms::Label^ label7;
-	private: System::Windows::Forms::RadioButton^ radioButton20;
-	private: System::Windows::Forms::RadioButton^ radioButton19;
-	private: System::Windows::Forms::RadioButton^ radioButton18;
 
 	protected:
 
@@ -145,12 +142,16 @@ namespace CppCLRWinFormsProject {
 			this->radioButton15 = (gcnew System::Windows::Forms::RadioButton());
 			this->radioButton16 = (gcnew System::Windows::Forms::RadioButton());
 			this->radioButton17 = (gcnew System::Windows::Forms::RadioButton());
+			this->radioButton18 = (gcnew System::Windows::Forms::RadioButton());
+			this->radioButton19 = (gcnew System::Windows::Forms::RadioButton());
+			this->radioButton20 = (gcnew System::Windows::Forms::RadioButton());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->label5 = (gcnew System::Windows::Forms::Label());
 			this->label6 = (gcnew System::Windows::Forms::Label());
+			this->label7 = (gcnew System::Windows::Forms::Label());
 			this->numericUpDown1 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->numericUpDown2 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->numericUpDown3 = (gcnew System::Windows::Forms::NumericUpDown());
@@ -162,10 +163,6 @@ namespace CppCLRWinFormsProject {
 			this->panel5 = (gcnew System::Windows::Forms::Panel());
 			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
 			this->panel6 = (gcnew System::Windows::Forms::Panel());
-			this->radioButton20 = (gcnew System::Windows::Forms::RadioButton());
-			this->radioButton19 = (gcnew System::Windows::Forms::RadioButton());
-			this->radioButton18 = (gcnew System::Windows::Forms::RadioButton());
-			this->label7 = (gcnew System::Windows::Forms::Label());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->BeginInit();
@@ -411,6 +408,42 @@ namespace CppCLRWinFormsProject {
 			this->radioButton17->Text = L"Pr filter";
 			this->radioButton17->UseVisualStyleBackColor = true;
 			// 
+			// radioButton18
+			// 
+			this->radioButton18->AutoSize = true;
+			this->radioButton18->Enabled = false;
+			this->radioButton18->Location = System::Drawing::Point(6, 13);
+			this->radioButton18->Name = L"radioButton18";
+			this->radioButton18->Size = System::Drawing::Size(48, 20);
+			this->radioButton18->TabIndex = 0;
+			this->radioButton18->TabStop = true;
+			this->radioButton18->Text = L"NN";
+			this->radioButton18->UseVisualStyleBackColor = true;
+			// 
+			// radioButton19
+			// 
+			this->radioButton19->AutoSize = true;
+			this->radioButton19->Enabled = false;
+			this->radioButton19->Location = System::Drawing::Point(60, 13);
+			this->radioButton19->Name = L"radioButton19";
+			this->radioButton19->Size = System::Drawing::Size(73, 20);
+			this->radioButton19->TabIndex = 1;
+			this->radioButton19->TabStop = true;
+			this->radioButton19->Text = L"Bilinear";
+			this->radioButton19->UseVisualStyleBackColor = true;
+			// 
+			// radioButton20
+			// 
+			this->radioButton20->AutoSize = true;
+			this->radioButton20->Checked = true;
+			this->radioButton20->Location = System::Drawing::Point(139, 13);
+			this->radioButton20->Name = L"radioButton20";
+			this->radioButton20->Size = System::Drawing::Size(72, 20);
+			this->radioButton20->TabIndex = 2;
+			this->radioButton20->TabStop = true;
+			this->radioButton20->Text = L"Bicubic";
+			this->radioButton20->UseVisualStyleBackColor = true;
+			// 
 			// label1
 			// 
 			this->label1->AutoSize = true;
@@ -464,6 +497,15 @@ namespace CppCLRWinFormsProject {
 			this->label6->Size = System::Drawing::Size(115, 16);
 			this->label6->TabIndex = 40;
 			this->label6->Text = L"Median batch size";
+			// 
+			// label7
+			// 
+			this->label7->AutoSize = true;
+			this->label7->Location = System::Drawing::Point(208, 195);
+			this->label7->Name = L"label7";
+			this->label7->Size = System::Drawing::Size(80, 16);
+			this->label7->TabIndex = 41;
+			this->label7->Text = L"Interpolation";
 			// 
 			// numericUpDown1
 			// 
@@ -560,13 +602,6 @@ namespace CppCLRWinFormsProject {
 			this->panel5->Size = System::Drawing::Size(96, 126);
 			this->panel5->TabIndex = 37;
 			// 
-			// textBox1
-			// 
-			this->textBox1->Location = System::Drawing::Point(139, 289);
-			this->textBox1->Name = L"textBox1";
-			this->textBox1->Size = System::Drawing::Size(209, 22);
-			this->textBox1->TabIndex = 20;
-			// 
 			// panel6
 			// 
 			this->panel6->Controls->Add(this->radioButton20);
@@ -577,59 +612,18 @@ namespace CppCLRWinFormsProject {
 			this->panel6->Size = System::Drawing::Size(216, 46);
 			this->panel6->TabIndex = 36;
 			// 
-			// radioButton20
+			// textBox1
 			// 
-			this->radioButton20->AutoSize = true;
-			this->radioButton20->Checked = true;
-			this->radioButton20->Location = System::Drawing::Point(139, 13);
-			this->radioButton20->Name = L"radioButton20";
-			this->radioButton20->Size = System::Drawing::Size(72, 20);
-			this->radioButton20->TabIndex = 2;
-			this->radioButton20->TabStop = true;
-			this->radioButton20->Text = L"Bicubic";
-			this->radioButton20->UseVisualStyleBackColor = true;
-			// 
-			// radioButton19
-			// 
-			this->radioButton19->AutoSize = true;
-			this->radioButton19->Enabled = false;
-			this->radioButton19->Location = System::Drawing::Point(60, 13);
-			this->radioButton19->Name = L"radioButton19";
-			this->radioButton19->Size = System::Drawing::Size(73, 20);
-			this->radioButton19->TabIndex = 1;
-			this->radioButton19->TabStop = true;
-			this->radioButton19->Text = L"Bilinear";
-			this->radioButton19->UseVisualStyleBackColor = true;
-			// 
-			// radioButton18
-			// 
-			this->radioButton18->AutoSize = true;
-			this->radioButton18->Enabled = false;
-			this->radioButton18->Location = System::Drawing::Point(6, 13);
-			this->radioButton18->Name = L"radioButton18";
-			this->radioButton18->Size = System::Drawing::Size(48, 20);
-			this->radioButton18->TabIndex = 0;
-			this->radioButton18->TabStop = true;
-			this->radioButton18->Text = L"NN";
-			this->radioButton18->UseVisualStyleBackColor = true;
-			// 
-			// label7
-			// 
-			this->label7->AutoSize = true;
-			this->label7->Location = System::Drawing::Point(208, 195);
-			this->label7->Name = L"label7";
-			this->label7->Size = System::Drawing::Size(80, 16);
-			this->label7->TabIndex = 41;
-			this->label7->Text = L"Interpolation";
-			this->label7->Click += gcnew System::EventHandler(this, &Form1::label7_Click);
+			this->textBox1->Location = System::Drawing::Point(139, 289);
+			this->textBox1->Name = L"textBox1";
+			this->textBox1->Size = System::Drawing::Size(209, 22);
+			this->textBox1->TabIndex = 20;
 			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(689, 364);
-			this->Controls->Add(this->label7);
-			this->Controls->Add(this->panel6);
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->numericUpDown4);
@@ -637,12 +631,14 @@ namespace CppCLRWinFormsProject {
 			this->Controls->Add(this->numericUpDown2);
 			this->Controls->Add(this->numericUpDown1);
 			this->Controls->Add(this->textBox1);
+			this->Controls->Add(this->label7);
 			this->Controls->Add(this->label6);
 			this->Controls->Add(this->label5);
 			this->Controls->Add(this->label4);
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->label2);
 			this->Controls->Add(this->label1);
+			this->Controls->Add(this->panel6);
 			this->Controls->Add(this->panel5);
 			this->Controls->Add(this->panel4);
 			this->Controls->Add(this->panel3);
@@ -813,6 +809,12 @@ namespace CppCLRWinFormsProject {
 	private: System::Void radioButton17_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 		flatDarksGroup = filter;
 	}
+	private: System::Void radioButton18_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
+	}
+	private: System::Void radioButton19_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
+	}
+	private: System::Void radioButton20_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
+	}
 
 	private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) {
 		if (folderBrowserDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
@@ -830,9 +832,5 @@ namespace CppCLRWinFormsProject {
 		os = chars;
 		Marshal::FreeHGlobal(IntPtr((void*)chars));
 	}
-private: System::Void radioButton19_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-}
-private: System::Void label7_Click(System::Object^ sender, System::EventArgs^ e) {
-}
 };
 }
