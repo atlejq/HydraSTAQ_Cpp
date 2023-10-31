@@ -586,6 +586,11 @@ int CppCLRWinFormsProject::Form1::Stack() {
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), cv::INTER_CUBIC);
             tempArray[tempcount] = lightFrame;
             tempcount++;
+            if (offsets.size() < medianBatchSize)
+            {
+                medianBatchSize = offsets.size();
+            }
+
             if (((k + 1) % medianBatchSize) == 0) {
                 std::vector<float> tmpVec(medianBatchSize);
 
