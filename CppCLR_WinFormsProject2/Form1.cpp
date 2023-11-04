@@ -578,16 +578,10 @@ int CppCLRWinFormsProject::Form1::Stack() {
         int k = 0;
         int i = 0;
         std::vector<int> m(iterations);
-        std::vector<int> m2(offsets.size());
         
         for (int j = 0; j < iterations; j++)
         {
             m[j] = j;
-        }
-
-        for (int j = 0; j < offsets.size(); j++)
-        {
-            m2[j] = j;
         }
 
         unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -635,13 +629,12 @@ int CppCLRWinFormsProject::Form1::Stack() {
         imwrite(path + outDir + "outMedian" + filter + ".tif", medianFrame);
 
         for (k = 0; k < offsets.size(); k++) {
-            i = m2[k];
-            cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
+            cv::Mat lightFrame = cv::imread(stackArray[k], cv::IMREAD_ANYDEPTH);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame -= masterDarkFrame;
             lightFrame /= calibratedFlatFrame;
-            lightFrame *= mean_background / background[i];
-            cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
+            lightFrame *= mean_background / background[k];
+            cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[k]), -sin(th[k]), dx[k], sin(th[k]), cos(th[k]), dy[k]);
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
             addWeighted(meanFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, meanFrame);
 
