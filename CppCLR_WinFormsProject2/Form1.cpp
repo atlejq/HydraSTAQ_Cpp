@@ -598,28 +598,28 @@ int CppCLRWinFormsProject::Form1::Stack() {
                     tempArray[tempcount] = lightFrame;
                 }
             
-            std::vector<float> tmpVec(medianBatchSize);
             
-            int j;
-            int h;
-            //#pragma omp parallel for private(j, h) num_threads(8) 
-            for (j = 0; j < medianFrame.cols; j++)
+            //int j;
+            //int h;
+            #pragma omp parallel for num_threads(8) 
+            for (int j = 0; j < medianFrame.cols; j++)
             {
-                for (h = 0; h < medianFrame.rows; h++)
+                for (int h = 0; h < medianFrame.rows; h++)
                 {
+                    std::vector<float> tmpVec(medianBatchSize);
                     for (int f = 0; f < medianBatchSize; f++)
-                    {                    
+                    {     
                         tmpVec[f] = tempArray[f].at<float>(h, j);
                     }
                     std::sort(tmpVec.begin(), tmpVec.end());
-                    if (medianBatchSize % 2 != 0)
-                    {
-                        tempFrame.at<float>(h, j) = tmpVec[medianBatchSize / 2];
-                    }
-                    else
-                    {
-                        tempFrame.at<float>(h, j) = (tmpVec[medianBatchSize / 2] + tmpVec[(medianBatchSize / 2) - 1])/2;
-                    }
+                   if (medianBatchSize % 2 != 0)
+                   {
+                       tempFrame.at<float>(h, j) = tmpVec[medianBatchSize / 2];
+                   }
+                   else
+                   {
+                       tempFrame.at<float>(h, j) = (tmpVec[medianBatchSize / 2] + tmpVec[(medianBatchSize / 2) - 1])/2;
+                   }
                 }
 
             }              
