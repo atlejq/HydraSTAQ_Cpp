@@ -609,14 +609,14 @@ int CppCLRWinFormsProject::Form1::Stack() {
                         tmpVec[f] = tempArray[f].at<float>(h, j);
                     }
                     std::sort(tmpVec.begin(), tmpVec.end());
-                   if (medianBatchSize % 2 != 0)
-                   {
-                       tempFrame.at<float>(h, j) = tmpVec[medianBatchSize / 2];
-                   }
-                   else
-                   {
-                       tempFrame.at<float>(h, j) = (tmpVec[medianBatchSize / 2] + tmpVec[(medianBatchSize / 2) - 1])/2;
-                   }
+                    if (medianBatchSize % 2 != 0)
+                    {
+                        tempFrame.at<float>(h, j) = tmpVec[medianBatchSize / 2];
+                    }
+                    else
+                    {
+                        tempFrame.at<float>(h, j) = (tmpVec[medianBatchSize / 2] + tmpVec[(medianBatchSize / 2) - 1])/2;
+                    }
                 }
 
             }              
