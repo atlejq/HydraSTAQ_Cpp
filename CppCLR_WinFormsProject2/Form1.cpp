@@ -598,9 +598,6 @@ int CppCLRWinFormsProject::Form1::Stack() {
                     tempArray[tempcount] = lightFrame;
                 }
             
-            
-            //int j;
-            //int h;
             #pragma omp parallel for num_threads(8) 
             for (int j = 0; j < medianFrame.cols; j++)
             {
@@ -628,7 +625,8 @@ int CppCLRWinFormsProject::Form1::Stack() {
 
         imwrite(path + outDir + "outMedian" + filter + ".tif", medianFrame);
 
-   /*     for (int k = 0; k < offsets.size(); k++) {
+        #pragma omp parallel for num_threads(8) 
+        for (int k = 0; k < offsets.size(); k++) {
             cv::Mat lightFrame = cv::imread(stackArray[k], cv::IMREAD_ANYDEPTH);
             lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
             lightFrame -= masterDarkFrame;
@@ -654,7 +652,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
         }
 
         imwrite(path + outDir + "outMean" + filter + ".tif", meanFrame);
-        imwrite(path + outDir + "outStack" + filter + ".tif", stackFrame); */
+        imwrite(path + outDir + "outStack" + filter + ".tif", stackFrame); 
         
         auto t2 = std::chrono::high_resolution_clock::now();
         auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
