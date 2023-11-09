@@ -110,7 +110,7 @@ int argmax(std::vector<std::vector<float>> v, int col)
     return argMax;
 }
 
-void SortByColumn(std::vector<std::vector<float>>& data, size_t column) {
+void SortByColumnF(std::vector<std::vector<float>>& data, size_t column) {
     std::sort(data.begin(), data.end(), [column](std::vector<float> const& v1, std::vector<float> const& v2)
         {
             return v1[column] > v2[column];
@@ -347,7 +347,7 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
 
                 if (starMatrix.size() > 3) {
 
-                    SortByColumn(starMatrix, 4);
+                    SortByColumnF(starMatrix, 4);
 
                     for (int i = 0; i < std::min(maxStars, int(starMatrix.size())); i++) {
                         xvec[n][i] = starMatrix[i][0];
