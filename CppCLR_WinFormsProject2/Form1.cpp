@@ -599,9 +599,9 @@ int CppCLRWinFormsProject::Form1::Stack() {
                 }
             
             #pragma omp parallel for num_threads(8) 
-            for (int j = 0; j < medianFrame.cols; j++)
+            for (int h = 0; h < medianFrame.rows; h++)
             {
-                for (int h = 0; h < medianFrame.rows; h++)
+                for (int j = 0; j < medianFrame.cols; j++)
                 {
                     std::vector<float> tmpVec(medianBatchSize);
                     for (int f = 0; f < medianBatchSize; f++)
@@ -636,9 +636,9 @@ int CppCLRWinFormsProject::Form1::Stack() {
             warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
             addWeighted(meanFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, meanFrame);
 
-            for (int j = 0; j < lightFrame.cols; j++)
+            for (int h = 0; h < lightFrame.rows; h++)
             {
-                for (int h = 0; h < lightFrame.rows; h++)
+                for (int j = 0; j < lightFrame.cols; j++)
                 {
                     float mf = medianFrame.at<float>(h, j);
                     float lf = lightFrame.at<float>(h, j);
