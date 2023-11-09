@@ -608,7 +608,23 @@ int CppCLRWinFormsProject::Form1::Stack() {
                     {     
                         tmpVec[f] = tempArray[f].at<float>(h, j);
                     }
-                    std::sort(tmpVec.begin(), tmpVec.end());
+
+                    int c = 0;
+                    int d = 0;
+                    int t = 0;
+
+                    for (c = 1; c < sizeof(tmpVec) / sizeof(tmpVec[0]); c++) {
+                        t = tmpVec[c];
+                        d = c - 1;
+
+                        while (d >= 0 && t <= tmpVec[d])  
+                        {
+                            tmpVec[d + 1] = tmpVec[d];
+                            d = d - 1;
+                        }
+                        tmpVec[d + 1] = t;
+                    }
+
                     if (medianBatchSize % 2 != 0)
                     {
                         tempFrame.at<float>(h, j) = tmpVec[(medianBatchSize / 2) - 1];
