@@ -643,7 +643,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
                     float mf = medianFrame.at<float>(h, j);
                     float lf = lightFrame.at<float>(h, j);
 
-                    if (abs(lf - mf) > (mf + 0.5 * sqrt(mf)))
+                    if (abs(lf - mf) > (0.5 * sqrt(mf)))
                     {
                         lightFrame.at<float>(h, j) = mf;
                     }
