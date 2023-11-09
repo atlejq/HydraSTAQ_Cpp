@@ -611,7 +611,7 @@ int CppCLRWinFormsProject::Form1::Stack() {
                     std::sort(tmpVec.begin(), tmpVec.end());
                     if (medianBatchSize % 2 != 0)
                     {
-                        tempFrame.at<float>(h, j) = tmpVec[medianBatchSize / 2];
+                        tempFrame.at<float>(h, j) = tmpVec[(medianBatchSize / 2) - 1];
                     }
                     else
                     {
