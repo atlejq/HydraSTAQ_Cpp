@@ -250,7 +250,7 @@ std::vector<std::string> getFrames(std::string path, std::string ext) {
     return filenames;
 }
 
-// Function to analyze the star field in the given light frame.
+//Function to analyze the star field in the given light frame.
 std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
     std::vector<std::vector<float>> starMatrix;
 
@@ -320,7 +320,7 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
 }
 
 //Function to read images
-int CppCLRWinFormsProject::Form1::ReadImages() {
+int HydraSTAQ::Form1::ReadImages() {
     int elapsedTime = 0;
 
     std::vector<std::string> lightFrames = getFrames(path + lightDir + filter, ext);
@@ -368,7 +368,7 @@ int CppCLRWinFormsProject::Form1::ReadImages() {
     return elapsedTime;
 }
 
-int CppCLRWinFormsProject::Form1::ComputeOffsets() {
+int HydraSTAQ::Form1::ComputeOffsets() {
     int elapsedTime = 0;
 
     std::string lightFrameArrayPath = path + parameterDir + "lightFrameArray" + filter + ".csv";
@@ -523,7 +523,7 @@ int CppCLRWinFormsProject::Form1::ComputeOffsets() {
     return elapsedTime;
 }
 
-int CppCLRWinFormsProject::Form1::Stack() {
+int HydraSTAQ::Form1::Stack() {
     int elapsedTime = 0;
     int scaling = 4;
 
