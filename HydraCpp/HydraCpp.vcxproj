@@ -31,7 +31,7 @@
     <ProjectGuid>{352b7983-b2b0-4776-9035-949c59966103}</ProjectGuid>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <Keyword>ManagedCProj</Keyword>
-    <RootNamespace>CppCLR_WinFormsProject2</RootNamespace>
+    <RootNamespace>HydraCpp</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>Winforms</ProjectName>
   </PropertyGroup>
