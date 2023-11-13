@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m1test/";
+std::string path = "C:/F/astro/matlab/m76/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
@@ -577,8 +577,10 @@ int Hydra::Form1::Stack() {
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup, 0);
         cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + flatDarksGroup, 0);
 
-        int elapsedTime = countNonZero(calibratedFlatFrame);
-        if (countNonZero(calibratedFlatFrame) < xSize * ySize)
+        double minVal,maxVal;
+        cv::minMaxLoc(calibratedFlatFrame, &minVal, &maxVal);
+
+        if (minVal>0)
         {
             calibratedFlatFrame *= xSize * ySize / cv::sum(calibratedFlatFrame)[0];
             if (offsets.size() < medianBatchSize)
