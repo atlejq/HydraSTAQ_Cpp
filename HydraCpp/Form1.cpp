@@ -124,7 +124,7 @@ void SortByColumnI(std::vector<std::vector<int>>& data, size_t column) {
         });
 }
 
-//Function that enumerates star triangles
+//Function for enumerating star triangles
 std::vector<std::vector<float>> triangles(std::vector<float> x, std::vector<float> y) {
     std::vector<std::vector<float>> triangleParameters((x.size() * (x.size() - 1) * (x.size() - 2)) / 6, std::vector<float>(5));
     float minEdge = 50;
@@ -150,7 +150,7 @@ std::vector<std::vector<float>> triangles(std::vector<float> x, std::vector<floa
     return triangleParameters;
 }
 
-//Function that computes angular and translational offsets between vectors
+//Function for computing angular and translational offsets between vectors
 std::tuple<float, float, float> findRT(Eigen::MatrixXf A, Eigen::MatrixXf B) {
     Eigen::Vector2f centroid_A = A.rowwise().mean().reshaped(-1, 1);
     Eigen::Vector2f centroid_B = B.rowwise().mean().reshaped(-1, 1);
@@ -170,7 +170,7 @@ std::tuple<float, float, float> findRT(Eigen::MatrixXf A, Eigen::MatrixXf B) {
     return std::make_tuple(theta, t[0], t[1]);
 }
 
-//Function to compute the "vote matrix"
+//Function for computing the "vote matrix"
 std::vector<std::vector<float>> getCorrectedVoteMatrix(std::vector<std::vector<float>> refTriangles, std::vector<std::vector<float>> frameTriangles, std::vector<float> refVectorX, std::vector<float> yvec) {
     float e = 0.005;
     std::vector<std::vector<float>> vote(refVectorX.size(), std::vector<float>(yvec.size(), 0));
@@ -199,7 +199,7 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(std::vector<std::vector<f
     return corrVote;
 }
 
-//Function that aligns frames
+//Function for aligning frames
 std::tuple<float, float, float> alignFrames(std::vector<std::vector<float>> corrVote, std::vector<float> refVectorX, std::vector<float> refVectorY, std::vector<float> xvec, std::vector<float> yvec, int topMatches) {
     std::vector<std::vector<int>> votePairs;
     for (int i = 0; i < corrVote[0].size(); i++) {
@@ -377,7 +377,7 @@ int Hydra::Form1::ReadImages() {
     return elapsedTime;
 }
 
-//Function that computes angular and translational offsets
+//Function for computing angular and translational offsets
 int Hydra::Form1::ComputeOffsets() {
     int elapsedTime = 0;
 
@@ -533,7 +533,7 @@ int Hydra::Form1::ComputeOffsets() {
     return elapsedTime;
 }
 
-//Function that stacks the images
+//Function for stacking the images
 int Hydra::Form1::Stack() {
     int elapsedTime = 0;
     int scaling = 4;
@@ -576,6 +576,8 @@ int Hydra::Form1::Stack() {
 
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup, 0);
         cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + flatDarksGroup, 0);
+
+        calibratedFlatFrame *= xSize * ySize / cv::sum(calibratedFlatFrame)[0];
 
         if (offsets.size() < medianBatchSize)
         {
