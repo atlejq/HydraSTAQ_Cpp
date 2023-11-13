@@ -124,6 +124,7 @@ void SortByColumnI(std::vector<std::vector<int>>& data, size_t column) {
         });
 }
 
+//Function that enumerates star triangles
 std::vector<std::vector<float>> triangles(std::vector<float> x, std::vector<float> y) {
     std::vector<std::vector<float>> triangleParameters((x.size() * (x.size() - 1) * (x.size() - 2)) / 6, std::vector<float>(5));
     float minEdge = 50;
@@ -149,6 +150,7 @@ std::vector<std::vector<float>> triangles(std::vector<float> x, std::vector<floa
     return triangleParameters;
 }
 
+//Function that computes angular and translational offsets between vectors
 std::tuple<float, float, float> findRT(Eigen::MatrixXf A, Eigen::MatrixXf B) {
     Eigen::Vector2f centroid_A = A.rowwise().mean().reshaped(-1, 1);
     Eigen::Vector2f centroid_B = B.rowwise().mean().reshaped(-1, 1);
@@ -168,6 +170,7 @@ std::tuple<float, float, float> findRT(Eigen::MatrixXf A, Eigen::MatrixXf B) {
     return std::make_tuple(theta, t[0], t[1]);
 }
 
+//Function to compute the "vote matrix"
 std::vector<std::vector<float>> getCorrectedVoteMatrix(std::vector<std::vector<float>> refTriangles, std::vector<std::vector<float>> frameTriangles, std::vector<float> refVectorX, std::vector<float> yvec) {
     float e = 0.005;
     std::vector<std::vector<float>> vote(refVectorX.size(), std::vector<float>(yvec.size(), 0));
@@ -196,6 +199,7 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(std::vector<std::vector<f
     return corrVote;
 }
 
+//Function that aligns frames
 std::tuple<float, float, float> alignFrames(std::vector<std::vector<float>> corrVote, std::vector<float> refVectorX, std::vector<float> refVectorY, std::vector<float> xvec, std::vector<float> yvec, int topMatches) {
     std::vector<std::vector<int>> votePairs;
     for (int i = 0; i < corrVote[0].size(); i++) {
@@ -319,7 +323,7 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
     return masterFrame;
 }
 
-//Function to read and register images
+//Function to read images
 int Hydra::Form1::ReadImages() {
     int elapsedTime = 0;
 
