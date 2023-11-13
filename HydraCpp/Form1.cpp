@@ -360,6 +360,11 @@ int HydraSTAQ::Form1::ReadImages() {
         auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
         elapsedTime = ms_int.count();
 
+        if (!std::filesystem::exists(path + parameterDir))
+        {
+            std::filesystem::create_directory(path + parameterDir);
+        }
+
         writeStrings(path + parameterDir + "lightFrameArray" + filter + ".csv", lightFrames);
         writeCSV(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
         writeCSV(path + parameterDir + "xvec" + filter + ".csv", xvec);
@@ -623,6 +628,11 @@ int HydraSTAQ::Form1::Stack() {
             }              
             addWeighted(medianFrame, 1, tempFrame, 1/float(offsets.size() / medianBatchSize), 0.0, medianFrame);               
     } 
+
+        if (!std::filesystem::exists(path + outDir))
+        {
+            std::filesystem::create_directory(path + outDir);
+        }
 
         imwrite(path + outDir + "outMedian" + filter + ".tif", medianFrame);
 
