@@ -21,7 +21,7 @@ extern int topMatches;
 extern std::string filter;
 extern std::string align;
 
-namespace HydraSTAQ {
+namespace Hydra {
 
 	using namespace System;
 	using namespace System::ComponentModel;

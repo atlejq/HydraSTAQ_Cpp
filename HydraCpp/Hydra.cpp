@@ -17,6 +17,6 @@ int main()
 {
   Application::EnableVisualStyles();
   Application::SetCompatibleTextRenderingDefault(false);
-  Application::Run(gcnew HydraSTAQ::Form1());
+  Application::Run(gcnew Hydra::Form1());
   return 0;
 }

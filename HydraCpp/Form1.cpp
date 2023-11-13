@@ -319,8 +319,8 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
     return masterFrame;
 }
 
-//Function to read images
-int HydraSTAQ::Form1::ReadImages() {
+//Function to read and register images
+int Hydra::Form1::ReadImages() {
     int elapsedTime = 0;
 
     std::vector<std::string> lightFrames = getFrames(path + lightDir + filter, ext);
@@ -373,7 +373,8 @@ int HydraSTAQ::Form1::ReadImages() {
     return elapsedTime;
 }
 
-int HydraSTAQ::Form1::ComputeOffsets() {
+//Function that computes angular and translational offsets
+int Hydra::Form1::ComputeOffsets() {
     int elapsedTime = 0;
 
     std::string lightFrameArrayPath = path + parameterDir + "lightFrameArray" + filter + ".csv";
@@ -528,7 +529,8 @@ int HydraSTAQ::Form1::ComputeOffsets() {
     return elapsedTime;
 }
 
-int HydraSTAQ::Form1::Stack() {
+//Function that stacks the images
+int Hydra::Form1::Stack() {
     int elapsedTime = 0;
     int scaling = 4;
 
