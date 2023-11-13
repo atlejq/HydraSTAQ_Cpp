@@ -577,10 +577,10 @@ int Hydra::Form1::Stack() {
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup, 0);
         cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + flatDarksGroup, 0);
 
-        calibratedFlatFrame *= xSize * ySize / cv::sum(calibratedFlatFrame)[0];
-
+        int elapsedTime = countNonZero(calibratedFlatFrame);
         if (countNonZero(calibratedFlatFrame) < xSize * ySize)
         {
+            calibratedFlatFrame *= xSize * ySize / cv::sum(calibratedFlatFrame)[0];
             if (offsets.size() < medianBatchSize)
             {
                 medianBatchSize = offsets.size();
@@ -600,20 +600,19 @@ int Hydra::Form1::Stack() {
             shuffle(m.begin(), m.end(), std::default_random_engine(seed));
 
             for (int k = 0; k < batches; k++) {
-            #pragma omp parallel for num_threads(8)
+                #pragma omp parallel for num_threads(8)
                 for (int tempcount = 0; tempcount < medianBatchSize; tempcount++) {
                     int i = m[k * medianBatchSize + tempcount];
                     cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
                     lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
-                    lightFrame -= masterDarkFrame;
-                    lightFrame /= calibratedFlatFrame;
+                    lightFrame = (lightFrame - masterDarkFrame) / calibratedFlatFrame;
                     lightFrame *= mean_background / background[i];
                     cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
                     warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
                     tempArray[tempcount] = lightFrame;
                 }
 
-            #pragma omp parallel for num_threads(8) 
+                #pragma omp parallel for num_threads(8) 
                 for (int h = 0; h < medianFrame.rows; h++)
                 {
                     for (int j = 0; j < medianFrame.cols; j++)
@@ -650,8 +649,7 @@ int Hydra::Form1::Stack() {
             for (int k = 0; k < offsets.size(); k++) {
                 cv::Mat lightFrame = cv::imread(stackArray[k], cv::IMREAD_ANYDEPTH);
                 lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
-                lightFrame -= masterDarkFrame;
-                lightFrame /= calibratedFlatFrame;
+                lightFrame = (lightFrame - masterDarkFrame) / calibratedFlatFrame;
                 lightFrame *= mean_background / background[k];
                 cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[k]), -sin(th[k]), dx[k], sin(th[k]), cos(th[k]), dy[k]);
                 warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
@@ -678,7 +676,7 @@ int Hydra::Form1::Stack() {
 
             auto t2 = std::chrono::high_resolution_clock::now();
             auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-            elapsedTime = ms_int.count();
+           // elapsedTime = ms_int.count();
 
             cv::Mat small;
             cv::resize(stackFrame, small, cv::Size(stackFrame.cols / scaling, stackFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
