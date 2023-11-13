@@ -579,28 +579,30 @@ int Hydra::Form1::Stack() {
 
         calibratedFlatFrame *= xSize * ySize / cv::sum(calibratedFlatFrame)[0];
 
-        if (offsets.size() < medianBatchSize)
+        if (countNonZero(calibratedFlatFrame) < xSize * ySize)
         {
-            medianBatchSize = offsets.size();
-        }
+            if (offsets.size() < medianBatchSize)
+            {
+                medianBatchSize = offsets.size();
+            }
 
-        int batches = (offsets.size() / medianBatchSize);
-        int iterations = medianBatchSize * batches;
+            int batches = (offsets.size() / medianBatchSize);
+            int iterations = medianBatchSize * batches;
 
-        std::vector<int> m(iterations);
-        
-        for (int j = 0; j < iterations; j++)
-        {
-            m[j] = j;
-        }
+            std::vector<int> m(iterations);
 
-        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-        shuffle(m.begin(), m.end(), std::default_random_engine(seed));
-    
-        for (int k = 0; k < batches; k++) {
+            for (int j = 0; j < iterations; j++)
+            {
+                m[j] = j;
+            }
+
+            unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+            shuffle(m.begin(), m.end(), std::default_random_engine(seed));
+
+            for (int k = 0; k < batches; k++) {
             #pragma omp parallel for num_threads(8)
-            for (int tempcount = 0; tempcount < medianBatchSize; tempcount++) {
-                    int i = m[k*medianBatchSize + tempcount];
+                for (int tempcount = 0; tempcount < medianBatchSize; tempcount++) {
+                    int i = m[k * medianBatchSize + tempcount];
                     cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
                     lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
                     lightFrame -= masterDarkFrame;
@@ -610,81 +612,82 @@ int Hydra::Form1::Stack() {
                     warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
                     tempArray[tempcount] = lightFrame;
                 }
-            
+
             #pragma omp parallel for num_threads(8) 
-            for (int h = 0; h < medianFrame.rows; h++)
-            {
-                for (int j = 0; j < medianFrame.cols; j++)
+                for (int h = 0; h < medianFrame.rows; h++)
                 {
-                    std::vector<float> tmpVec(medianBatchSize);
-                    for (int f = 0; f < medianBatchSize; f++)
-                    {     
-                        tmpVec[f] = tempArray[f].at<float>(h, j);
-                    }
-                    if (medianBatchSize % 2 != 0)
+                    for (int j = 0; j < medianFrame.cols; j++)
                     {
-                        std::partial_sort(tmpVec.begin(), tmpVec.begin() + medianBatchSize / 2, tmpVec.end());
-                        tempFrame.at<float>(h, j) = tmpVec[(medianBatchSize / 2) - 1];
+                        std::vector<float> tmpVec(medianBatchSize);
+                        for (int f = 0; f < medianBatchSize; f++)
+                        {
+                            tmpVec[f] = tempArray[f].at<float>(h, j);
+                        }
+                        if (medianBatchSize % 2 != 0)
+                        {
+                            std::partial_sort(tmpVec.begin(), tmpVec.begin() + medianBatchSize / 2, tmpVec.end());
+                            tempFrame.at<float>(h, j) = tmpVec[(medianBatchSize / 2) - 1];
+                        }
+                        else
+                        {
+                            std::partial_sort(tmpVec.begin(), tmpVec.begin() + medianBatchSize / 2 + 1, tmpVec.end());
+                            tempFrame.at<float>(h, j) = (tmpVec[medianBatchSize / 2] + tmpVec[(medianBatchSize / 2) - 1]) / 2;
+                        }
                     }
-                    else
-                    {
-                        std::partial_sort(tmpVec.begin(), tmpVec.begin() + medianBatchSize / 2 + 1, tmpVec.end());
-                        tempFrame.at<float>(h, j) = (tmpVec[medianBatchSize / 2] + tmpVec[(medianBatchSize / 2) - 1])/2;
-                    }
+
                 }
-
-            }              
-            addWeighted(medianFrame, 1, tempFrame, 1/float(offsets.size() / medianBatchSize), 0.0, medianFrame);               
-    } 
-
-        if (!std::filesystem::exists(path + outDir))
-        {
-            std::filesystem::create_directory(path + outDir);
-        }
-
-        imwrite(path + outDir + "outMedian" + filter + ".tif", medianFrame);
-
-        #pragma omp parallel for num_threads(8) 
-        for (int k = 0; k < offsets.size(); k++) {
-            cv::Mat lightFrame = cv::imread(stackArray[k], cv::IMREAD_ANYDEPTH);
-            lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
-            lightFrame -= masterDarkFrame;
-            lightFrame /= calibratedFlatFrame;
-            lightFrame *= mean_background / background[k];
-            cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[k]), -sin(th[k]), dx[k], sin(th[k]), cos(th[k]), dy[k]);
-            warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
-            addWeighted(meanFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, meanFrame);
-
-            for (int h = 0; h < lightFrame.rows; h++)
-            {
-                for (int j = 0; j < lightFrame.cols; j++)
-                {
-                    float mf = medianFrame.at<float>(h, j);
-                    float lf = lightFrame.at<float>(h, j);
-
-                    if (abs(lf - mf) > (0.5 * sqrt(mf)))
-                    {
-                        lightFrame.at<float>(h, j) = mf;
-                    }
-                }
+                addWeighted(medianFrame, 1, tempFrame, 1 / float(offsets.size() / medianBatchSize), 0.0, medianFrame);
             }
-            addWeighted(stackFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, stackFrame);
+
+            if (!std::filesystem::exists(path + outDir))
+            {
+                std::filesystem::create_directory(path + outDir);
+            }
+
+            imwrite(path + outDir + "outMedian" + filter + ".tif", medianFrame);
+
+            #pragma omp parallel for num_threads(8) 
+            for (int k = 0; k < offsets.size(); k++) {
+                cv::Mat lightFrame = cv::imread(stackArray[k], cv::IMREAD_ANYDEPTH);
+                lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
+                lightFrame -= masterDarkFrame;
+                lightFrame /= calibratedFlatFrame;
+                lightFrame *= mean_background / background[k];
+                cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[k]), -sin(th[k]), dx[k], sin(th[k]), cos(th[k]), dy[k]);
+                warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
+                addWeighted(meanFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, meanFrame);
+
+                for (int h = 0; h < lightFrame.rows; h++)
+                {
+                    for (int j = 0; j < lightFrame.cols; j++)
+                    {
+                        float mf = medianFrame.at<float>(h, j);
+                        float lf = lightFrame.at<float>(h, j);
+
+                        if (abs(lf - mf) > (0.5 * sqrt(mf)))
+                        {
+                            lightFrame.at<float>(h, j) = mf;
+                        }
+                    }
+                }
+                addWeighted(stackFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, stackFrame);
+            }
+
+            imwrite(path + outDir + "outMean" + filter + ".tif", meanFrame);
+            imwrite(path + outDir + "outStack" + filter + ".tif", stackFrame);
+
+            auto t2 = std::chrono::high_resolution_clock::now();
+            auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
+            elapsedTime = ms_int.count();
+
+            cv::Mat small;
+            cv::resize(stackFrame, small, cv::Size(stackFrame.cols / scaling, stackFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
+
+            cv::imshow("Stack", small * 5);
+            cv::waitKey(0);
+            cv::destroyAllWindows();
         }
-
-        imwrite(path + outDir + "outMean" + filter + ".tif", meanFrame);
-        imwrite(path + outDir + "outStack" + filter + ".tif", stackFrame); 
-        
-        auto t2 = std::chrono::high_resolution_clock::now();
-        auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-        elapsedTime = ms_int.count();
-
-        cv::Mat small;
-        cv::resize(stackFrame, small, cv::Size(stackFrame.cols / scaling, stackFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
-
-        cv::imshow("Stack", small*5);
-        cv::waitKey(0);
-        cv::destroyAllWindows();
-    }
+    }       
     
     return elapsedTime;
 }
