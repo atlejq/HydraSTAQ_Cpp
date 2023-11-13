@@ -678,7 +678,7 @@ int Hydra::Form1::Stack() {
 
             auto t2 = std::chrono::high_resolution_clock::now();
             auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-           // elapsedTime = ms_int.count();
+            elapsedTime = ms_int.count();
 
             cv::Mat small;
             cv::resize(stackFrame, small, cv::Size(stackFrame.cols / scaling, stackFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
