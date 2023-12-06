@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m76/";
+std::string path = "C:/F/astro/matlab/m1test/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
@@ -614,29 +614,34 @@ int Hydra::Form1::Stack() {
                     tempArray[tempcount] = lightFrame;
                 }
 
-                #pragma omp parallel for num_threads(8) 
-                for (int h = 0; h < medianFrame.rows; h++)
-                {
-                    for (int j = 0; j < medianFrame.cols; j++)
-                    {
-                        std::vector<float> tmpVec(medianBatchSize);
-                        for (int f = 0; f < medianBatchSize; f++)
-                        {
-                            tmpVec[f] = tempArray[f].at<float>(h, j);
-                        }
-                        if (medianBatchSize % 2 != 0)
-                        {
-                            std::partial_sort(tmpVec.begin(), tmpVec.begin() + medianBatchSize / 2, tmpVec.end());
-                            tempFrame.at<float>(h, j) = tmpVec[(medianBatchSize / 2) - 1];
-                        }
-                        else
-                        {
-                            std::partial_sort(tmpVec.begin(), tmpVec.begin() + medianBatchSize / 2 + 1, tmpVec.end());
-                            tempFrame.at<float>(h, j) = (tmpVec[medianBatchSize / 2] + tmpVec[(medianBatchSize / 2) - 1]) / 2;
-                        }
-                    }
+                int rows = medianFrame.rows;
+                int cols = medianFrame.cols;
 
+                medianFrame.reshape(cols * rows);
+                tempFrame.reshape(cols * rows);
+
+                #pragma omp parallel for num_threads(8) 
+                for (int h = 0; h < cols * rows; h++)
+                {
+                    std::vector<float> tmpVec(medianBatchSize);
+                    for (int f = 0; f < medianBatchSize; f++)
+                    {
+                        tmpVec[f] = tempArray[f].at<float>(h);
+                    }
+                    if (medianBatchSize % 2 != 0)
+                    {
+                        std::partial_sort(tmpVec.begin(), tmpVec.begin() + medianBatchSize / 2, tmpVec.end());
+                        tempFrame.at<float>(h) = tmpVec[(medianBatchSize / 2) - 1];
+                    }
+                    else
+                    {
+                        std::partial_sort(tmpVec.begin(), tmpVec.begin() + medianBatchSize / 2 + 1, tmpVec.end());
+                        tempFrame.at<float>(h) = (tmpVec[medianBatchSize / 2] + tmpVec[(medianBatchSize / 2) - 1]) / 2;
+                    }            
                 }
+                medianFrame.reshape(cols, rows);
+                tempFrame.reshape(cols, rows);
+
                 addWeighted(medianFrame, 1, tempFrame, 1 / float(offsets.size() / medianBatchSize), 0.0, medianFrame);
             }
 
@@ -657,19 +662,22 @@ int Hydra::Form1::Stack() {
                 warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
                 addWeighted(meanFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, meanFrame);
 
-                for (int h = 0; h < lightFrame.rows; h++)
-                {
-                    for (int j = 0; j < lightFrame.cols; j++)
-                    {
-                        float mf = medianFrame.at<float>(h, j);
-                        float lf = lightFrame.at<float>(h, j);
+                int rows = lightFrame.rows;
+                int cols = lightFrame.cols;
 
-                        if (abs(lf - mf) > (0.5 * sqrt(mf)))
-                        {
-                            lightFrame.at<float>(h, j) = mf;
-                        }
+                lightFrame.reshape(cols*rows);
+                for (int h = 0; h < cols * rows; h++)
+                {
+                    float mf = medianFrame.at<float>(h);
+                    float lf = lightFrame.at<float>(h);
+
+                    if (abs(lf - mf) > (0.5 * sqrt(mf)))
+                    {
+                        lightFrame.at<float>(h) = mf;
                     }
                 }
+                lightFrame.reshape(cols, rows);
+
                 addWeighted(stackFrame, 1, lightFrame, 1 / float(offsets.size()), 0.0, stackFrame);
             }
 
