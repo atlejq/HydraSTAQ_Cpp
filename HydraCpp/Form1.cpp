@@ -110,14 +110,14 @@ int argmax(std::vector<std::vector<float>> v, int col)
     return argMax;
 }
 
-void SortByColumnF(std::vector<std::vector<float>>& data, size_t column) {
+void sortFloatByColumn(std::vector<std::vector<float>>& data, size_t column) {
     std::sort(data.begin(), data.end(), [column](std::vector<float> const& v1, std::vector<float> const& v2)
         {
             return v1[column] > v2[column];
         });
 }
 
-void SortByColumnI(std::vector<std::vector<int>>& data, size_t column) {
+void sortIntByColumn(std::vector<std::vector<int>>& data, size_t column) {
     std::sort(data.begin(), data.end(), [column](std::vector<int> const& v1, std::vector<int> const& v2)
         {
             return v1[column] > v2[column];
@@ -214,7 +214,7 @@ std::tuple<float, float, float> alignFrames(std::vector<std::vector<float>> corr
         votePairs.push_back({ i, maxIndex, maxValue });
     }
 
-    SortByColumnI(votePairs, 2);
+    sortIntByColumn(votePairs, 2);
 
     std::vector<std::vector<int>> rankPairs(votePairs.begin(), votePairs.end());
 
@@ -351,7 +351,7 @@ int Hydra::Form1::ReadImages() {
 
                 if (starMatrix.size() > 3) {
 
-                    SortByColumnF(starMatrix, 4);
+                    sortFloatByColumn(starMatrix, 4);
 
                     for (int i = 0; i < std::min(maxStars, int(starMatrix.size())); i++) {
                         xvec[n][i] = starMatrix[i][0];
@@ -458,7 +458,7 @@ int Hydra::Form1::ComputeOffsets() {
                     }
                 }
 
-                SortByColumnI(q, 1);
+                sortIntByColumn(q, 1);
 
                 std::vector<int> e(q.size(),0);
 
@@ -474,14 +474,14 @@ int Hydra::Form1::ComputeOffsets() {
                     {
                         std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[e[k]]), clean(yvec[e[k]]));
                         std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvec[argmax(qualVec, 0)]));
-                        std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvecAlign[argmax(qualVecAlign, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
-                        offsets[k][0] = std::get<0>(tuple);
-                        offsets[k][1] = std::get<1>(tuple);
-                        offsets[k][2] = std::get<2>(tuple);
-                        offsets[k][3] = float(qualVec[e[k]][0]);
-                        offsets[k][4] = float(qualVec[e[k]][1]);
-                        offsets[k][5] = float(qualVec[e[k]][2]);
-                        offsets[k][6] = float(qualVec[e[k]][3]);
+                        std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvecAlign[argmax(qualVecAlign, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);                      
+                        offsets[k][0] = float(qualVec[e[k]][0]);
+                        offsets[k][1] = float(qualVec[e[k]][1]);
+                        offsets[k][2] = float(qualVec[e[k]][2]);
+                        offsets[k][3] = float(qualVec[e[k]][3]);
+                        offsets[k][4] = std::get<0>(tuple);
+                        offsets[k][5] = std::get<1>(tuple);
+                        offsets[k][6] = std::get<2>(tuple);
                         stackArray[k] = lightFrameArray[e[k]];
                     }
                 }
@@ -510,8 +510,8 @@ int Hydra::Form1::ComputeOffsets() {
                 }
 
                 for (int i = 0; i < offsets.size(); i++) {
-                    float R[2][2] = { {cos(offsets[i][0]), -sin(offsets[i][0])}, {sin(offsets[i][0]), cos(offsets[i][0])} };
-                    float t[2] = { offsets[i][1], offsets[i][2] };
+                    float R[2][2] = { {cos(offsets[i][4]), -sin(offsets[i][4])}, {sin(offsets[i][4]), cos(offsets[i][4])} };
+                    float t[2] = { offsets[i][5], offsets[i][6] };
 
                     for (int j = 0; j < xvec[e[i]].size(); j++) {
                         xDeb[j] = R[0][0] * xvec[e[i]][j] + R[0][1] * yvec[e[i]][j] + t[0];
@@ -558,15 +558,15 @@ int Hydra::Form1::Stack() {
         float mean_background = 0;
 
         for (int i = 0; i < offsets.size(); i++) {
-            th[i] = offsets[i][0];
-            dx[i] = offsets[i][1];
-            dy[i] = offsets[i][2];
-            background[i] = offsets[i][4];
+            th[i] = offsets[i][4];
+            dx[i] = offsets[i][5];
+            dy[i] = offsets[i][6];
+            background[i] = offsets[i][1];
             mean_background = mean_background + background[i]/float(offsets.size());
         }
 
-        int xSize = offsets[0][5];
-        int ySize = offsets[0][6];
+        int xSize = offsets[0][2];
+        int ySize = offsets[0][3];
 
         cv::Mat meanFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
         cv::Mat medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
@@ -605,7 +605,7 @@ int Hydra::Form1::Stack() {
                 #pragma omp parallel for num_threads(8)
                 for (int tempcount = 0; tempcount < medianBatchSize; tempcount++) {
                     int i = m[k * medianBatchSize + tempcount];
-                    cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_ANYDEPTH);
+                    cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_GRAYSCALE);
                     lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
                     lightFrame = (lightFrame - masterDarkFrame) / calibratedFlatFrame;
                     lightFrame *= mean_background / background[i];
@@ -654,7 +654,7 @@ int Hydra::Form1::Stack() {
 
             #pragma omp parallel for num_threads(8) 
             for (int k = 0; k < offsets.size(); k++) {
-                cv::Mat lightFrame = cv::imread(stackArray[k], cv::IMREAD_ANYDEPTH);
+                cv::Mat lightFrame = cv::imread(stackArray[k], cv::IMREAD_GRAYSCALE);
                 lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
                 lightFrame = (lightFrame - masterDarkFrame) / calibratedFlatFrame;
                 lightFrame *= mean_background / background[k];
