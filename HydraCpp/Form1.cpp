@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m1test/";
+std::string path = "C:/F/astro/matlab/m76/";
 std::string parameterDir = "/parametersCPP/";
 std::string outDir = "/outCPP/";
 std::string lightDir = "/lights/";
@@ -45,6 +45,26 @@ void writeStrings(std::string path, std::vector<std::string> stringArray)
     stringFileStream.close();
 }
 
+std::vector<std::string> matrixToString(std::vector<std::vector<float>> numberVector)
+{
+
+    std::vector<std::string> strings(numberVector.size());
+    for (int i = 0; i < numberVector.size(); i++)
+    {
+        std::string line = "";
+        for (int j = 0; j < numberVector[0].size(); j++)
+        {
+            line = line + std::to_string(numberVector[i][j]);
+            if (j < numberVector[0].size() - 1)
+            {
+                line = line + ",";
+            }
+        }
+        strings[i] = line;
+    }
+    return strings;
+}
+
 std::vector<std::vector<float>> readCSV(std::string path, int size1, int size2)
 {
     std::vector<std::vector<float>> commaSeparatedArray(size1, std::vector<float>(size2));
@@ -68,21 +88,6 @@ std::vector<std::vector<float>> readCSV(std::string path, int size1, int size2)
         commaSeparatedArrayStream.close();
     }
     return commaSeparatedArray;
-}
-
-void writeCSV(std::string path, std::vector<std::vector<float>> numberVector)
-{
-    std::ofstream numberFileStream(path);
-    for (int i = 0; i < numberVector.size(); i++)
-    {
-        for (int j = 0; j < numberVector[0].size() - 1; j++)
-        {
-            numberFileStream << numberVector[i][j] << ",";
-        }
-        numberFileStream << numberVector[i][numberVector[0].size() - 1];
-        numberFileStream << "\n";
-    }
-    numberFileStream.close();
 }
 
 std::vector<float> clean(std::vector<float> v)
@@ -370,9 +375,9 @@ int Hydra::Form1::ReadImages() {
         }
 
         writeStrings(path + parameterDir + "lightFrameArray" + filter + ".csv", lightFrames);
-        writeCSV(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
-        writeCSV(path + parameterDir + "xvec" + filter + ".csv", xvec);
-        writeCSV(path + parameterDir + "yvec" + filter + ".csv", yvec);
+        writeStrings(path + parameterDir + "qualVec" + filter + ".csv", matrixToString(qualVec));
+        writeStrings(path + parameterDir + "xvec" + filter + ".csv", matrixToString(xvec));
+        writeStrings(path + parameterDir + "yvec" + filter + ".csv", matrixToString(yvec));
     }
     return elapsedTime;
 }
@@ -490,7 +495,7 @@ int Hydra::Form1::ComputeOffsets() {
                 auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
                 elapsedTime = ms_int.count();
 
-                writeCSV(path + parameterDir + "offsets" + filter + ".csv", offsets);
+                writeStrings(path + parameterDir + "offsets" + filter + ".csv", matrixToString(offsets));
                 writeStrings(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
 
                 std::vector<float> xDeb(maxStars);
