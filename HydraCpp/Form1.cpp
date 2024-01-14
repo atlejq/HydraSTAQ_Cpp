@@ -192,9 +192,7 @@ std::tuple<float, float, float> alignFrames(std::vector<std::vector<float>> corr
     Eigen::MatrixXf referenceM(2, topMatches);
     Eigen::MatrixXf frameM(2, topMatches);
 
-    float theta;
-    float t1;
-    float t2;
+    float theta, t1, t2;
 
     for (int i = 0; i < topMatches; i++) {
         referenceM(0, i) = refVectorX[rankPairs[i][1]];
@@ -203,11 +201,8 @@ std::tuple<float, float, float> alignFrames(std::vector<std::vector<float>> corr
         frameM(1, i) = yvec[rankPairs[i][0]];
     }
     std::tuple<float, float, float> tuple = findRT(frameM, referenceM);
-    t1 = std::get<0>(tuple);
-    t2 = std::get<1>(tuple);
-    theta = std::get<2>(tuple);
 
-    return std::make_tuple(t1, t2, theta);
+    return tuple;
 }
 
 //Function to get all the file names in the given directory.
@@ -278,7 +273,7 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
         std::vector<std::string> calibrationFrameArray = getFrames(calibrationPath + "/", ext);
         if (!calibrationFrameArray.empty())
         {
-#pragma omp parallel for num_threads(8)
+            #pragma omp parallel for num_threads(8)
             for (int n = 0; n < calibrationFrameArray.size(); n++)
             {
                 cv::Mat calibrationFrame = cv::imread(calibrationFrameArray[n], cv::IMREAD_ANYDEPTH);
