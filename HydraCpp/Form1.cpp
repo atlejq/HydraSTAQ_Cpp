@@ -122,7 +122,7 @@ std::vector<std::vector<float>> triangles(std::vector<float> x, std::vector<floa
 }
 
 //Function for computing angular and translational offsets between vectors
-std::tuple<float, float, float> findRT(Eigen::MatrixXf A, Eigen::MatrixXf B) {
+std::vector<float> findRT(Eigen::MatrixXf A, Eigen::MatrixXf B) {
     Eigen::Vector2f centroid_A = A.rowwise().mean().reshaped(-1, 1);
     Eigen::Vector2f centroid_B = B.rowwise().mean().reshaped(-1, 1);
     Eigen::MatrixXf Am = A - centroid_A.replicate(1, A.cols());
@@ -136,9 +136,9 @@ std::tuple<float, float, float> findRT(Eigen::MatrixXf A, Eigen::MatrixXf B) {
         V.col(1) *= -1;
         R = V * U.transpose();
     }
-    double theta = std::atan2(R(1, 0), R(0, 0));
+    float theta = std::atan2(R(1, 0), R(0, 0));
     Eigen::Vector2f t = -R * centroid_A + centroid_B;
-    return std::make_tuple(theta, t[0], t[1]);
+    return { theta, t[0], t[1] };
 }
 
 //Function for computing the "vote matrix"
@@ -171,7 +171,7 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(std::vector<std::vector<f
 }
 
 //Function for aligning frames
-std::tuple<float, float, float> alignFrames(std::vector<std::vector<float>> corrVote, std::vector<float> refVectorX, std::vector<float> refVectorY, std::vector<float> xvec, std::vector<float> yvec, int topMatches) {
+std::vector<float> alignFrames(std::vector<std::vector<float>> corrVote, std::vector<float> refVectorX, std::vector<float> refVectorY, std::vector<float> xvec, std::vector<float> yvec, int topMatches) {
     std::vector<std::vector<int>> votePairs;
     for (int i = 0; i < corrVote[0].size(); i++) {
         int maxIndex = 0;
@@ -200,9 +200,9 @@ std::tuple<float, float, float> alignFrames(std::vector<std::vector<float>> corr
         frameM(0, i) = xvec[rankPairs[i][0]];
         frameM(1, i) = yvec[rankPairs[i][0]];
     }
-    std::tuple<float, float, float> tuple = findRT(frameM, referenceM);
+    std::vector<float> RTparams = findRT(frameM, referenceM);
 
-    return tuple;
+    return RTparams;
 }
 
 //Function to get all the file names in the given directory.
@@ -446,8 +446,8 @@ int Hydra::Form1::ComputeOffsets() {
                     {
                         std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[e[k]]), clean(yvec[e[k]]));
                         std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvec[argmax(qualVec, 0)]));
-                        std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvecAlign[argmax(qualVecAlign, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
-                        offsets[k] = { float(qualVec[e[k]][0]), float(qualVec[e[k]][1]), float(qualVec[e[k]][2]), float(qualVec[e[k]][3]), std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple) };
+                        std::vector<float> RTparams = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvecAlign[argmax(qualVecAlign, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
+                        offsets[k] = { float(qualVec[e[k]][0]), float(qualVec[e[k]][1]), float(qualVec[e[k]][2]), float(qualVec[e[k]][3]), RTparams[0], RTparams[1], RTparams[2]};
                         stackArray[k][0] = lightFrameArray[e[k]];
                         stackArray[k][1] = std::to_string(offsets[k][0]);
                         stackArray[k][2] = std::to_string(offsets[k][1]);
