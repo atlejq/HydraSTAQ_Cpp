@@ -60,6 +60,28 @@ void writeStringMatrix(std::string path, std::vector<std::vector<std::string>> s
     stringFileStream.close();
 }
 
+std::tuple<std::vector<std::string>, std::vector<std::vector<float>>, std::vector<std::vector<float>>, std::vector<std::vector<float>>> unpack(std::vector<std::vector<std::string>> lFA)
+{
+    std::vector<std::string> lightFrameArray(lFA.size());
+    std::vector<std::vector<float>> qualVec(lFA.size());
+    std::vector<std::vector<float>> xvec(lFA.size(), std::vector<float>(maxStars));
+    std::vector<std::vector<float>> yvec(lFA.size(), std::vector<float>(maxStars));
+
+    for (int i = 0; i < lFA.size(); i++)
+    {
+        lightFrameArray[i] = lFA[i][0];
+        qualVec[i] = { stof(lFA[i][1]), stof(lFA[i][2]), stof(lFA[i][3]), stof(lFA[i][4]), stof(lFA[i][5]) };
+
+        for (int j = 6; j < 6 + maxStars; j++)
+        {
+            xvec[i][j - 6] = stof(lFA[i][j]);
+            yvec[i][j - 6] = stof(lFA[i][maxStars + j]);
+        }
+    }
+
+    return std::make_tuple(lightFrameArray, qualVec, xvec, yvec);
+}
+
 std::vector<float> clean(std::vector<float> v)
 {
     std::vector<float> vFiltered;
@@ -352,36 +374,18 @@ int Hydra::Form1::ComputeOffsets() {
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
-        std::vector<std::vector<std::string>> lFA = readStringMatrix(qualVecPath);
-        std::vector<std::vector<std::string>> lFAA = readStringMatrix(qualVecAlignPath);
-        std::vector<std::string> lightFrameArray(lFA.size()), lightFrameArrayAlign(lFAA.size());
-        std::vector<std::vector<float>> qualVec(lFA.size()), qualVecAlign(lFAA.size());
-        std::vector<std::vector<float>> xvec(lFA.size(), std::vector<float>(maxStars)), xvecAlign(lFAA.size(), std::vector<float>(maxStars));
-        std::vector<std::vector<float>> yvec(lFA.size(), std::vector<float>(maxStars)), yvecAlign(lFAA.size(), std::vector<float>(maxStars));
+        std::tuple tuple = unpack(readStringMatrix(qualVecPath));
+        std::tuple alignTuple = unpack(readStringMatrix(qualVecAlignPath));
 
-        for (int i = 0; i < lFA.size(); i++)
-        {
-            lightFrameArray[i] = lFA[i][0];
-            qualVec[i] = { stof(lFA[i][1]), stof(lFA[i][2]), stof(lFA[i][3]), stof(lFA[i][4]), stof(lFA[i][5]) };
+        std::vector<std::string> lightFrameArray = std::get<0>(tuple);
+        std::vector<std::vector<float>> qualVec = std::get<1>(tuple);
+        std::vector<std::vector<float>> xvec = std::get<2>(tuple);
+        std::vector<std::vector<float>> yvec = std::get<3>(tuple);
 
-            for (int j = 6; j < 6 + maxStars; j++)
-            {
-                xvec[i][j - 6] = stof(lFA[i][j]);
-                yvec[i][j - 6] = stof(lFA[i][maxStars + j]);
-            }
-        }
-
-        for (int i = 0; i < lFAA.size(); i++)
-        {
-            lightFrameArrayAlign[i] = lFAA[i][0];
-            qualVecAlign[i] = { stof(lFAA[i][1]), stof(lFAA[i][2]), stof(lFAA[i][3]), stof(lFAA[i][4]), stof(lFAA[i][5]) };
-
-            for (int j = 6; j < 6 + maxStars; j++)
-            {
-                xvecAlign[i][j - 6] = stof(lFAA[i][j]);
-                yvecAlign[i][j - 6] = stof(lFAA[i][maxStars + j]);
-            }
-        }
+        std::vector<std::string> lightFrameArrayAlign = std::get<0>(alignTuple);
+        std::vector<std::vector<float>> qualVecAlign = std::get<1>(alignTuple);
+        std::vector<std::vector<float>> xvecAlign = std::get<2>(alignTuple);
+        std::vector<std::vector<float>> yvecAlign = std::get<3>(alignTuple);
 
         bool sizesEqual = true;
 
