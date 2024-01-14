@@ -18,7 +18,7 @@ extern int medianBatchSize;
 extern int interpolationFlag;
 extern int maxStars;
 extern int topMatches;
-extern int samplingFactor;
+extern float samplingFactor;
 extern std::string filter;
 extern std::string align;
 

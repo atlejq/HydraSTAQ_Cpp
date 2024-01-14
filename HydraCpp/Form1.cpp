@@ -18,7 +18,7 @@ int interpolationFlag = 2;
 int maxStars = 15;
 int topMatches = 6;
 int scaling = 4;
-int samplingFactor = 1;
+float samplingFactor = 1;
 std::string filter = "R";
 std::string align = "R";
 
