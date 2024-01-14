@@ -11,8 +11,8 @@ std::string flatDarksDir = "/flatDarks/";
 std::string darkGroup = "RGB";
 std::string flatDarksGroup = "LRGB";
 std::string ext = ".png";
-int detectionThreshold = 0.5;
-float discardPercentage = 10;
+int detectionThreshold = 50;
+int discardPercentage = 10;
 int medianBatchSize = 30;
 int interpolationFlag = 2;
 int maxStars = 15;
@@ -60,22 +60,22 @@ void writeStringMatrix(std::string path, std::vector<std::vector<std::string>> s
     stringFileStream.close();
 }
 
-std::tuple<std::vector<std::string>, std::vector<std::vector<float>>, std::vector<std::vector<float>>, std::vector<std::vector<float>>> unpack(std::vector<std::vector<std::string>> lFA)
+std::tuple<std::vector<std::string>, std::vector<std::vector<float>>, std::vector<std::vector<float>>, std::vector<std::vector<float>>> unpack(std::vector<std::vector<std::string>> inputArray)
 {
-    std::vector<std::string> lightFrameArray(lFA.size());
-    std::vector<std::vector<float>> qualVec(lFA.size());
-    std::vector<std::vector<float>> xvec(lFA.size(), std::vector<float>(maxStars));
-    std::vector<std::vector<float>> yvec(lFA.size(), std::vector<float>(maxStars));
+    std::vector<std::string> lightFrameArray(inputArray.size());
+    std::vector<std::vector<float>> qualVec(inputArray.size());
+    std::vector<std::vector<float>> xvec(inputArray.size(), std::vector<float>(maxStars));
+    std::vector<std::vector<float>> yvec(inputArray.size(), std::vector<float>(maxStars));
 
-    for (int i = 0; i < lFA.size(); i++)
+    for (int i = 0; i < inputArray.size(); i++)
     {
-        lightFrameArray[i] = lFA[i][0];
-        qualVec[i] = { stof(lFA[i][1]), stof(lFA[i][2]), stof(lFA[i][3]), stof(lFA[i][4]), stof(lFA[i][5]) };
+        lightFrameArray[i] = inputArray[i][0];
+        qualVec[i] = { stof(inputArray[i][1]), stof(inputArray[i][2]), stof(inputArray[i][3]), stof(inputArray[i][4]), stof(inputArray[i][5]) };
 
-        for (int j = 6; j < 6 + maxStars; j++)
+        for (int j = 0; j < maxStars; j++)
         {
-            xvec[i][j - 6] = stof(lFA[i][j]);
-            yvec[i][j - 6] = stof(lFA[i][maxStars + j]);
+            xvec[i][j] = stof(inputArray[i][j + 6]);
+            yvec[i][j] = stof(inputArray[i][j + 6 + maxStars]);
         }
     }
 
@@ -213,8 +213,6 @@ std::vector<float> alignFrames(std::vector<std::vector<float>> corrVote, std::ve
 
     Eigen::MatrixXf referenceM(2, topMatches);
     Eigen::MatrixXf frameM(2, topMatches);
-
-    float theta, t1, t2;
 
     for (int i = 0; i < topMatches; i++) {
         referenceM(0, i) = refVectorX[rankPairs[i][1]];
@@ -422,7 +420,7 @@ int Hydra::Form1::ComputeOffsets() {
 
                 std::sort(rankedQualVec.begin(), rankedQualVec.end());
 
-                float qualityThreshold = rankedQualVec[floor(rankedQualVec.size() * discardPercentage / 100)];
+                float qualityThreshold = rankedQualVec[floor(rankedQualVec.size() * float(discardPercentage) / 100)];
 
                 std::vector<std::vector<int>> q;
                 for (int i = 0; i < qualVec.size(); i++) {
@@ -527,8 +525,6 @@ int Hydra::Form1::Stack() {
         std::vector<float> background(stackInfo.size());
         float mean_background = 0;
 
-        std::ofstream myfile;
-
         for (int i = 0; i < stackInfo.size(); i++)
         {
             stackArray[i] = stackInfo[i][0];
@@ -539,8 +535,8 @@ int Hydra::Form1::Stack() {
             mean_background = mean_background + background[i] / float(stackInfo.size());
         }
 
-        int xSize = stof(stackInfo[0][3]);
-        int ySize = stof(stackInfo[0][4]);
+        int xSize = stoi(stackInfo[0][3]);
+        int ySize = stoi(stackInfo[0][4]);
 
         cv::Mat meanFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
         cv::Mat medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));

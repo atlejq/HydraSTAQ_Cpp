@@ -13,7 +13,7 @@ extern std::string darkGroup;
 extern std::string flatDarksGroup;
 extern std::string ext;
 extern int detectionThreshold;
-extern float discardPercentage;
+extern int discardPercentage;
 extern int medianBatchSize;
 extern int interpolationFlag;
 extern int maxStars;
