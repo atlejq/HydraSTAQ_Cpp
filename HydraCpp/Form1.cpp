@@ -42,16 +42,6 @@ std::vector<std::vector<std::string>> readStringMatrix(std::string path)
     return commaSeparatedArray;
 }
 
-void writeStrings(std::string path, std::vector<std::string> stringArray)
-{
-    std::ofstream stringFileStream(path);
-    for (int i = 0; i < stringArray.size(); i++)
-    {
-        stringFileStream << stringArray[i] << "\n";
-    }
-    stringFileStream.close();
-}
-
 void writeStringMatrix(std::string path, std::vector<std::vector<std::string>> stringArray)
 {
     std::ofstream stringFileStream(path);
@@ -314,10 +304,7 @@ int Hydra::Form1::ReadImages() {
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
-        //std::vector<std::string> qualVec(lightFrames.size());
         std::vector<std::vector<std::string>> qualVec(lightFrames.size(), std::vector<std::string>(6 + 2 * maxStars, "-1"));
-        std::vector<std::vector<float>> xvec(lightFrames.size(), std::vector<float>(maxStars, -1));
-        std::vector<std::vector<float>> yvec(lightFrames.size(), std::vector<float>(maxStars, -1));
 
         #pragma omp parallel for num_threads(8)
         for (int n = 0; n < lightFrames.size(); n++) {
@@ -341,7 +328,6 @@ int Hydra::Form1::ReadImages() {
                         qualVec[n][i+6+maxStars] = std::to_string(starMatrix[i][1]);
                     }
                 }
-
             }
         }
         auto t2 = std::chrono::high_resolution_clock::now();
@@ -353,7 +339,6 @@ int Hydra::Form1::ReadImages() {
             std::filesystem::create_directory(path + parameterDir);
         }
 
-        //writeStrings(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
         writeStringMatrix(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
     }
     return elapsedTime;
@@ -374,14 +359,10 @@ int Hydra::Form1::ComputeOffsets() {
 
         std::vector<std::vector<std::string>> lFA = readStringMatrix(qualVecPath);
         std::vector<std::vector<std::string>> lFAA = readStringMatrix(qualVecAlignPath);
-        std::vector<std::string> lightFrameArray(lFA.size());;
-        std::vector<std::string> lightFrameArrayAlign(lFAA.size());
-        std::vector<std::vector<float>> qualVec(lFA.size());
-        std::vector<std::vector<float>> qualVecAlign(lFAA.size());
-        std::vector<std::vector<float>> xvec(lFA.size(), std::vector<float>(maxStars));
-        std::vector<std::vector<float>> xvecAlign(lFAA.size(), std::vector<float>(maxStars));
-        std::vector<std::vector<float>> yvec(lFA.size(), std::vector<float>(maxStars));
-        std::vector<std::vector<float>> yvecAlign(lFAA.size(), std::vector<float>(maxStars));
+        std::vector<std::string> lightFrameArray(lFA.size()), lightFrameArrayAlign(lFAA.size());
+        std::vector<std::vector<float>> qualVec(lFA.size()), qualVecAlign(lFAA.size());
+        std::vector<std::vector<float>> xvec(lFA.size(), std::vector<float>(maxStars)), xvecAlign(lFAA.size(), std::vector<float>(maxStars));
+        std::vector<std::vector<float>> yvec(lFA.size(), std::vector<float>(maxStars)), yvecAlign(lFAA.size(), std::vector<float>(maxStars));
 
         for (int i = 0; i < lFA.size(); i++)
         {
@@ -463,7 +444,7 @@ int Hydra::Form1::ComputeOffsets() {
                 }
 
                 std::vector<std::vector<float>> offsets(e.size(), std::vector<float>(7));
-                std::vector<std::string> stackArray(size(e));
+                std::vector<std::vector<std::string>> stackArray(e.size(), std::vector<std::string>(8));
 
                 for (int k = 0; k < size(e); k++) {
                     if (!clean(xvec[e[k]]).empty() && clean(xvec[e[k]]).size() >= topMatches)
@@ -472,10 +453,14 @@ int Hydra::Form1::ComputeOffsets() {
                         std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvec[argmax(qualVec, 0)]));
                         std::tuple<float, float, float> tuple = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvecAlign[argmax(qualVecAlign, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
                         offsets[k] = { float(qualVec[e[k]][0]), float(qualVec[e[k]][1]), float(qualVec[e[k]][2]), float(qualVec[e[k]][3]), std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple) };
-                        stackArray[k] = lightFrameArray[e[k]] + ',' + std::to_string(offsets[k][0]) + ',' +
-                            std::to_string(offsets[k][1]) + ',' + std::to_string(offsets[k][2]) + ',' +
-                            std::to_string(offsets[k][3]) + ',' + std::to_string(offsets[k][4]) + ',' +
-                            std::to_string(offsets[k][5]) + ',' + std::to_string(offsets[k][6]);
+                        stackArray[k][0] = lightFrameArray[e[k]];
+                        stackArray[k][1] = std::to_string(offsets[k][0]);
+                        stackArray[k][2] = std::to_string(offsets[k][1]);
+                        stackArray[k][3] = std::to_string(offsets[k][2]);
+                        stackArray[k][4] = std::to_string(offsets[k][3]);
+                        stackArray[k][5] = std::to_string(offsets[k][4]);
+                        stackArray[k][6] = std::to_string(offsets[k][5]);
+                        stackArray[k][7] = std::to_string(offsets[k][6]);
                     }
                 }
 
@@ -483,7 +468,7 @@ int Hydra::Form1::ComputeOffsets() {
                 auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
                 elapsedTime = ms_int.count();
 
-                writeStrings(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
+                writeStringMatrix(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
 
                 std::vector<float> xDeb(maxStars);
                 std::vector<float> yDeb(maxStars);
