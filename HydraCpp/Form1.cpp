@@ -427,10 +427,7 @@ int Hydra::Form1::ComputeOffsets() {
                 std::vector<std::vector<int>> q;
                 for (int i = 0; i < qualVec.size(); i++) {
                     if (qualVec[i][0] > qualityThreshold) {
-                        std::vector<int> f = { 0, 0 };
-                        f[0] = i;
-                        f[1] = qualVec[i][0];
-                        q.push_back(f);
+                        q.push_back({ i, int(qualVec[i][0]) });
                     }
                 }
 
