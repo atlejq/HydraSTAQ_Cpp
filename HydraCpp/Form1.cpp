@@ -52,6 +52,24 @@ void writeStrings(std::string path, std::vector<std::string> stringArray)
     stringFileStream.close();
 }
 
+void writeStringMatrix(std::string path, std::vector<std::vector<std::string>> stringArray)
+{
+    std::ofstream stringFileStream(path);
+    for (int i = 0; i < stringArray.size(); i++)
+    {
+        for (int j = 0; j < stringArray[0].size(); j++)
+        {
+            stringFileStream << stringArray[i][j];
+            if (j < stringArray[0].size() - 1)
+            {
+                stringFileStream << ",";
+            }
+        }
+        stringFileStream << "\n";
+    }
+    stringFileStream.close();
+}
+
 std::vector<float> clean(std::vector<float> v)
 {
     std::vector<float> vFiltered;
@@ -296,7 +314,8 @@ int Hydra::Form1::ReadImages() {
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
-        std::vector<std::string> qualVec(lightFrames.size());
+        //std::vector<std::string> qualVec(lightFrames.size());
+        std::vector<std::vector<std::string>> qualVec(lightFrames.size(), std::vector<std::string>(6 + 2 * maxStars, "-1"));
         std::vector<std::vector<float>> xvec(lightFrames.size(), std::vector<float>(maxStars, -1));
         std::vector<std::vector<float>> yvec(lightFrames.size(), std::vector<float>(maxStars, -1));
 
@@ -306,30 +325,23 @@ int Hydra::Form1::ReadImages() {
             if (lightFrame.data != NULL) {
                 std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
 
+                qualVec[n][0] = lightFrames[n];
+                qualVec[n][1] = std::to_string(starMatrix.size());
+                qualVec[n][2] = std::to_string(cv::sum(lightFrame)[0]);
+                qualVec[n][3] = std::to_string(lightFrame.cols);
+                qualVec[n][4] = std::to_string(lightFrame.rows);
+                qualVec[n][5] = std::to_string(lightFrame.elemSize());
+
                 if (starMatrix.size() > 3) {
 
                     sortFloatByColumn(starMatrix, 4);
 
                     for (int i = 0; i < std::min(maxStars, int(starMatrix.size())); i++) {
-                        xvec[n][i] = starMatrix[i][0];
-                        yvec[n][i] = starMatrix[i][1];
-                    }
-                }
-                std::string x = "";
-                std::string y = "";
-                for (int i = 0; i < xvec[0].size(); i++) {
-                    x = x + std::to_string(xvec[n][i]);
-                    y = y + std::to_string(yvec[n][i]);
-                    if (i < xvec[0].size() - 1)
-                    {
-                        x = x + ',';
-                        y = y + ',';
+                        qualVec[n][i+6] = std::to_string(starMatrix[i][0]);
+                        qualVec[n][i+6+maxStars] = std::to_string(starMatrix[i][1]);
                     }
                 }
 
-                qualVec[n] = lightFrames[n] + "," + std::to_string(starMatrix.size()) + ',' + std::to_string(cv::sum(lightFrame)[0]) + ',' +
-                    std::to_string(lightFrame.cols) + ',' + std::to_string(lightFrame.rows) + ',' + std::to_string(lightFrame.elemSize()) + ',' +
-                    x + ',' + y;
             }
         }
         auto t2 = std::chrono::high_resolution_clock::now();
@@ -341,7 +353,8 @@ int Hydra::Form1::ReadImages() {
             std::filesystem::create_directory(path + parameterDir);
         }
 
-        writeStrings(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
+        //writeStrings(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
+        writeStringMatrix(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
     }
     return elapsedTime;
 }
