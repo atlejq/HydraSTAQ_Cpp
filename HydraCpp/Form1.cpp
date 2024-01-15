@@ -65,9 +65,7 @@ void writeStringMatrix(std::string path, std::vector<std::vector<std::string>> s
 std::tuple<std::vector<std::string>, std::vector<std::vector<float>>, std::vector<std::vector<float>>, std::vector<std::vector<float>>> unpack(std::vector<std::vector<std::string>> inputArray)
 {
     std::vector<std::string> lightFrameArray(inputArray.size());
-    std::vector<std::vector<float>> qualVec(inputArray.size());
-    std::vector<std::vector<float>> xvec(inputArray.size(), std::vector<float>(maxStars));
-    std::vector<std::vector<float>> yvec(inputArray.size(), std::vector<float>(maxStars));
+    std::vector<std::vector<float>> qualVec(inputArray.size()), xvec(inputArray.size(), std::vector<float>(maxStars)), yvec(inputArray.size(), std::vector<float>(maxStars));
 
     for (int i = 0; i < inputArray.size(); i++)
     {
@@ -167,8 +165,7 @@ std::vector<float> findRT(Eigen::MatrixXf A, Eigen::MatrixXf B) {
 //Function for computing the "vote matrix"
 std::vector<std::vector<float>> getCorrectedVoteMatrix(std::vector<std::vector<float>> refTriangles, std::vector<std::vector<float>> frameTriangles, std::vector<float> refVectorX, std::vector<float> yvec) {
     float e = 0.005;
-    std::vector<std::vector<float>> vote(refVectorX.size(), std::vector<float>(yvec.size(), 0));
-    std::vector<std::vector<float>> corrVote(refVectorX.size(), std::vector<float>(yvec.size(), 0));
+    std::vector<std::vector<float>> vote(refVectorX.size(), std::vector<float>(yvec.size(), 0)), corrVote(refVectorX.size(), std::vector<float>(yvec.size(), 0));
     for (int a = 0; a < refTriangles.size(); a++) {
         std::vector<int> triangleList;
         for (int b = 0; b < frameTriangles.size(); b++) {
@@ -252,10 +249,8 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
             lightFrame = lightFrame / 255;
             lightFrame.convertTo(lightFrame, CV_8U);
         }
-        cv::Mat filteredImage;
+        cv::Mat filteredImage, thresh;
         cv::medianBlur(lightFrame, filteredImage, 3);
-
-        cv::Mat thresh;
         cv::threshold(filteredImage, thresh, t * 255, 255, 0);
 
         std::vector<std::vector<cv::Point>> contours;
@@ -410,7 +405,6 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
             if (!xRef.empty() && xRef.size() >= topMatches)
             {
                 std::vector<std::vector<float>> refTriangles = triangles(xRef, yRef);
-
                 std::vector<float> rankedQualVec(qualVec.size());
 
                 for (int i = 0; i < qualVec.size(); i++) {
@@ -465,8 +459,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
                 writeStringMatrix(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
 
-                std::vector<float> xDeb(maxStars);
-                std::vector<float> yDeb(maxStars);
+                std::vector<float> xDeb(maxStars), yDeb(maxStars);
 
                 cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[argmax(qualVecAlign, 0)], cv::IMREAD_GRAYSCALE);
                 cv::Mat small;
@@ -514,10 +507,7 @@ std::vector<int> Hydra::Form1::Stack() {
 
         std::vector<std::vector<std::string>> stackInfo = readStringMatrix(stackArrayPath);
         std::vector<std::string> stackArray(stackInfo.size());
-        std::vector<float> th(stackInfo.size());
-        std::vector<float> dx(stackInfo.size());
-        std::vector<float> dy(stackInfo.size());
-        std::vector<float> background(stackInfo.size());
+        std::vector<float> th(stackInfo.size()), dx(stackInfo.size()), dy(stackInfo.size()), background(stackInfo.size());
         float mean_background = 0;
 
         n = stackInfo.size();
@@ -562,10 +552,7 @@ std::vector<int> Hydra::Form1::Stack() {
             xSize = int(xSize * samplingFactor);
             ySize = int(ySize * samplingFactor);
 
-            cv::Mat meanFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
-            cv::Mat medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
-            cv::Mat stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
-            cv::Mat tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+            cv::Mat meanFrame(ySize, xSize, CV_32FC1, cv::Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0)), tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
             std::vector<cv::Mat> tempArray(medianBatchSize, cv::Mat(ySize, xSize, CV_32FC1));
 
             unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
