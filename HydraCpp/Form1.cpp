@@ -214,7 +214,6 @@ std::vector<float> alignFrames(std::vector<std::vector<float>> corrVote, std::ve
         frameM(1, i) = yvec[rankPairs[i][0]];
     }
     std::vector<float> RTparams = findRT(frameM, referenceM);
-
     return RTparams;
 }
 
