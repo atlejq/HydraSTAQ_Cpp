@@ -444,7 +444,6 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
                 cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[argmax(qualVecAlign, 0)], cv::IMREAD_GRAYSCALE);
                 cv::Mat small;
-
                 cv::resize(maxQualFrame, small, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
                 cv::Mat img_rgb(small.size(), CV_8UC3);
                 cv::cvtColor(small, img_rgb, cv::COLOR_GRAY2BGR);
@@ -618,7 +617,6 @@ std::vector<int> Hydra::Form1::Stack() {
 
             cv::Mat small;
             cv::resize(stackFrame, small, cv::Size(stackFrame.cols / (scaling * samplingFactor), stackFrame.rows / (scaling * samplingFactor)), 0, 0, cv::INTER_CUBIC);
-
             cv::imshow("Stack", small * 5);
             cv::waitKey(0);
             cv::destroyAllWindows();
