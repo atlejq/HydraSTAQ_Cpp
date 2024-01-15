@@ -80,7 +80,6 @@ std::tuple<std::vector<std::string>, std::vector<std::vector<float>>, std::vecto
             yvec[i][j] = stof(inputArray[i][j + 6 + maxStars]);
         }
     }
-
     return std::make_tuple(lightFrameArray, qualVec, xvec, yvec);
 }
 
@@ -359,7 +358,6 @@ std::vector<int> Hydra::Form1::ReadImages() {
 
         writeStringMatrix(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
     }
-
     return { n, elapsedTime };
 }
 
@@ -505,8 +503,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
             }
         }
     }
-    return { n, elapsedTime};;
-    ;
+    return { n, elapsedTime};
 }
 
 //Function for stacking the images
@@ -672,6 +669,5 @@ std::vector<int> Hydra::Form1::Stack() {
             cv::destroyAllWindows();
         }
     }
-
     return { n, elapsedTime };
 }
