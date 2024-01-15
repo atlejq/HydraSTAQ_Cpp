@@ -394,15 +394,11 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
         while (sizesEqual == true && l < qualVec.size())
         {
-            if (qualVec[l][2] != qualVec[0][2])
+            if ((qualVec[l][2] != qualVec[0][2])||(qualVec[l][3] != qualVec[0][3]))
             {
                 sizesEqual = false;
             }
 
-            if (qualVec[l][3] != qualVec[0][3])
-            {
-                sizesEqual = false;
-            }
             l++;
         }
 
