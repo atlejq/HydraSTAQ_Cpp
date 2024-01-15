@@ -53,9 +53,7 @@ void writeStringMatrix(std::string path, std::vector<std::vector<std::string>> s
         {
             stringFileStream << stringArray[i][j];
             if (j < stringArray[0].size() - 1)
-            {
                 stringFileStream << ",";
-            }
         }
         stringFileStream << "\n";
     }
@@ -85,9 +83,8 @@ std::vector<float> clean(std::vector<float> v)
 {
     std::vector<float> vFiltered;
     for (int i = 0; i < v.size(); i++) {
-        if (v[i] != -1) {
+        if (v[i] != -1) 
             vFiltered.push_back(v[i]);
-        }
     }
     return vFiltered;
 }
@@ -169,9 +166,8 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(std::vector<std::vector<f
     for (int a = 0; a < refTriangles.size(); a++) {
         std::vector<int> triangleList;
         for (int b = 0; b < frameTriangles.size(); b++) {
-            if (std::abs(refTriangles[a][3] - frameTriangles[b][3]) < e) {
+            if (std::abs(refTriangles[a][3] - frameTriangles[b][3]) < e) 
                 triangleList.push_back(b);
-            }
         }
         for (int c = 0; c < triangleList.size(); c++) {
             int b = triangleList[c];
@@ -206,7 +202,6 @@ std::vector<float> alignFrames(std::vector<std::vector<float>> corrVote, std::ve
     }
 
     sortIntByColumn(votePairs, 2);
-
     std::vector<std::vector<int>> rankPairs(votePairs.begin(), votePairs.end());
 
     Eigen::MatrixXf referenceM(2, topMatches);
@@ -280,9 +275,7 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
     {
         cv::Mat tmpCalibrationFrame = cv::imread(calibrationPath + "/" + "masterFrame.tif", cv::IMREAD_ANYDEPTH);
         if (tmpCalibrationFrame.cols == masterFrame.cols && tmpCalibrationFrame.rows == masterFrame.rows)
-        {
             masterFrame = tmpCalibrationFrame;
-        }
     }
     else
     {
@@ -315,7 +308,6 @@ std::vector<int> Hydra::Form1::ReadImages() {
     if (!lightFrames.empty())
     {
         auto t1 = std::chrono::high_resolution_clock::now();
-
         std::vector<std::vector<std::string>> qualVec(lightFrames.size(), std::vector<std::string>(6 + 2 * maxStars, "-1"));
 
         #pragma omp parallel for num_threads(8)
@@ -332,9 +324,7 @@ std::vector<int> Hydra::Form1::ReadImages() {
                 qualVec[k][5] = std::to_string(lightFrame.elemSize());
 
                 if (starMatrix.size() > 3) {
-
                     sortFloatByColumn(starMatrix, 4);
-
                     for (int i = 0; i < std::min(maxStars, int(starMatrix.size())); i++) {
                         qualVec[k][i+6] = std::to_string(starMatrix[i][0]);
                         qualVec[k][i+6+maxStars] = std::to_string(starMatrix[i][1]);
@@ -347,9 +337,7 @@ std::vector<int> Hydra::Form1::ReadImages() {
         elapsedTime = ms_int.count();
 
         if (!std::filesystem::exists(path + parameterDir))
-        {
             std::filesystem::create_directory(path + parameterDir);
-        }
 
         writeStringMatrix(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
     }
@@ -384,15 +372,12 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
         std::vector<std::vector<float>> yvecAlign = std::get<3>(alignTuple);
 
         bool sizesEqual = true;
-
         int l = 0;
 
         while (sizesEqual == true && l < qualVec.size())
         {
             if ((qualVec[l][2] != qualVec[0][2])||(qualVec[l][3] != qualVec[0][3]))
-            {
                 sizesEqual = false;
-            }
 
             l++;
         }
@@ -412,18 +397,15 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                 }
 
                 std::sort(rankedQualVec.begin(), rankedQualVec.end());
-
                 float qualityThreshold = rankedQualVec[floor(rankedQualVec.size() * float(discardPercentage) / 100)];
 
                 std::vector<std::vector<int>> q;
                 for (int i = 0; i < qualVec.size(); i++) {
-                    if (qualVec[i][0] > qualityThreshold) {
+                    if (qualVec[i][0] > qualityThreshold) 
                         q.push_back({ i, int(qualVec[i][0]) });
-                    }
                 }
 
                 sortIntByColumn(q, 1);
-
                 std::vector<int> e(q.size(), 0);
 
                 for (int i = 0; i < q.size(); i++) {
@@ -535,9 +517,7 @@ std::vector<int> Hydra::Form1::Stack() {
         {
             calibratedFlatFrame *= xSize * ySize / cv::sum(calibratedFlatFrame)[0];
             if (stackInfo.size() < medianBatchSize)
-            {
                 medianBatchSize = stackInfo.size();
-            }
 
             int batches = (stackInfo.size() / medianBatchSize);
             int iterations = medianBatchSize * batches;
@@ -601,9 +581,7 @@ std::vector<int> Hydra::Form1::Stack() {
             }
 
             if (!std::filesystem::exists(path + outDir))
-            {
                 std::filesystem::create_directory(path + outDir);
-            }
 
             imwrite(path + outDir + "outMedian" + filter + ".tif", medianFrame);
 
@@ -625,9 +603,7 @@ std::vector<int> Hydra::Form1::Stack() {
                     float lf = lightFrame.at<float>(h);
 
                     if (abs(lf - mf) > (0.5 * sqrt(mf)))
-                    {
                         lightFrame.at<float>(h) = mf;
-                    }
                 }
                 lightFrame.reshape(xSize, ySize);
 
