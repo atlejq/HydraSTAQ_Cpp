@@ -480,12 +480,9 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                 }
 
                 for (int i = 0; i < offsets.size(); i++) {
-                    float R[2][2] = { {cos(offsets[i][4]), -sin(offsets[i][4])}, {sin(offsets[i][4]), cos(offsets[i][4])} };
-                    float t[2] = { offsets[i][5], offsets[i][6] };
-
                     for (int j = 0; j < xvec[e[i]].size(); j++) {
-                        xDeb[j] = R[0][0] * xvec[e[i]][j] + R[0][1] * yvec[e[i]][j] + t[0];
-                        yDeb[j] = R[1][0] * xvec[e[i]][j] + R[1][1] * yvec[e[i]][j] + t[1];
+                        xDeb[j] = cos(offsets[i][4]) * xvec[e[i]][j] - sin(offsets[i][4]) * yvec[e[i]][j] + offsets[i][5];
+                        yDeb[j] = sin(offsets[i][4]) * xvec[e[i]][j] + cos(offsets[i][4]) * yvec[e[i]][j] + offsets[i][6];
                     }
                     xDeb = clean(xDeb);
                     yDeb = clean(yDeb);
