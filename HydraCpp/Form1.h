@@ -46,9 +46,7 @@ namespace Hydra {
 		}
 
 	public:std::vector<int> ReadImages();
-
 	public:std::vector<int> ComputeOffsets();
-
 	public:std::vector<int> Stack();
 
 	protected:
@@ -115,7 +113,8 @@ namespace Hydra {
 	protected:
 
 	private:
-		/// <summary>
+	private: System::Windows::Forms::Panel^ panel7;
+		   /// <summary>
 		/// Required designer variable.
 		/// </summary>
 		System::ComponentModel::Container^ components;
@@ -171,6 +170,7 @@ namespace Hydra {
 			this->panel5 = (gcnew System::Windows::Forms::Panel());
 			this->panel6 = (gcnew System::Windows::Forms::Panel());
 			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
+			this->panel7 = (gcnew System::Windows::Forms::Panel());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->BeginInit();
@@ -181,6 +181,7 @@ namespace Hydra {
 			this->panel4->SuspendLayout();
 			this->panel5->SuspendLayout();
 			this->panel6->SuspendLayout();
+			this->panel7->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// button1
@@ -441,6 +442,7 @@ namespace Hydra {
 			// radioButton20
 			// 
 			this->radioButton20->AutoSize = true;
+			this->radioButton20->Checked = true;
 			this->radioButton20->Enabled = false;
 			this->radioButton20->Location = System::Drawing::Point(12, 92);
 			this->radioButton20->Name = L"radioButton20";
@@ -454,7 +456,7 @@ namespace Hydra {
 			this->radioButton21->AutoSize = true;
 			this->radioButton21->Checked = true;
 			this->radioButton21->Enabled = false;
-			this->radioButton21->Location = System::Drawing::Point(121, 13);
+			this->radioButton21->Location = System::Drawing::Point(25, 13);
 			this->radioButton21->Name = L"radioButton21";
 			this->radioButton21->Size = System::Drawing::Size(46, 20);
 			this->radioButton21->TabIndex = 4;
@@ -467,7 +469,7 @@ namespace Hydra {
 			// 
 			this->radioButton22->AutoSize = true;
 			this->radioButton22->Enabled = false;
-			this->radioButton22->Location = System::Drawing::Point(121, 55);
+			this->radioButton22->Location = System::Drawing::Point(25, 55);
 			this->radioButton22->Name = L"radioButton22";
 			this->radioButton22->Size = System::Drawing::Size(41, 20);
 			this->radioButton22->TabIndex = 3;
@@ -542,7 +544,7 @@ namespace Hydra {
 			// label8
 			// 
 			this->label8->AutoSize = true;
-			this->label8->Location = System::Drawing::Point(260, 195);
+			this->label8->Location = System::Drawing::Point(285, 195);
 			this->label8->Name = L"label8";
 			this->label8->Size = System::Drawing::Size(47, 16);
 			this->label8->TabIndex = 42;
@@ -648,11 +650,9 @@ namespace Hydra {
 			this->panel6->Controls->Add(this->radioButton18);
 			this->panel6->Controls->Add(this->radioButton19);
 			this->panel6->Controls->Add(this->radioButton20);
-			this->panel6->Controls->Add(this->radioButton21);
-			this->panel6->Controls->Add(this->radioButton22);
 			this->panel6->Location = System::Drawing::Point(137, 222);
 			this->panel6->Name = L"panel6";
-			this->panel6->Size = System::Drawing::Size(197, 126);
+			this->panel6->Size = System::Drawing::Size(95, 126);
 			this->panel6->TabIndex = 36;
 			// 
 			// textBox1
@@ -662,11 +662,21 @@ namespace Hydra {
 			this->textBox1->Size = System::Drawing::Size(488, 22);
 			this->textBox1->TabIndex = 20;
 			// 
+			// panel7
+			// 
+			this->panel7->Controls->Add(this->radioButton21);
+			this->panel7->Controls->Add(this->radioButton22);
+			this->panel7->Location = System::Drawing::Point(263, 222);
+			this->panel7->Name = L"panel7";
+			this->panel7->Size = System::Drawing::Size(93, 126);
+			this->panel7->TabIndex = 43;
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(689, 420);
+			this->Controls->Add(this->panel7);
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->textBox1);
@@ -707,6 +717,8 @@ namespace Hydra {
 			this->panel5->PerformLayout();
 			this->panel6->ResumeLayout(false);
 			this->panel6->PerformLayout();
+			this->panel7->ResumeLayout(false);
+			this->panel7->PerformLayout();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
