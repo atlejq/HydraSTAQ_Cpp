@@ -17,6 +17,8 @@ int medianBatchSize = 30;
 int interpolationFlag = 2;
 int maxStars = 15;
 int topMatches = 6;
+int scaling = 4;
+float samplingFactor = 1;
 std::string filter = "R";
 std::string align = "R";
 
@@ -310,10 +312,11 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
 }
 
 //Function to read images
-int Hydra::Form1::ReadImages() {
+std::vector<int> Hydra::Form1::ReadImages() {
     int elapsedTime = 0;
 
     std::vector<std::string> lightFrames = getFrames(path + lightDir + filter, ext);
+    int k = lightFrames.size();
 
     if (!lightFrames.empty())
     {
@@ -356,12 +359,14 @@ int Hydra::Form1::ReadImages() {
 
         writeStringMatrix(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
     }
-    return elapsedTime;
+
+    return { k, elapsedTime };
 }
 
 //Function for computing angular and translational offsets
-int Hydra::Form1::ComputeOffsets() {
+std::vector<int> Hydra::Form1::ComputeOffsets() {
     int elapsedTime = 0;
+    int n = 0;
 
     std::string qualVecPath = path + parameterDir + "qualVec" + filter + ".csv";
     std::string qualVecAlignPath = path + parameterDir + "qualVec" + align + ".csv";
@@ -436,6 +441,8 @@ int Hydra::Form1::ComputeOffsets() {
                 for (int i = 0; i < q.size(); i++) {
                     e[i] = q[i][0];
                 }
+                
+                n = e.size();
 
                 std::vector<std::vector<float>> offsets(e.size(), std::vector<float>(7));
                 std::vector<std::vector<std::string>> stackArray(e.size(), std::vector<std::string>(8));
@@ -466,8 +473,6 @@ int Hydra::Form1::ComputeOffsets() {
 
                 std::vector<float> xDeb(maxStars);
                 std::vector<float> yDeb(maxStars);
-
-                int scaling = 4;
 
                 cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[argmax(qualVecAlign, 0)], cv::IMREAD_GRAYSCALE);
                 cv::Mat small;
@@ -500,14 +505,14 @@ int Hydra::Form1::ComputeOffsets() {
             }
         }
     }
-
-    return elapsedTime;
+    return { n, elapsedTime};;
+    ;
 }
 
 //Function for stacking the images
-int Hydra::Form1::Stack() {
+std::vector<int> Hydra::Form1::Stack() {
     int elapsedTime = 0;
-    int scaling = 4;
+    int n = 0;
 
     std::string stackArrayPath = path + parameterDir + "stackArray" + filter + ".csv";
 
@@ -525,6 +530,8 @@ int Hydra::Form1::Stack() {
         std::vector<float> background(stackInfo.size());
         float mean_background = 0;
 
+        n = stackInfo.size();
+
         for (int i = 0; i < stackInfo.size(); i++)
         {
             stackArray[i] = stackInfo[i][0];
@@ -537,12 +544,6 @@ int Hydra::Form1::Stack() {
 
         int xSize = stoi(stackInfo[0][3]);
         int ySize = stoi(stackInfo[0][4]);
-
-        cv::Mat meanFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
-        cv::Mat medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
-        cv::Mat stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
-        cv::Mat tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
-        std::vector<cv::Mat> tempArray(medianBatchSize, cv::Mat(ySize, xSize, CV_32FC1));
 
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup, 0);
         cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + flatDarksGroup, 0);
@@ -568,6 +569,15 @@ int Hydra::Form1::Stack() {
                 m[j] = j;
             }
 
+            xSize = int(xSize * samplingFactor);
+            ySize = int(ySize * samplingFactor);
+
+            cv::Mat meanFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+            cv::Mat medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+            cv::Mat stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+            cv::Mat tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+            std::vector<cv::Mat> tempArray(medianBatchSize, cv::Mat(ySize, xSize, CV_32FC1));
+
             unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
             shuffle(m.begin(), m.end(), std::default_random_engine(seed));
 
@@ -579,7 +589,8 @@ int Hydra::Form1::Stack() {
                     lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
                     lightFrame = (lightFrame - masterDarkFrame) / calibratedFlatFrame;
                     lightFrame *= mean_background / background[i];
-                    cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), dx[i], sin(th[i]), cos(th[i]), dy[i]);
+                    cv::resize(lightFrame, lightFrame, cv::Size(xSize, ySize), 0, 0, cv::INTER_CUBIC);
+                    cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), samplingFactor * dx[i], sin(th[i]), cos(th[i]), samplingFactor * dy[i]);
                     warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
                     tempArray[tempcount] = lightFrame;
                 }
@@ -625,7 +636,8 @@ int Hydra::Form1::Stack() {
                 lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
                 lightFrame = (lightFrame - masterDarkFrame) / calibratedFlatFrame;
                 lightFrame *= mean_background / background[k];
-                cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[k]), -sin(th[k]), dx[k], sin(th[k]), cos(th[k]), dy[k]);
+                cv::resize(lightFrame, lightFrame, cv::Size(xSize, ySize), 0, 0, cv::INTER_CUBIC);
+                cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[k]), -sin(th[k]), samplingFactor * dx[k], sin(th[k]), cos(th[k]), samplingFactor * dy[k]);
                 warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
                 addWeighted(meanFrame, 1, lightFrame, 1 / float(stackInfo.size()), 0.0, meanFrame);
 
@@ -653,7 +665,7 @@ int Hydra::Form1::Stack() {
             elapsedTime = ms_int.count();
 
             cv::Mat small;
-            cv::resize(stackFrame, small, cv::Size(stackFrame.cols / scaling, stackFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
+            cv::resize(stackFrame, small, cv::Size(stackFrame.cols / (scaling * samplingFactor), stackFrame.rows / (scaling * samplingFactor)), 0, 0, cv::INTER_CUBIC);
 
             cv::imshow("Stack", small * 5);
             cv::waitKey(0);
@@ -661,5 +673,5 @@ int Hydra::Form1::Stack() {
         }
     }
 
-    return elapsedTime;
+    return { n, elapsedTime };
 }
