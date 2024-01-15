@@ -316,7 +316,7 @@ std::vector<int> Hydra::Form1::ReadImages() {
     int elapsedTime = 0;
 
     std::vector<std::string> lightFrames = getFrames(path + lightDir + filter, ext);
-    int k = lightFrames.size();
+    int n = lightFrames.size();
 
     if (!lightFrames.empty())
     {
@@ -325,25 +325,25 @@ std::vector<int> Hydra::Form1::ReadImages() {
         std::vector<std::vector<std::string>> qualVec(lightFrames.size(), std::vector<std::string>(6 + 2 * maxStars, "-1"));
 
         #pragma omp parallel for num_threads(8)
-        for (int n = 0; n < lightFrames.size(); n++) {
-            cv::Mat lightFrame = cv::imread(lightFrames[n], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+        for (int k = 0; k < lightFrames.size(); k++) {
+            cv::Mat lightFrame = cv::imread(lightFrames[k], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
             if (lightFrame.data != NULL) {
                 std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
 
-                qualVec[n][0] = lightFrames[n];
-                qualVec[n][1] = std::to_string(starMatrix.size());
-                qualVec[n][2] = std::to_string(cv::sum(lightFrame)[0]);
-                qualVec[n][3] = std::to_string(lightFrame.cols);
-                qualVec[n][4] = std::to_string(lightFrame.rows);
-                qualVec[n][5] = std::to_string(lightFrame.elemSize());
+                qualVec[k][0] = lightFrames[k];
+                qualVec[k][1] = std::to_string(starMatrix.size());
+                qualVec[k][2] = std::to_string(cv::sum(lightFrame)[0]);
+                qualVec[k][3] = std::to_string(lightFrame.cols);
+                qualVec[k][4] = std::to_string(lightFrame.rows);
+                qualVec[k][5] = std::to_string(lightFrame.elemSize());
 
                 if (starMatrix.size() > 3) {
 
                     sortFloatByColumn(starMatrix, 4);
 
                     for (int i = 0; i < std::min(maxStars, int(starMatrix.size())); i++) {
-                        qualVec[n][i+6] = std::to_string(starMatrix[i][0]);
-                        qualVec[n][i+6+maxStars] = std::to_string(starMatrix[i][1]);
+                        qualVec[k][i+6] = std::to_string(starMatrix[i][0]);
+                        qualVec[k][i+6+maxStars] = std::to_string(starMatrix[i][1]);
                     }
                 }
             }
@@ -360,7 +360,7 @@ std::vector<int> Hydra::Form1::ReadImages() {
         writeStringMatrix(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
     }
 
-    return { k, elapsedTime };
+    return { n, elapsedTime };
 }
 
 //Function for computing angular and translational offsets
