@@ -45,11 +45,11 @@ namespace Hydra {
 			//
 		}
 
-	public:int ReadImages();
+	public:std::vector<int> ReadImages();
 
-	public:int ComputeOffsets();
+	public:std::vector<int> ComputeOffsets();
 
-	public:int Stack();
+	public:std::vector<int> Stack();
 
 	protected:
 		/// <summary>
@@ -452,12 +452,13 @@ namespace Hydra {
 			// radioButton21
 			// 
 			this->radioButton21->AutoSize = true;
-			this->radioButton21->Enabled = false;
 			this->radioButton21->Checked = true;
+			this->radioButton21->Enabled = false;
 			this->radioButton21->Location = System::Drawing::Point(121, 13);
 			this->radioButton21->Name = L"radioButton21";
 			this->radioButton21->Size = System::Drawing::Size(46, 20);
 			this->radioButton21->TabIndex = 4;
+			this->radioButton21->TabStop = true;
 			this->radioButton21->Text = L"No";
 			this->radioButton21->UseVisualStyleBackColor = true;
 			this->radioButton21->CheckedChanged += gcnew System::EventHandler(this, &Form1::radioButton21_CheckedChanged);
@@ -658,7 +659,7 @@ namespace Hydra {
 			// 
 			this->textBox1->Location = System::Drawing::Point(137, 366);
 			this->textBox1->Name = L"textBox1";
-			this->textBox1->Size = System::Drawing::Size(209, 22);
+			this->textBox1->Size = System::Drawing::Size(488, 22);
 			this->textBox1->TabIndex = 20;
 			// 
 			// Form1
@@ -712,29 +713,31 @@ namespace Hydra {
 		}
 #pragma endregion
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
-		int k = 0;
 
 		if((radioButton9->Checked))
 		{
 			detectionThreshold = int((numericUpDown1->Value));
-			k = ReadImages();
+			std::vector<int> k = ReadImages();
+			textBox1->Clear();
+			textBox1->AppendText("Read " + k[0].ToString() + " frames in " + k[1].ToString() + " milliseconds.");
 		}
 
 		if ((radioButton10->Checked))
 		{
 			topMatches = int((numericUpDown2->Value));
 			discardPercentage = int((numericUpDown3->Value));
-		    k = ComputeOffsets();
+			std::vector<int> k = ComputeOffsets();
+			textBox1->Clear();
+			textBox1->AppendText("Aligned " + k[0].ToString() + " frames in " + k[1].ToString() + " milliseconds.");
 		}
 
 		if ((radioButton11->Checked))
 		{
 			medianBatchSize = int((numericUpDown4->Value));
-		    k = Stack();
+			std::vector<int> k = Stack();
+			textBox1->Clear();
+			textBox1->AppendText("Stacked " + k[0].ToString() + " frames in " + k[1].ToString() + " milliseconds.");
 		}
-
-		textBox1->Clear();
-		textBox1->AppendText("Milliseconds: " + k.ToString());
 	}
 
 	private: System::Void Form1_Load(System::Object^ sender, System::EventArgs^ e) {

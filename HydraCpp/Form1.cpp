@@ -312,10 +312,11 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
 }
 
 //Function to read images
-int Hydra::Form1::ReadImages() {
+std::vector<int> Hydra::Form1::ReadImages() {
     int elapsedTime = 0;
 
     std::vector<std::string> lightFrames = getFrames(path + lightDir + filter, ext);
+    int k = lightFrames.size();
 
     if (!lightFrames.empty())
     {
@@ -358,12 +359,14 @@ int Hydra::Form1::ReadImages() {
 
         writeStringMatrix(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
     }
-    return elapsedTime;
+
+    return { k, elapsedTime };
 }
 
 //Function for computing angular and translational offsets
-int Hydra::Form1::ComputeOffsets() {
+std::vector<int> Hydra::Form1::ComputeOffsets() {
     int elapsedTime = 0;
+    int n = 0;
 
     std::string qualVecPath = path + parameterDir + "qualVec" + filter + ".csv";
     std::string qualVecAlignPath = path + parameterDir + "qualVec" + align + ".csv";
@@ -438,6 +441,8 @@ int Hydra::Form1::ComputeOffsets() {
                 for (int i = 0; i < q.size(); i++) {
                     e[i] = q[i][0];
                 }
+                
+                n = e.size();
 
                 std::vector<std::vector<float>> offsets(e.size(), std::vector<float>(7));
                 std::vector<std::vector<std::string>> stackArray(e.size(), std::vector<std::string>(8));
@@ -500,13 +505,14 @@ int Hydra::Form1::ComputeOffsets() {
             }
         }
     }
-
-    return elapsedTime;
+    return { n, elapsedTime};;
+    ;
 }
 
 //Function for stacking the images
-int Hydra::Form1::Stack() {
+std::vector<int> Hydra::Form1::Stack() {
     int elapsedTime = 0;
+    int n = 0;
 
     std::string stackArrayPath = path + parameterDir + "stackArray" + filter + ".csv";
 
@@ -523,6 +529,8 @@ int Hydra::Form1::Stack() {
         std::vector<float> dy(stackInfo.size());
         std::vector<float> background(stackInfo.size());
         float mean_background = 0;
+
+        n = stackInfo.size();
 
         for (int i = 0; i < stackInfo.size(); i++)
         {
@@ -665,5 +673,5 @@ int Hydra::Form1::Stack() {
         }
     }
 
-    return elapsedTime;
+    return { n, elapsedTime };
 }
