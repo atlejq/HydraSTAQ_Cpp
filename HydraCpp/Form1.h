@@ -110,16 +110,13 @@ namespace Hydra {
 	private: System::Windows::Forms::Panel^ panel5;
 	private: System::Windows::Forms::Panel^ panel6;
 
-	protected:
-
-	private:
 	private: System::Windows::Forms::Panel^ panel7;
 		   /// <summary>
 		/// Required designer variable.
 		/// </summary>
 		System::ComponentModel::Container^ components;
 
-#pragma region Windows Form Designer generated code
+		#pragma region Windows Form Designer generated code
 		/// <summary>
 		/// Required method for Designer support - do not modify
 		/// the contents of this method with the code editor.
@@ -169,8 +166,8 @@ namespace Hydra {
 			this->panel4 = (gcnew System::Windows::Forms::Panel());
 			this->panel5 = (gcnew System::Windows::Forms::Panel());
 			this->panel6 = (gcnew System::Windows::Forms::Panel());
-			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
 			this->panel7 = (gcnew System::Windows::Forms::Panel());
+			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->BeginInit();
@@ -676,7 +673,6 @@ namespace Hydra {
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(689, 420);
-			this->Controls->Add(this->panel7);
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->textBox1);
@@ -692,6 +688,7 @@ namespace Hydra {
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->label2);
 			this->Controls->Add(this->label1);
+			this->Controls->Add(this->panel7);
 			this->Controls->Add(this->panel6);
 			this->Controls->Add(this->panel5);
 			this->Controls->Add(this->panel4);
