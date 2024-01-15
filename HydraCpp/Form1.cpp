@@ -17,7 +17,7 @@ int medianBatchSize = 30;
 int interpolationFlag = 2;
 int maxStars = 15;
 int topMatches = 6;
-int scaling = 4;
+int scaling = 6;
 float samplingFactor = 1;
 std::string filter = "R";
 std::string align = "R";
@@ -268,9 +268,8 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
 cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, float defaultValue)
 {
     cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(defaultValue));
-    bool masterFrameExists = std::filesystem::exists(calibrationPath + "/" + "masterFrame.tif");
 
-    if (masterFrameExists)
+    if (std::filesystem::exists(calibrationPath + "/" + "masterFrame.tif"))
     {
         cv::Mat tmpCalibrationFrame = cv::imread(calibrationPath + "/" + "masterFrame.tif", cv::IMREAD_ANYDEPTH);
         if (tmpCalibrationFrame.cols == masterFrame.cols && tmpCalibrationFrame.rows == masterFrame.rows)
@@ -351,9 +350,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
     std::string qualVecPath = path + parameterDir + "qualVec" + filter + ".csv";
     std::string qualVecAlignPath = path + parameterDir + "qualVec" + align + ".csv";
 
-    bool filesExist = (std::filesystem::exists(qualVecPath) && std::filesystem::exists(qualVecAlignPath));
-
-    if (filesExist)
+    if ((std::filesystem::exists(qualVecPath) && std::filesystem::exists(qualVecAlignPath)))
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
@@ -479,9 +476,7 @@ std::vector<int> Hydra::Form1::Stack() {
 
     std::string stackArrayPath = path + parameterDir + "stackArray" + filter + ".csv";
 
-    bool filesExist = std::filesystem::exists(stackArrayPath);
-
-    if (filesExist)
+    if (std::filesystem::exists(stackArrayPath))
     {
         auto t1 = std::chrono::high_resolution_clock::now();
 
