@@ -296,6 +296,17 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
     return masterFrame;
 }
 
+cv::Mat processFrame(std::string framePath, cv::Mat masterDarkFrame, cv::Mat calibratedFlatFrame, float backGroundCorrection, float th, float dx, float dy)
+{
+    cv::Mat lightFrame = cv::imread(framePath, cv::IMREAD_GRAYSCALE);
+    lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
+    lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame) / calibratedFlatFrame;
+    cv::resize(lightFrame, lightFrame, cv::Size(lightFrame.cols, lightFrame.rows), 0, 0, cv::INTER_CUBIC);
+    cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th), -sin(th), dx, sin(th), cos(th), dy);
+    warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
+    return lightFrame;
+}
+
 //Function to read images
 std::vector<int> Hydra::Form1::ReadImages() {
     int elapsedTime = 0;
@@ -482,7 +493,8 @@ std::vector<int> Hydra::Form1::Stack() {
 
         std::vector<std::vector<std::string>> stackInfo = readStringMatrix(stackArrayPath);
         std::vector<std::string> stackArray(stackInfo.size());
-        std::vector<float> th(stackInfo.size()), dx(stackInfo.size()), dy(stackInfo.size()), background(stackInfo.size());
+        std::vector<std::vector<float>> thetadxdy(stackInfo.size());
+        std::vector<float>background(stackInfo.size());
         float mean_background = 0;
 
         n = stackInfo.size();
@@ -490,9 +502,7 @@ std::vector<int> Hydra::Form1::Stack() {
         for (int i = 0; i < stackInfo.size(); i++)
         {
             stackArray[i] = stackInfo[i][0];
-            th[i] = stof(stackInfo[i][5]);
-            dx[i] = stof(stackInfo[i][6]);
-            dy[i] = stof(stackInfo[i][7]);
+            thetadxdy[i] = { stof(stackInfo[i][5]), samplingFactor * stof(stackInfo[i][6]), samplingFactor * stof(stackInfo[i][7]) };
             background[i] = stof(stackInfo[i][2]);
             mean_background = mean_background + background[i] / float(stackInfo.size());
         }
@@ -535,14 +545,7 @@ std::vector<int> Hydra::Form1::Stack() {
                 #pragma omp parallel for num_threads(8)
                 for (int tempcount = 0; tempcount < medianBatchSize; tempcount++) {
                     int i = m[k * medianBatchSize + tempcount];
-                    cv::Mat lightFrame = cv::imread(stackArray[i], cv::IMREAD_GRAYSCALE);
-                    lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
-                    lightFrame = (lightFrame - masterDarkFrame) / calibratedFlatFrame;
-                    lightFrame *= mean_background / background[i];
-                    cv::resize(lightFrame, lightFrame, cv::Size(xSize, ySize), 0, 0, cv::INTER_CUBIC);
-                    cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[i]), -sin(th[i]), samplingFactor * dx[i], sin(th[i]), cos(th[i]), samplingFactor * dy[i]);
-                    warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
-                    tempArray[tempcount] = lightFrame;
+                    tempArray[tempcount] = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], thetadxdy[i][0], thetadxdy[i][1], thetadxdy[i][2]);
                 }
 
                 medianFrame.reshape(xSize * ySize);
@@ -580,13 +583,7 @@ std::vector<int> Hydra::Form1::Stack() {
 
             #pragma omp parallel for num_threads(8) 
             for (int k = 0; k < stackInfo.size(); k++) {
-                cv::Mat lightFrame = cv::imread(stackArray[k], cv::IMREAD_GRAYSCALE);
-                lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
-                lightFrame = (lightFrame - masterDarkFrame) / calibratedFlatFrame;
-                lightFrame *= mean_background / background[k];
-                cv::resize(lightFrame, lightFrame, cv::Size(xSize, ySize), 0, 0, cv::INTER_CUBIC);
-                cv::Mat M = (cv::Mat_<float>(2, 3) << cos(th[k]), -sin(th[k]), samplingFactor * dx[k], sin(th[k]), cos(th[k]), samplingFactor * dy[k]);
-                warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
+                cv::Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], thetadxdy[k][0], thetadxdy[k][1], thetadxdy[k][2]);
                 addWeighted(meanFrame, 1, lightFrame, 1 / float(stackInfo.size()), 0.0, meanFrame);
 
                 lightFrame.reshape(xSize * ySize);
