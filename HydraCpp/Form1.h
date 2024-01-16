@@ -441,6 +441,7 @@ namespace Hydra {
 			// radioButton20
 			// 
 			this->radioButton20->AutoSize = true;
+			this->radioButton20->Checked = true;
 			this->radioButton20->Enabled = false;
 			this->radioButton20->Location = System::Drawing::Point(12, 92);
 			this->radioButton20->Name = L"radioButton20";
