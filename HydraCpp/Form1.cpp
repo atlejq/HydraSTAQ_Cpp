@@ -128,9 +128,7 @@ std::vector<std::vector<float>> triangles(std::vector<float> x, std::vector<floa
                 std::vector<double> d = { sqrt(pow(x[i] - x[j], 2) + pow(y[i] - y[j], 2)), sqrt(pow(x[j] - x[k], 2) + pow(y[j] - y[k], 2)), sqrt(pow(x[i] - x[k], 2) + pow(y[i] - y[k], 2)) };
                 if (*std::min_element(d.begin(), d.end()) > minEdge) {
                     std::sort(d.begin(), d.end());
-                    float u = d[1] / *std::max_element(d.begin(), d.end());
-                    float v = *std::min_element(d.begin(), d.end()) / *std::max_element(d.begin(), d.end());
-                    triangleParameters[count] = { float(i), float(j), float(k), u, v };
+                    triangleParameters[count] = { float(i), float(j), float(k), float(d[1] / d[2]), float(d[0] / d[2])};
                     count++;
                 }
             }
@@ -154,9 +152,8 @@ std::vector<float> findRT(Eigen::MatrixXf A, Eigen::MatrixXf B) {
         V.col(1) *= -1;
         R = V * U.transpose();
     }
-    float theta = std::atan2(R(1, 0), R(0, 0));
     Eigen::Vector2f t = -R * centroid_A + centroid_B;
-    return { theta, t[0], t[1] };
+    return { std::atan2(R(1, 0), R(0, 0)), t[0], t[1] };
 }
 
 //Function for computing the "vote matrix"
@@ -202,10 +199,9 @@ std::vector<float> alignFrames(std::vector<std::vector<float>> corrVote, std::ve
     }
 
     sortIntByColumn(votePairs, 2);
-    std::vector<std::vector<int>> rankPairs(votePairs.begin(), votePairs.end());
 
-    Eigen::MatrixXf referenceM(2, topMatches);
-    Eigen::MatrixXf frameM(2, topMatches);
+    std::vector<std::vector<int>> rankPairs(votePairs.begin(), votePairs.end());
+    Eigen::MatrixXf referenceM(2, topMatches), frameM(2, topMatches);
 
     for (int i = 0; i < topMatches; i++) {
         referenceM(0, i) = refVectorX[rankPairs[i][1]];
