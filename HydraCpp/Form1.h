@@ -486,7 +486,7 @@ namespace Hydra {
 			// label4
 			// 
 			this->label4->AutoSize = true;
-			this->label4->Location = System::Drawing::Point(412, 170);
+			this->label4->Location = System::Drawing::Point(412, 158);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(81, 16);
 			this->label4->TabIndex = 36;
@@ -495,7 +495,7 @@ namespace Hydra {
 			// label5
 			// 
 			this->label5->AutoSize = true;
-			this->label5->Location = System::Drawing::Point(412, 211);
+			this->label5->Location = System::Drawing::Point(412, 199);
 			this->label5->Name = L"label5";
 			this->label5->Size = System::Drawing::Size(98, 16);
 			this->label5->TabIndex = 38;
@@ -513,7 +513,7 @@ namespace Hydra {
 			// label7
 			// 
 			this->label7->AutoSize = true;
-			this->label7->Location = System::Drawing::Point(413, 123);
+			this->label7->Location = System::Drawing::Point(413, 111);
 			this->label7->Name = L"label7";
 			this->label7->Size = System::Drawing::Size(80, 16);
 			this->label7->TabIndex = 41;
@@ -531,7 +531,7 @@ namespace Hydra {
 			// label9
 			// 
 			this->label9->AutoSize = true;
-			this->label9->Location = System::Drawing::Point(413, 30);
+			this->label9->Location = System::Drawing::Point(413, 18);
 			this->label9->Name = L"label9";
 			this->label9->Size = System::Drawing::Size(57, 16);
 			this->label9->TabIndex = 44;
@@ -540,7 +540,7 @@ namespace Hydra {
 			// label10
 			// 
 			this->label10->AutoSize = true;
-			this->label10->Location = System::Drawing::Point(413, 75);
+			this->label10->Location = System::Drawing::Point(413, 63);
 			this->label10->Name = L"label10";
 			this->label10->Size = System::Drawing::Size(55, 16);
 			this->label10->TabIndex = 45;
@@ -608,7 +608,7 @@ namespace Hydra {
 			this->panel1->Controls->Add(this->radioButton3);
 			this->panel1->Controls->Add(this->radioButton2);
 			this->panel1->Controls->Add(this->radioButton1);
-			this->panel1->Location = System::Drawing::Point(543, 19);
+			this->panel1->Location = System::Drawing::Point(543, 10);
 			this->panel1->Name = L"panel1";
 			this->panel1->Size = System::Drawing::Size(185, 35);
 			this->panel1->TabIndex = 21;
@@ -619,7 +619,7 @@ namespace Hydra {
 			this->panel2->Controls->Add(this->radioButton7);
 			this->panel2->Controls->Add(this->radioButton6);
 			this->panel2->Controls->Add(this->radioButton5);
-			this->panel2->Location = System::Drawing::Point(543, 67);
+			this->panel2->Location = System::Drawing::Point(543, 58);
 			this->panel2->Name = L"panel2";
 			this->panel2->Size = System::Drawing::Size(185, 34);
 			this->panel2->TabIndex = 22;
@@ -639,7 +639,7 @@ namespace Hydra {
 			this->panel4->Controls->Add(this->radioButton14);
 			this->panel4->Controls->Add(this->radioButton12);
 			this->panel4->Controls->Add(this->radioButton13);
-			this->panel4->Location = System::Drawing::Point(543, 165);
+			this->panel4->Location = System::Drawing::Point(543, 156);
 			this->panel4->Name = L"panel4";
 			this->panel4->Size = System::Drawing::Size(253, 26);
 			this->panel4->TabIndex = 35;
@@ -649,7 +649,7 @@ namespace Hydra {
 			this->panel5->Controls->Add(this->radioButton15);
 			this->panel5->Controls->Add(this->radioButton16);
 			this->panel5->Controls->Add(this->radioButton17);
-			this->panel5->Location = System::Drawing::Point(543, 206);
+			this->panel5->Location = System::Drawing::Point(543, 197);
 			this->panel5->Name = L"panel5";
 			this->panel5->Size = System::Drawing::Size(253, 27);
 			this->panel5->TabIndex = 37;
@@ -659,7 +659,7 @@ namespace Hydra {
 			this->panel6->Controls->Add(this->radioButton20);
 			this->panel6->Controls->Add(this->radioButton19);
 			this->panel6->Controls->Add(this->radioButton18);
-			this->panel6->Location = System::Drawing::Point(543, 117);
+			this->panel6->Location = System::Drawing::Point(543, 108);
 			this->panel6->Name = L"panel6";
 			this->panel6->Size = System::Drawing::Size(224, 28);
 			this->panel6->TabIndex = 36;
@@ -675,7 +675,7 @@ namespace Hydra {
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(919, 284);
+			this->ClientSize = System::Drawing::Size(821, 284);
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->textBox1);
