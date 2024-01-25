@@ -86,8 +86,6 @@ namespace Hydra {
 	private: System::Windows::Forms::RadioButton^ radioButton18;
 	private: System::Windows::Forms::RadioButton^ radioButton19;
 	private: System::Windows::Forms::RadioButton^ radioButton20;
-	private: System::Windows::Forms::RadioButton^ radioButton21;
-	private: System::Windows::Forms::RadioButton^ radioButton22;
 
 	private: System::Windows::Forms::TextBox^ textBox1;
 
@@ -104,6 +102,7 @@ namespace Hydra {
 	private: System::Windows::Forms::NumericUpDown^ numericUpDown2;
 	private: System::Windows::Forms::NumericUpDown^ numericUpDown3;
 	private: System::Windows::Forms::NumericUpDown^ numericUpDown4;
+	private: System::Windows::Forms::NumericUpDown^ numericUpDown5;
 
 	private: System::Windows::Forms::Panel^ panel1;
 	private: System::Windows::Forms::Panel^ panel2;
@@ -150,8 +149,6 @@ namespace Hydra {
 			this->radioButton18 = (gcnew System::Windows::Forms::RadioButton());
 			this->radioButton19 = (gcnew System::Windows::Forms::RadioButton());
 			this->radioButton20 = (gcnew System::Windows::Forms::RadioButton());
-			this->radioButton21 = (gcnew System::Windows::Forms::RadioButton());
-			this->radioButton22 = (gcnew System::Windows::Forms::RadioButton());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->label3 = (gcnew System::Windows::Forms::Label());
@@ -159,7 +156,6 @@ namespace Hydra {
 			this->label5 = (gcnew System::Windows::Forms::Label());
 			this->label6 = (gcnew System::Windows::Forms::Label());
 			this->label7 = (gcnew System::Windows::Forms::Label());
-			this->label8 = (gcnew System::Windows::Forms::Label());
 			this->numericUpDown1 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->numericUpDown2 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->numericUpDown3 = (gcnew System::Windows::Forms::NumericUpDown());
@@ -169,8 +165,10 @@ namespace Hydra {
 			this->panel3 = (gcnew System::Windows::Forms::Panel());
 			this->panel4 = (gcnew System::Windows::Forms::Panel());
 			this->panel5 = (gcnew System::Windows::Forms::Panel());
-			this->panel6 = (gcnew System::Windows::Forms::Panel());
 			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
+			this->panel6 = (gcnew System::Windows::Forms::Panel());
+			this->numericUpDown5 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->label8 = (gcnew System::Windows::Forms::Label());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->BeginInit();
@@ -181,6 +179,7 @@ namespace Hydra {
 			this->panel4->SuspendLayout();
 			this->panel5->SuspendLayout();
 			this->panel6->SuspendLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown5))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// button1
@@ -195,7 +194,7 @@ namespace Hydra {
 			// 
 			// button2
 			// 
-			this->button2->Location = System::Drawing::Point(20, 188);
+			this->button2->Location = System::Drawing::Point(20, 180);
 			this->button2->Name = L"button2";
 			this->button2->Size = System::Drawing::Size(75, 23);
 			this->button2->TabIndex = 32;
@@ -420,10 +419,11 @@ namespace Hydra {
 			// 
 			this->radioButton18->AutoSize = true;
 			this->radioButton18->Enabled = false;
-			this->radioButton18->Location = System::Drawing::Point(11, 13);
+			this->radioButton18->Location = System::Drawing::Point(6, 13);
 			this->radioButton18->Name = L"radioButton18";
 			this->radioButton18->Size = System::Drawing::Size(48, 20);
 			this->radioButton18->TabIndex = 0;
+			this->radioButton18->TabStop = true;
 			this->radioButton18->Text = L"NN";
 			this->radioButton18->UseVisualStyleBackColor = true;
 			// 
@@ -431,10 +431,11 @@ namespace Hydra {
 			// 
 			this->radioButton19->AutoSize = true;
 			this->radioButton19->Enabled = false;
-			this->radioButton19->Location = System::Drawing::Point(11, 55);
+			this->radioButton19->Location = System::Drawing::Point(60, 13);
 			this->radioButton19->Name = L"radioButton19";
 			this->radioButton19->Size = System::Drawing::Size(73, 20);
 			this->radioButton19->TabIndex = 1;
+			this->radioButton19->TabStop = true;
 			this->radioButton19->Text = L"Bilinear";
 			this->radioButton19->UseVisualStyleBackColor = true;
 			// 
@@ -443,39 +444,13 @@ namespace Hydra {
 			this->radioButton20->AutoSize = true;
 			this->radioButton20->Checked = true;
 			this->radioButton20->Enabled = false;
-			this->radioButton20->Location = System::Drawing::Point(12, 92);
+			this->radioButton20->Location = System::Drawing::Point(139, 13);
 			this->radioButton20->Name = L"radioButton20";
 			this->radioButton20->Size = System::Drawing::Size(72, 20);
 			this->radioButton20->TabIndex = 2;
+			this->radioButton20->TabStop = true;
 			this->radioButton20->Text = L"Bicubic";
 			this->radioButton20->UseVisualStyleBackColor = true;
-			// 
-			// radioButton21
-			// 
-			this->radioButton21->AutoSize = true;
-			this->radioButton21->Checked = true;
-			this->radioButton21->Enabled = false;
-			this->radioButton21->Location = System::Drawing::Point(121, 13);
-			this->radioButton21->Name = L"radioButton21";
-			this->radioButton21->Size = System::Drawing::Size(46, 20);
-			this->radioButton21->TabIndex = 4;
-			this->radioButton21->TabStop = true;
-			this->radioButton21->Text = L"No";
-			this->radioButton21->UseVisualStyleBackColor = true;
-			this->radioButton21->CheckedChanged += gcnew System::EventHandler(this, &Form1::radioButton21_CheckedChanged);
-			// 
-			// radioButton22
-			// 
-			this->radioButton22->AutoSize = true;
-			this->radioButton22->Enabled = false;
-			this->radioButton22->Location = System::Drawing::Point(121, 55);
-			this->radioButton22->Name = L"radioButton22";
-			this->radioButton22->Size = System::Drawing::Size(41, 20);
-			this->radioButton22->TabIndex = 3;
-			this->radioButton22->TabStop = true;
-			this->radioButton22->Text = L"2x";
-			this->radioButton22->UseVisualStyleBackColor = true;
-			this->radioButton22->CheckedChanged += gcnew System::EventHandler(this, &Form1::radioButton22_CheckedChanged);
 			// 
 			// label1
 			// 
@@ -507,7 +482,7 @@ namespace Hydra {
 			// label4
 			// 
 			this->label4->AutoSize = true;
-			this->label4->Location = System::Drawing::Point(394, 195);
+			this->label4->Location = System::Drawing::Point(395, 229);
 			this->label4->Name = L"label4";
 			this->label4->Size = System::Drawing::Size(81, 16);
 			this->label4->TabIndex = 36;
@@ -516,7 +491,7 @@ namespace Hydra {
 			// label5
 			// 
 			this->label5->AutoSize = true;
-			this->label5->Location = System::Drawing::Point(526, 195);
+			this->label5->Location = System::Drawing::Point(526, 229);
 			this->label5->Name = L"label5";
 			this->label5->Size = System::Drawing::Size(98, 16);
 			this->label5->TabIndex = 38;
@@ -534,20 +509,11 @@ namespace Hydra {
 			// label7
 			// 
 			this->label7->AutoSize = true;
-			this->label7->Location = System::Drawing::Point(141, 195);
+			this->label7->Location = System::Drawing::Point(208, 229);
 			this->label7->Name = L"label7";
 			this->label7->Size = System::Drawing::Size(80, 16);
 			this->label7->TabIndex = 41;
 			this->label7->Text = L"Interpolation";
-			// 
-			// label8
-			// 
-			this->label8->AutoSize = true;
-			this->label8->Location = System::Drawing::Point(260, 195);
-			this->label8->Name = L"label8";
-			this->label8->Size = System::Drawing::Size(47, 16);
-			this->label8->TabIndex = 42;
-			this->label8->Text = L"Drizzle";
 			// 
 			// numericUpDown1
 			// 
@@ -594,10 +560,10 @@ namespace Hydra {
 			// 
 			// panel1
 			// 
-			this->panel1->Controls->Add(this->radioButton1);
-			this->panel1->Controls->Add(this->radioButton2);
-			this->panel1->Controls->Add(this->radioButton3);
 			this->panel1->Controls->Add(this->radioButton4);
+			this->panel1->Controls->Add(this->radioButton3);
+			this->panel1->Controls->Add(this->radioButton2);
+			this->panel1->Controls->Add(this->radioButton1);
 			this->panel1->Location = System::Drawing::Point(390, 10);
 			this->panel1->Name = L"panel1";
 			this->panel1->Size = System::Drawing::Size(100, 157);
@@ -605,10 +571,10 @@ namespace Hydra {
 			// 
 			// panel2
 			// 
-			this->panel2->Controls->Add(this->radioButton5);
-			this->panel2->Controls->Add(this->radioButton6);
-			this->panel2->Controls->Add(this->radioButton7);
 			this->panel2->Controls->Add(this->radioButton8);
+			this->panel2->Controls->Add(this->radioButton7);
+			this->panel2->Controls->Add(this->radioButton6);
+			this->panel2->Controls->Add(this->radioButton5);
 			this->panel2->Location = System::Drawing::Point(510, 10);
 			this->panel2->Name = L"panel2";
 			this->panel2->Size = System::Drawing::Size(131, 156);
@@ -617,8 +583,8 @@ namespace Hydra {
 			// panel3
 			// 
 			this->panel3->Controls->Add(this->radioButton9);
-			this->panel3->Controls->Add(this->radioButton10);
 			this->panel3->Controls->Add(this->radioButton11);
+			this->panel3->Controls->Add(this->radioButton10);
 			this->panel3->Location = System::Drawing::Point(12, 10);
 			this->panel3->Name = L"panel3";
 			this->panel3->Size = System::Drawing::Size(92, 130);
@@ -626,10 +592,10 @@ namespace Hydra {
 			// 
 			// panel4
 			// 
+			this->panel4->Controls->Add(this->radioButton14);
 			this->panel4->Controls->Add(this->radioButton12);
 			this->panel4->Controls->Add(this->radioButton13);
-			this->panel4->Controls->Add(this->radioButton14);
-			this->panel4->Location = System::Drawing::Point(392, 222);
+			this->panel4->Location = System::Drawing::Point(390, 256);
 			this->panel4->Name = L"panel4";
 			this->panel4->Size = System::Drawing::Size(96, 126);
 			this->panel4->TabIndex = 35;
@@ -639,38 +605,59 @@ namespace Hydra {
 			this->panel5->Controls->Add(this->radioButton15);
 			this->panel5->Controls->Add(this->radioButton16);
 			this->panel5->Controls->Add(this->radioButton17);
-			this->panel5->Location = System::Drawing::Point(529, 222);
+			this->panel5->Location = System::Drawing::Point(529, 256);
 			this->panel5->Name = L"panel5";
 			this->panel5->Size = System::Drawing::Size(96, 126);
 			this->panel5->TabIndex = 37;
 			// 
-			// panel6
-			// 
-			this->panel6->Controls->Add(this->radioButton18);
-			this->panel6->Controls->Add(this->radioButton19);
-			this->panel6->Controls->Add(this->radioButton20);
-			this->panel6->Controls->Add(this->radioButton21);
-			this->panel6->Controls->Add(this->radioButton22);
-			this->panel6->Location = System::Drawing::Point(137, 222);
-			this->panel6->Name = L"panel6";
-			this->panel6->Size = System::Drawing::Size(197, 126);
-			this->panel6->TabIndex = 36;
-			// 
 			// textBox1
 			// 
-			this->textBox1->Location = System::Drawing::Point(137, 366);
+			this->textBox1->Location = System::Drawing::Point(139, 399);
 			this->textBox1->Name = L"textBox1";
-			this->textBox1->Size = System::Drawing::Size(488, 22);
+			this->textBox1->Size = System::Drawing::Size(486, 22);
 			this->textBox1->TabIndex = 20;
+			// 
+			// panel6
+			// 
+			this->panel6->Controls->Add(this->radioButton20);
+			this->panel6->Controls->Add(this->radioButton19);
+			this->panel6->Controls->Add(this->radioButton18);
+			this->panel6->Location = System::Drawing::Point(137, 256);
+			this->panel6->Name = L"panel6";
+			this->panel6->Size = System::Drawing::Size(216, 46);
+			this->panel6->TabIndex = 36;
+			// 
+			// numericUpDown5
+			// 
+			this->numericUpDown5->DecimalPlaces = 1;
+			this->numericUpDown5->Enabled = false;
+			this->numericUpDown5->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 65536 });
+			this->numericUpDown5->Location = System::Drawing::Point(137, 182);
+			this->numericUpDown5->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 2, 0, 0, 0 });
+			this->numericUpDown5->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 5, 0, 0, 65536 });
+			this->numericUpDown5->Name = L"numericUpDown5";
+			this->numericUpDown5->Size = System::Drawing::Size(66, 22);
+			this->numericUpDown5->TabIndex = 42;
+			this->numericUpDown5->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 10, 0, 0, 65536 });
+			// 
+			// label8
+			// 
+			this->label8->AutoSize = true;
+			this->label8->Location = System::Drawing::Point(219, 184);
+			this->label8->Name = L"label8";
+			this->label8->Size = System::Drawing::Size(47, 16);
+			this->label8->TabIndex = 43;
+			this->label8->Text = L"Drizzle";
 			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(689, 420);
+			this->ClientSize = System::Drawing::Size(689, 452);
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->textBox1);
+			this->Controls->Add(this->numericUpDown5);
 			this->Controls->Add(this->numericUpDown4);
 			this->Controls->Add(this->numericUpDown3);
 			this->Controls->Add(this->numericUpDown2);
@@ -708,6 +695,7 @@ namespace Hydra {
 			this->panel5->PerformLayout();
 			this->panel6->ResumeLayout(false);
 			this->panel6->PerformLayout();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown5))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -784,6 +772,7 @@ namespace Hydra {
 		numericUpDown2->Enabled = false;
 		numericUpDown3->Enabled = false;
 		numericUpDown4->Enabled = false;
+		numericUpDown5->Enabled = false;
 		radioButton5->Enabled = false;
 		radioButton6->Enabled = false;
 		radioButton7->Enabled = false;
@@ -797,8 +786,6 @@ namespace Hydra {
 		radioButton18->Enabled = false;
 		radioButton19->Enabled = false;
 		radioButton20->Enabled = false;
-		radioButton21->Enabled = false;
-		radioButton22->Enabled = false;
 	}
 
 	private: System::Void radioButton10_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
@@ -806,6 +793,7 @@ namespace Hydra {
 		numericUpDown2->Enabled = true;
 		numericUpDown3->Enabled = true;
 		numericUpDown4->Enabled = false;
+		numericUpDown5->Enabled = false;
 		radioButton5->Enabled = true;
 		radioButton6->Enabled = true;
 		radioButton7->Enabled = true;
@@ -819,8 +807,6 @@ namespace Hydra {
 		radioButton18->Enabled = false;
 		radioButton19->Enabled = false;
 		radioButton20->Enabled = false;
-		radioButton21->Enabled = false;
-		radioButton22->Enabled = false;
 	}
 
 	private: System::Void radioButton11_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
@@ -828,6 +814,7 @@ namespace Hydra {
 		numericUpDown2->Enabled = false;
 		numericUpDown3->Enabled = false;
 		numericUpDown4->Enabled = true;
+		numericUpDown5->Enabled = true;
 		radioButton5->Enabled = false;
 		radioButton6->Enabled = false;
 		radioButton7->Enabled = false;
@@ -841,8 +828,6 @@ namespace Hydra {
 		radioButton18->Enabled = true;
 		radioButton19->Enabled = true;
 		radioButton20->Enabled = true;
-		radioButton21->Enabled = true;
-		radioButton22->Enabled = true;
 	}
 	private: System::Void radioButton12_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 		darkGroup = "LRGB";
@@ -871,12 +856,6 @@ namespace Hydra {
 	private: System::Void radioButton20_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 		interpolationFlag = 2;
 	}
-	private: System::Void radioButton21_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-		samplingFactor = 1;
-	}
-	private: System::Void radioButton22_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-		samplingFactor = 2;
-	}
 
 	private: System::Void button2_Click(System::Object^ sender, System::EventArgs^ e) {
 		if (folderBrowserDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
@@ -894,5 +873,5 @@ namespace Hydra {
 			   os = chars;
 			   Marshal::FreeHGlobal(IntPtr((void*)chars));
 		   }
-	};
+};
 }
