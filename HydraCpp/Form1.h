@@ -156,30 +156,30 @@ namespace Hydra {
 			this->label5 = (gcnew System::Windows::Forms::Label());
 			this->label6 = (gcnew System::Windows::Forms::Label());
 			this->label7 = (gcnew System::Windows::Forms::Label());
+			this->label8 = (gcnew System::Windows::Forms::Label());
 			this->numericUpDown1 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->numericUpDown2 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->numericUpDown3 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->numericUpDown4 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->numericUpDown5 = (gcnew System::Windows::Forms::NumericUpDown());
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
 			this->panel2 = (gcnew System::Windows::Forms::Panel());
 			this->panel3 = (gcnew System::Windows::Forms::Panel());
 			this->panel4 = (gcnew System::Windows::Forms::Panel());
 			this->panel5 = (gcnew System::Windows::Forms::Panel());
-			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
 			this->panel6 = (gcnew System::Windows::Forms::Panel());
-			this->numericUpDown5 = (gcnew System::Windows::Forms::NumericUpDown());
-			this->label8 = (gcnew System::Windows::Forms::Label());
+			this->textBox1 = (gcnew System::Windows::Forms::TextBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown4))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown5))->BeginInit();
 			this->panel1->SuspendLayout();
 			this->panel2->SuspendLayout();
 			this->panel3->SuspendLayout();
 			this->panel4->SuspendLayout();
 			this->panel5->SuspendLayout();
 			this->panel6->SuspendLayout();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown5))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// button1
@@ -515,6 +515,15 @@ namespace Hydra {
 			this->label7->TabIndex = 41;
 			this->label7->Text = L"Interpolation";
 			// 
+			// label8
+			// 
+			this->label8->AutoSize = true;
+			this->label8->Location = System::Drawing::Point(219, 184);
+			this->label8->Name = L"label8";
+			this->label8->Size = System::Drawing::Size(47, 16);
+			this->label8->TabIndex = 43;
+			this->label8->Text = L"Drizzle";
+			// 
 			// numericUpDown1
 			// 
 			this->numericUpDown1->Location = System::Drawing::Point(137, 17);
@@ -557,6 +566,19 @@ namespace Hydra {
 			this->numericUpDown4->Size = System::Drawing::Size(66, 22);
 			this->numericUpDown4->TabIndex = 39;
 			this->numericUpDown4->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 30, 0, 0, 0 });
+			// 
+			// numericUpDown5
+			// 
+			this->numericUpDown5->DecimalPlaces = 1;
+			this->numericUpDown5->Enabled = false;
+			this->numericUpDown5->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 65536 });
+			this->numericUpDown5->Location = System::Drawing::Point(137, 182);
+			this->numericUpDown5->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 2, 0, 0, 0 });
+			this->numericUpDown5->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 5, 0, 0, 65536 });
+			this->numericUpDown5->Name = L"numericUpDown5";
+			this->numericUpDown5->Size = System::Drawing::Size(66, 22);
+			this->numericUpDown5->TabIndex = 42;
+			this->numericUpDown5->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 10, 0, 0, 65536 });
 			// 
 			// panel1
 			// 
@@ -609,14 +631,6 @@ namespace Hydra {
 			this->panel5->Name = L"panel5";
 			this->panel5->Size = System::Drawing::Size(96, 126);
 			this->panel5->TabIndex = 37;
-			// 
-			// textBox1
-			// 
-			this->textBox1->Location = System::Drawing::Point(139, 399);
-			this->textBox1->Name = L"textBox1";
-			this->textBox1->Size = System::Drawing::Size(486, 22);
-			this->textBox1->TabIndex = 20;
-			// 
 			// panel6
 			// 
 			this->panel6->Controls->Add(this->radioButton20);
@@ -627,27 +641,13 @@ namespace Hydra {
 			this->panel6->Size = System::Drawing::Size(216, 46);
 			this->panel6->TabIndex = 36;
 			// 
-			// numericUpDown5
+			// textBox1
 			// 
-			this->numericUpDown5->DecimalPlaces = 1;
-			this->numericUpDown5->Enabled = false;
-			this->numericUpDown5->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 65536 });
-			this->numericUpDown5->Location = System::Drawing::Point(137, 182);
-			this->numericUpDown5->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 2, 0, 0, 0 });
-			this->numericUpDown5->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 5, 0, 0, 65536 });
-			this->numericUpDown5->Name = L"numericUpDown5";
-			this->numericUpDown5->Size = System::Drawing::Size(66, 22);
-			this->numericUpDown5->TabIndex = 42;
-			this->numericUpDown5->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 10, 0, 0, 65536 });
+			this->textBox1->Location = System::Drawing::Point(139, 399);
+			this->textBox1->Name = L"textBox1";
+			this->textBox1->Size = System::Drawing::Size(486, 22);
+			this->textBox1->TabIndex = 20;
 			// 
-			// label8
-			// 
-			this->label8->AutoSize = true;
-			this->label8->Location = System::Drawing::Point(219, 184);
-			this->label8->Name = L"label8";
-			this->label8->Size = System::Drawing::Size(47, 16);
-			this->label8->TabIndex = 43;
-			this->label8->Text = L"Drizzle";
 			// 
 			// Form1
 			// 
@@ -683,6 +683,7 @@ namespace Hydra {
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown3))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown4))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown5))->EndInit();
 			this->panel1->ResumeLayout(false);
 			this->panel1->PerformLayout();
 			this->panel2->ResumeLayout(false);
@@ -695,7 +696,6 @@ namespace Hydra {
 			this->panel5->PerformLayout();
 			this->panel6->ResumeLayout(false);
 			this->panel6->PerformLayout();
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown5))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -723,6 +723,7 @@ namespace Hydra {
 		if ((radioButton11->Checked))
 		{
 			medianBatchSize = int((numericUpDown4->Value));
+			samplingFactor = float((numericUpDown5->Value));
 			std::vector<int> k = Stack();
 			textBox1->Clear();
 			textBox1->AppendText("Stacked " + k[0].ToString() + " frames in " + k[1].ToString() + " milliseconds.");
