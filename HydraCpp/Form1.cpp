@@ -2,8 +2,8 @@
 #include "Form1.h"
 
 std::string path = "C:/F/astro/matlab/m1test/";
-std::string parameterDir = "/parametersCPP/";
-std::string outDir = "/outCPP/";
+std::string parameterDir = "/parameters/";
+std::string outputDir = "/output/";
 std::string lightDir = "/lights/";
 std::string darkDir = "/darks/";
 std::string flatDir = "/flats/";
@@ -572,10 +572,10 @@ std::vector<int> Hydra::Form1::Stack() {
                 addWeighted(medianFrame, 1, tempFrame, 1 / float(stackInfo.size() / medianBatchSize), 0.0, medianFrame);
             }
 
-            if (!std::filesystem::exists(path + outDir))
-                std::filesystem::create_directory(path + outDir);
+            if (!std::filesystem::exists(path + outputDir))
+                std::filesystem::create_directory(path + outputDir);
 
-            imwrite(path + outDir + "outMedian" + filter + ".tif", medianFrame);
+            imwrite(path + outputDir + "Median" + "_" + std::to_string(stackInfo.size()) + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", medianFrame);
 
             #pragma omp parallel for num_threads(8) 
             for (int k = 0; k < stackInfo.size(); k++) {
@@ -596,8 +596,8 @@ std::vector<int> Hydra::Form1::Stack() {
                 addWeighted(stackFrame, 1, lightFrame, 1 / float(stackInfo.size()), 0.0, stackFrame);
             }
 
-            imwrite(path + outDir + "outMean" + filter + ".tif", meanFrame);
-            imwrite(path + outDir + "outStack" + filter + ".tif", stackFrame);
+            imwrite(path + outputDir + "Mean" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", meanFrame);
+            imwrite(path + outputDir + "Stack" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", stackFrame);
 
             auto t2 = std::chrono::high_resolution_clock::now();
             auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);

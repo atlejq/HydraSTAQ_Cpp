@@ -4,7 +4,7 @@
 
 extern std::string path;
 extern std::string parameterDir;
-extern std::string outDir;
+extern std::string outputDir;
 extern std::string lightDir;
 extern std::string darkDir;
 extern std::string flatDir;
