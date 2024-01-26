@@ -549,8 +549,8 @@ std::vector<int> Hydra::Form1::Stack() {
                     int i = m[k * medianBatchSize + tempcount];
                     proc = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], RTparams[i]);
                     tempArray[tempcount] = proc;
-                    addWeighted(p, 1, proc.mul(proc) / iterations, 1 , 0.0, p);
-                    addWeighted(psqr, 1, proc / iterations, 1, 0.0, psqr);
+                    addWeighted(p, 1, proc / iterations, 1 , 0.0, p);
+                    addWeighted(psqr, 1, proc.mul(proc) / iterations, 1, 0.0, psqr);
                     //outfile << medianFrame.at<float>(0,0);
                 }
 
