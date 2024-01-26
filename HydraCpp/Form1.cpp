@@ -292,6 +292,7 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
     return masterFrame;
 }
 
+//Function to rotate images
 cv::Mat processFrame(std::string framePath, cv::Mat masterDarkFrame, cv::Mat calibratedFlatFrame, float backGroundCorrection, std::vector<float> RTparams)
 {
     cv::Mat lightFrame = cv::imread(framePath, cv::IMREAD_GRAYSCALE);
@@ -518,7 +519,7 @@ std::vector<int> Hydra::Form1::Stack() {
             if (stackInfo.size() < medianBatchSize)
                 medianBatchSize = stackInfo.size();
 
-            int batches = (stackInfo.size() / medianBatchSize);
+            int batches = stackInfo.size() / medianBatchSize;
             int iterations = medianBatchSize * batches;
 
             std::vector<int> m(iterations);
@@ -531,17 +532,22 @@ std::vector<int> Hydra::Form1::Stack() {
             xSize = int(xSize * samplingFactor);
             ySize = int(ySize * samplingFactor);
 
-            cv::Mat meanFrame(ySize, xSize, CV_32FC1, cv::Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0)), tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+            cv::Mat p(ySize, xSize, CV_32FC1, cv::Scalar(0)), psqr(ySize, xSize, CV_32FC1, cv::Scalar(0)), var(ySize, xSize, CV_32FC1, cv::Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0)), tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
             std::vector<cv::Mat> tempArray(medianBatchSize, cv::Mat(ySize, xSize, CV_32FC1));
 
             unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
             shuffle(m.begin(), m.end(), std::default_random_engine(seed));
 
+            cv::Mat proc(ySize, xSize, CV_32FC1, cv::Scalar(0));
+
             for (int k = 0; k < batches; k++) {
                 #pragma omp parallel for num_threads(8)
                 for (int tempcount = 0; tempcount < medianBatchSize; tempcount++) {
                     int i = m[k * medianBatchSize + tempcount];
-                    tempArray[tempcount] = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], RTparams[i]);
+                    proc = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], RTparams[i]);
+                    tempArray[tempcount] = proc;
+                    addWeighted(p, 1, proc/iterations, 1 , 0.0, p);
+                    addWeighted(psqr, 1, proc/iterations, 1, 0.0, psqr);
                 }
 
                 medianFrame.reshape(xSize * ySize);
@@ -572,31 +578,37 @@ std::vector<int> Hydra::Form1::Stack() {
                 addWeighted(medianFrame, 1, tempFrame, 1 / float(stackInfo.size() / medianBatchSize), 0.0, medianFrame);
             }
 
+            var = (psqr - p.mul(p)) * iterations / (iterations - 1);
+            var.reshape(xSize * ySize);
+
             if (!std::filesystem::exists(path + outputDir))
                 std::filesystem::create_directory(path + outputDir);
 
             imwrite(path + outputDir + "Median" + "_" + std::to_string(stackInfo.size()) + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", medianFrame);
+            imwrite(path + outputDir + "Var" + "_" + std::to_string(stackInfo.size()) + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", var);
 
             #pragma omp parallel for num_threads(8) 
             for (int k = 0; k < stackInfo.size(); k++) {
                 cv::Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k]);
-                addWeighted(meanFrame, 1, lightFrame, 1 / float(stackInfo.size()), 0.0, meanFrame);
 
                 lightFrame.reshape(xSize * ySize);
                 for (int h = 0; h < xSize * ySize; h++)
                 {
                     float mf = medianFrame.at<float>(h);
                     float lf = lightFrame.at<float>(h);
+                    float v = var.at<float>(h);
 
-                    if (abs(lf - mf) > (0.5 * sqrt(mf)))
+                    if (abs(lf - mf) > v)
                         lightFrame.at<float>(h) = mf;
+                    
+                    //if (abs(lf - mf) > (0.5 * sqrt(mf)))
+                    //    lightFrame.at<float>(h) = mf;
                 }
                 lightFrame.reshape(xSize, ySize);
 
                 addWeighted(stackFrame, 1, lightFrame, 1 / float(stackInfo.size()), 0.0, stackFrame);
             }
 
-            imwrite(path + outputDir + "Mean" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", meanFrame);
             imwrite(path + outputDir + "Stack" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", stackFrame);
 
             auto t2 = std::chrono::high_resolution_clock::now();
