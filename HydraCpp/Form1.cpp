@@ -538,20 +538,13 @@ std::vector<int> Hydra::Form1::Stack() {
             unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
             shuffle(m.begin(), m.end(), std::default_random_engine(seed));
 
-            cv::Mat proc(ySize, xSize, CV_32FC1, cv::Scalar(0));
-
-            //std::ofstream outfile;
-           // outfile.open("C:\\F\\astro\\matlab\\m1test\\debug.csv");
-
             for (int k = 0; k < batches; k++) {
-                #pragma omp parallel for num_threads(1)
+                #pragma omp parallel for num_threads(8)
                 for (int tempcount = 0; tempcount < medianBatchSize; tempcount++) {
                     int i = m[k * medianBatchSize + tempcount];
-                    proc = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], RTparams[i]);
-                    tempArray[tempcount] = proc;
-                    addWeighted(p, 1, proc / iterations, 1 , 0.0, p);
-                    addWeighted(psqr, 1, proc.mul(proc) / iterations, 1, 0.0, psqr);
-                    //outfile << medianFrame.at<float>(0,0);
+                    tempArray[tempcount] = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], RTparams[i]);;
+                    addWeighted(p, 1, tempArray[tempcount] / iterations, 1 , 0.0, p);
+                    addWeighted(psqr, 1, tempArray[tempcount].mul(tempArray[tempcount]) / iterations, 1, 0.0, psqr);
                 }
 
                 medianFrame.reshape(xSize * ySize);
@@ -582,16 +575,14 @@ std::vector<int> Hydra::Form1::Stack() {
                 addWeighted(medianFrame, 1, tempFrame, 1 / float(stackInfo.size() / medianBatchSize), 0.0, medianFrame);
             }
 
-            //outfile.close();
-
             var = (psqr - p.mul(p)) * iterations / (iterations - 1);
+
             var.reshape(xSize * ySize);
 
             if (!std::filesystem::exists(path + outputDir))
                 std::filesystem::create_directory(path + outputDir);
 
             imwrite(path + outputDir + "Median" + "_" + std::to_string(stackInfo.size()) + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", medianFrame);
-            imwrite(path + outputDir + "Var" + "_" + std::to_string(stackInfo.size()) + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", var);
             imwrite(path + outputDir + "Mean" + "_" + std::to_string(stackInfo.size()) + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", p);
 
             #pragma omp parallel for num_threads(8) 
@@ -605,7 +596,7 @@ std::vector<int> Hydra::Form1::Stack() {
                     float lf = lightFrame.at<float>(h);
                     float v = var.at<float>(h);
 
-                    if (abs(lf - mf) > 1.0*cv::sqrt(v))
+                    if (abs(lf - mf) > 2.0*cv::sqrt(v))
                         lightFrame.at<float>(h) = mf;
                     
                 }
