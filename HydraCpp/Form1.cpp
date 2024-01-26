@@ -586,6 +586,7 @@ std::vector<int> Hydra::Form1::Stack() {
 
             imwrite(path + outputDir + "Median" + "_" + std::to_string(stackInfo.size()) + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", medianFrame);
             imwrite(path + outputDir + "Var" + "_" + std::to_string(stackInfo.size()) + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", var);
+            imwrite(path + outputDir + "Mean" + "_" + std::to_string(stackInfo.size()) + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", p);
 
             #pragma omp parallel for num_threads(8) 
             for (int k = 0; k < stackInfo.size(); k++) {
@@ -598,11 +599,9 @@ std::vector<int> Hydra::Form1::Stack() {
                     float lf = lightFrame.at<float>(h);
                     float v = var.at<float>(h);
 
-                    if (abs(lf - mf) > v)
+                    if (abs(lf - mf) > 1.0*cv::sqrt(v))
                         lightFrame.at<float>(h) = mf;
                     
-                    //if (abs(lf - mf) > (0.5 * sqrt(mf)))
-                    //    lightFrame.at<float>(h) = mf;
                 }
                 lightFrame.reshape(xSize, ySize);
 
