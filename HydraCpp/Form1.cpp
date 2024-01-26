@@ -540,14 +540,18 @@ std::vector<int> Hydra::Form1::Stack() {
 
             cv::Mat proc(ySize, xSize, CV_32FC1, cv::Scalar(0));
 
+            //std::ofstream outfile;
+           // outfile.open("C:\\F\\astro\\matlab\\m1test\\debug.csv");
+
             for (int k = 0; k < batches; k++) {
-                #pragma omp parallel for num_threads(8)
+                #pragma omp parallel for num_threads(1)
                 for (int tempcount = 0; tempcount < medianBatchSize; tempcount++) {
                     int i = m[k * medianBatchSize + tempcount];
                     proc = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], RTparams[i]);
                     tempArray[tempcount] = proc;
-                    addWeighted(p, 1, proc/iterations, 1 , 0.0, p);
-                    addWeighted(psqr, 1, proc/iterations, 1, 0.0, psqr);
+                    addWeighted(p, 1, proc.mul(proc) / iterations, 1 , 0.0, p);
+                    addWeighted(psqr, 1, proc / iterations, 1, 0.0, psqr);
+                    //outfile << medianFrame.at<float>(0,0);
                 }
 
                 medianFrame.reshape(xSize * ySize);
@@ -577,6 +581,8 @@ std::vector<int> Hydra::Form1::Stack() {
 
                 addWeighted(medianFrame, 1, tempFrame, 1 / float(stackInfo.size() / medianBatchSize), 0.0, medianFrame);
             }
+
+            //outfile.close();
 
             var = (psqr - p.mul(p)) * iterations / (iterations - 1);
             var.reshape(xSize * ySize);
