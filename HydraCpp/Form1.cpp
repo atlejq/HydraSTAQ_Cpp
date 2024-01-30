@@ -402,8 +402,8 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                         std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[0]), clean(yvec[0]));
                         std::vector<float> RTparams = alignFrames(correctedVoteMatrix, clean(xvecAlign[0]), clean(yvecAlign[0]), clean(xvec[k]), clean(yvec[k]), topMatches);
                         offsets[k] = { float(qualVec[k][0]), float(qualVec[k][1]), float(qualVec[k][2]), float(qualVec[k][3]), RTparams[0], RTparams[1], RTparams[2]};
-                        stackArray[k] = { lightFrameArray[k], std::to_string(offsets[k][0]), std::to_string(offsets[k][1]), std::to_string(offsets[k][2]), std::to_string(offsets[k][3]),
-                                          std::to_string(offsets[k][4]), std::to_string(offsets[k][5]), std::to_string(offsets[k][6]), std::to_string(offsets[k][7]) };
+                        stackArray[k] = { lightFrameArray[k], std::to_string(offsets[k][0]), std::to_string(offsets[k][1]), std::to_string(offsets[k][2]), 
+                                          std::to_string(offsets[k][3]), std::to_string(offsets[k][4]), std::to_string(offsets[k][5]), std::to_string(offsets[k][6]) };
                     }
                 }
 
