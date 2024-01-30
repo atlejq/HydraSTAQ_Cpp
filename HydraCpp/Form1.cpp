@@ -89,20 +89,6 @@ std::vector<float> clean(std::vector<float> v)
     return vFiltered;
 }
 
-int argmax(std::vector<std::vector<float>> v, int col)
-{
-    int argMax = 0;
-    int tmp = 0;
-    for (int i = 0; i < v.size(); i++) {
-        if (tmp < v[i][col])
-        {
-            tmp = v[i][col];
-            argMax = i;
-        }
-    }
-    return argMax;
-}
-
 void sortFloatByColumn(std::vector<std::vector<float>>& data, size_t column) {
     std::sort(data.begin(), data.end(), [column](std::vector<float> const& v1, std::vector<float> const& v2)
         {
@@ -399,15 +385,13 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
         if (sizesEqual)
         {
-            std::vector xRef = clean(xvecAlign[argmax(qualVecAlign, 0)]);
-            std::vector yRef = clean(yvecAlign[argmax(qualVecAlign, 0)]);
+            std::vector xRef = clean(xvecAlign[0]);
+            std::vector yRef = clean(yvecAlign[0]);
 
             if (!xRef.empty() && xRef.size() >= topMatches)
             {
                 int stackSize = floor(qualVec.size() * (100 - float(discardPercentage)) / 100);
-
                 std::vector<std::vector<float>> refTriangles = triangles(xRef, yRef);
-
                 std::vector<std::vector<float>> offsets(stackSize, std::vector<float>(7));
                 std::vector<std::vector<std::string>> stackArray(stackSize, std::vector<std::string>(8));
 
@@ -415,8 +399,8 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                     if (!clean(xvec[k]).empty() && clean(xvec[k]).size() >= topMatches)
                     {
                         std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[k]), clean(yvec[k]));
-                        std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvec[argmax(qualVec, 0)]));
-                        std::vector<float> RTparams = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvecAlign[argmax(qualVecAlign, 0)]), clean(xvec[k]), clean(yvec[k]), topMatches);
+                        std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[0]), clean(yvec[0]));
+                        std::vector<float> RTparams = alignFrames(correctedVoteMatrix, clean(xvecAlign[0]), clean(yvecAlign[0]), clean(xvec[k]), clean(yvec[k]), topMatches);
                         offsets[k] = { float(qualVec[k][0]), float(qualVec[k][1]), float(qualVec[k][2]), float(qualVec[k][3]), RTparams[0], RTparams[1], RTparams[2]};
                         stackArray[k][0] = lightFrameArray[k];
                         stackArray[k][1] = std::to_string(offsets[k][0]);
