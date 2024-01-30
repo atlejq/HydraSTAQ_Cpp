@@ -404,42 +404,21 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
             if (!xRef.empty() && xRef.size() >= topMatches)
             {
+                int stackSize = floor(qualVec.size() * (100 - float(discardPercentage)) / 100);
+
                 std::vector<std::vector<float>> refTriangles = triangles(xRef, yRef);
-                std::vector<float> rankedQualVec(qualVec.size());
 
-                for (int i = 0; i < qualVec.size(); i++) {
-                    rankedQualVec[i] = qualVec[i][0];
-                }
+                std::vector<std::vector<float>> offsets(stackSize, std::vector<float>(7));
+                std::vector<std::vector<std::string>> stackArray(stackSize, std::vector<std::string>(8));
 
-                std::sort(rankedQualVec.begin(), rankedQualVec.end());
-                float qualityThreshold = rankedQualVec[floor(rankedQualVec.size() * float(discardPercentage) / 100)];
-
-                std::vector<std::vector<int>> q;
-                for (int i = 0; i < qualVec.size(); i++) {
-                    if (qualVec[i][0] > qualityThreshold) 
-                        q.push_back({ i, int(qualVec[i][0]) });
-                }
-
-                sortIntByColumn(q, 1);
-                std::vector<int> e(q.size(), 0);
-
-                for (int i = 0; i < q.size(); i++) {
-                    e[i] = q[i][0];
-                }
-                
-                n = e.size();
-
-                std::vector<std::vector<float>> offsets(e.size(), std::vector<float>(7));
-                std::vector<std::vector<std::string>> stackArray(e.size(), std::vector<std::string>(8));
-
-                for (int k = 0; k < size(e); k++) {
-                    if (!clean(xvec[e[k]]).empty() && clean(xvec[e[k]]).size() >= topMatches)
+                for (int k = 0; k < stackSize; k++) {
+                    if (!clean(xvec[k]).empty() && clean(xvec[k]).size() >= topMatches)
                     {
-                        std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[e[k]]), clean(yvec[e[k]]));
+                        std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[k]), clean(yvec[k]));
                         std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvec[argmax(qualVec, 0)]));
-                        std::vector<float> RTparams = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvecAlign[argmax(qualVecAlign, 0)]), clean(xvec[e[k]]), clean(yvec[e[k]]), topMatches);
-                        offsets[k] = { float(qualVec[e[k]][0]), float(qualVec[e[k]][1]), float(qualVec[e[k]][2]), float(qualVec[e[k]][3]), RTparams[0], RTparams[1], RTparams[2]};
-                        stackArray[k][0] = lightFrameArray[e[k]];
+                        std::vector<float> RTparams = alignFrames(correctedVoteMatrix, clean(xvecAlign[argmax(qualVecAlign, 0)]), clean(yvecAlign[argmax(qualVecAlign, 0)]), clean(xvec[k]), clean(yvec[k]), topMatches);
+                        offsets[k] = { float(qualVec[k][0]), float(qualVec[k][1]), float(qualVec[k][2]), float(qualVec[k][3]), RTparams[0], RTparams[1], RTparams[2]};
+                        stackArray[k][0] = lightFrameArray[k];
                         stackArray[k][1] = std::to_string(offsets[k][0]);
                         stackArray[k][2] = std::to_string(offsets[k][1]);
                         stackArray[k][3] = std::to_string(offsets[k][2]);
@@ -458,7 +437,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
                 std::vector<float> xDeb(maxStars), yDeb(maxStars);
 
-                cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[argmax(qualVecAlign, 0)], cv::IMREAD_GRAYSCALE);
+                cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[0], cv::IMREAD_GRAYSCALE);
                 cv::Mat small;
                 cv::resize(maxQualFrame, small, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
                 cv::Mat img_rgb(small.size(), CV_8UC3);
@@ -469,9 +448,9 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                 }
 
                 for (int i = 0; i < offsets.size(); i++) {
-                    for (int j = 0; j < xvec[e[i]].size(); j++) {
-                        xDeb[j] = cos(offsets[i][4]) * xvec[e[i]][j] - sin(offsets[i][4]) * yvec[e[i]][j] + offsets[i][5];
-                        yDeb[j] = sin(offsets[i][4]) * xvec[e[i]][j] + cos(offsets[i][4]) * yvec[e[i]][j] + offsets[i][6];
+                    for (int j = 0; j < xvec[i].size(); j++) {
+                        xDeb[j] = cos(offsets[i][4]) * xvec[i][j] - sin(offsets[i][4]) * yvec[i][j] + offsets[i][5];
+                        yDeb[j] = sin(offsets[i][4]) * xvec[i][j] + cos(offsets[i][4]) * yvec[i][j] + offsets[i][6];
                     }
                     xDeb = clean(xDeb);
                     yDeb = clean(yDeb);
