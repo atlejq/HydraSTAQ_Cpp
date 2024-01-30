@@ -314,7 +314,8 @@ std::vector<int> Hydra::Form1::ReadImages() {
     if (!lightFrames.empty())
     {
         auto t1 = std::chrono::high_resolution_clock::now();
-        std::vector<std::vector<std::string>> qualVec(lightFrames.size(), std::vector<std::string>(6 + 2 * maxStars, "-1"));
+        std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(6 + 2 * maxStars, -1));
+        std::vector<std::vector<std::string>> qualVecS(lightFrames.size(), std::vector<std::string>(6 + 2 * maxStars));
 
         #pragma omp parallel for num_threads(8)
         for (int k = 0; k < lightFrames.size(); k++) {
@@ -322,22 +323,32 @@ std::vector<int> Hydra::Form1::ReadImages() {
             if (lightFrame.data != NULL) {
                 std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
 
-                qualVec[k][0] = lightFrames[k];
-                qualVec[k][1] = std::to_string(starMatrix.size());
-                qualVec[k][2] = std::to_string(cv::sum(lightFrame)[0]);
-                qualVec[k][3] = std::to_string(lightFrame.cols);
-                qualVec[k][4] = std::to_string(lightFrame.rows);
-                qualVec[k][5] = std::to_string(lightFrame.elemSize());
+                qualVec[k][0] = k;
+                qualVec[k][1] = starMatrix.size();
+                qualVec[k][2] = cv::sum(lightFrame)[0];
+                qualVec[k][3] = lightFrame.cols;
+                qualVec[k][4] = lightFrame.rows;
+                qualVec[k][5] = lightFrame.elemSize();
 
                 if (starMatrix.size() > 3) {
                     sortFloatByColumn(starMatrix, 4);
                     for (int i = 0; i < std::min(maxStars, int(starMatrix.size())); i++) {
-                        qualVec[k][i+6] = std::to_string(starMatrix[i][0]);
-                        qualVec[k][i+6+maxStars] = std::to_string(starMatrix[i][1]);
+                        qualVec[k][i+6] = starMatrix[i][0];
+                        qualVec[k][i+6+maxStars] = starMatrix[i][1];
                     }
                 }
             }
         }
+
+        sortFloatByColumn(qualVec, 1);
+
+        for (int k = 0; k < qualVec.size(); k++) {
+            qualVecS[k][0] = lightFrames[int(qualVec[k][0])];
+            for (int l = 1; l < qualVec[0].size(); l++) {
+                qualVecS[k][l] = std::to_string(qualVec[k][l]);
+            }
+        }
+
         auto t2 = std::chrono::high_resolution_clock::now();
         auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
         elapsedTime = ms_int.count();
@@ -345,7 +356,7 @@ std::vector<int> Hydra::Form1::ReadImages() {
         if (!std::filesystem::exists(path + parameterDir))
             std::filesystem::create_directory(path + parameterDir);
 
-        writeStringMatrix(path + parameterDir + "qualVec" + filter + ".csv", qualVec);
+        writeStringMatrix(path + parameterDir + "qualVec" + filter + ".csv", qualVecS);
     }
     return { n, elapsedTime };
 }
