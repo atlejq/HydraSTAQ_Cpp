@@ -390,12 +390,12 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
             if (!xRef.empty() && xRef.size() >= topMatches)
             {
-                int stackSize = floor(qualVec.size() * (100 - float(discardPercentage)) / 100);
+                n = floor(qualVec.size() * (100 - float(discardPercentage)) / 100);
                 std::vector<std::vector<float>> refTriangles = triangles(xRef, yRef);
-                std::vector<std::vector<float>> offsets(stackSize, std::vector<float>(7));
-                std::vector<std::vector<std::string>> stackArray(stackSize, std::vector<std::string>(8));
+                std::vector<std::vector<float>> offsets(n, std::vector<float>(7));
+                std::vector<std::vector<std::string>> stackArray(n, std::vector<std::string>(8));
 
-                for (int k = 0; k < stackSize; k++) {
+                for (int k = 0; k < n; k++) {
                     if (!clean(xvec[k]).empty() && clean(xvec[k]).size() >= topMatches)
                     {
                         std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[k]), clean(yvec[k]));
@@ -437,12 +437,12 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                     }
                 }
                 cv::imshow("Debug", img_rgb);
-                cv::waitKey(0);
-                cv::destroyAllWindows();
             }
         }
     }
     return { n, elapsedTime};
+    cv::waitKey(0);
+    cv::destroyAllWindows();
 }
 
 //Function for stacking the images
@@ -582,9 +582,9 @@ std::vector<int> Hydra::Form1::Stack() {
             cv::Mat small;
             cv::resize(stackFrame, small, cv::Size(stackFrame.cols / (scaling * samplingFactor), stackFrame.rows / (scaling * samplingFactor)), 0, 0, cv::INTER_CUBIC);
             cv::imshow("Stack", small * 5);
-            cv::waitKey(0);
-            cv::destroyAllWindows();
         }
     }
     return { n, elapsedTime };
+    cv::waitKey(0);
+    cv::destroyAllWindows();
 }
