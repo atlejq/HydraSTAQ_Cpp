@@ -502,7 +502,7 @@ std::vector<int> Hydra::Form1::Stack() {
             std::vector<cv::Mat> tempArray(medianBatchSize, cv::Mat(ySize, xSize, CV_32FC1));
 
             unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-           // shuffle(m.begin(), m.end(), std::default_random_engine(seed));
+            shuffle(m.begin(), m.end(), std::default_random_engine(seed));
 
             for (int k = 0; k < batches; k++) {
                 #pragma omp parallel for num_threads(8)
