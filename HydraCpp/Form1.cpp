@@ -105,17 +105,15 @@ void sortIntByColumn(std::vector<std::vector<int>>& data, size_t column) {
 
 //Function for enumerating star triangles
 std::vector<std::vector<float>> triangles(std::vector<float> x, std::vector<float> y) {
-    std::vector<std::vector<float>> triangleParameters((x.size() * (x.size() - 1) * (x.size() - 2)) / 6, std::vector<float>(5));
+    std::vector<std::vector<float>> triangleParameters;
     float minEdge = 50;
-    int count = 0;
     for (int i = 0; i < x.size() - 2; i++) {
         for (int j = i + 1; j < x.size() - 1; j++) {
             for (int k = j + 1; k < x.size(); k++) {
                 std::vector<double> d = { sqrt(pow(x[i] - x[j], 2) + pow(y[i] - y[j], 2)), sqrt(pow(x[j] - x[k], 2) + pow(y[j] - y[k], 2)), sqrt(pow(x[i] - x[k], 2) + pow(y[i] - y[k], 2)) };
                 if (*std::min_element(d.begin(), d.end()) > minEdge) {
                     std::sort(d.begin(), d.end());
-                    triangleParameters[count] = { float(i), float(j), float(k), float(d[1] / d[2]), float(d[0] / d[2])};
-                    count++;
+                    triangleParameters.push_back({ float(i), float(j), float(k), float(d[1] / d[2]), float(d[0] / d[2]) });
                 }
             }
         }
@@ -550,8 +548,8 @@ std::vector<int> Hydra::Form1::Stack() {
             if (!std::filesystem::exists(path + outputDir))
                 std::filesystem::create_directory(path + outputDir);
 
-            imwrite(path + outputDir + "Median" + "_" + std::to_string(stackInfo.size()) + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", medianFrame);
-            imwrite(path + outputDir + "Mean" + "_" + std::to_string(stackInfo.size()) + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", p);
+            imwrite(path + outputDir + "Median" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", medianFrame);
+            imwrite(path + outputDir + "Mean" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", p);
 
             #pragma omp parallel for num_threads(8) 
             for (int k = 0; k < stackInfo.size(); k++) {
@@ -560,13 +558,8 @@ std::vector<int> Hydra::Form1::Stack() {
                 lightFrame.reshape(xSize * ySize);
                 for (int h = 0; h < xSize * ySize; h++)
                 {
-                    float mf = medianFrame.at<float>(h);
-                    float lf = lightFrame.at<float>(h);
-                    float v = var.at<float>(h);
-
-                    if (abs(lf - mf) > 2.0*cv::sqrt(v))
-                        lightFrame.at<float>(h) = mf;
-                    
+                    if (abs(lightFrame.at<float>(h) - medianFrame.at<float>(h)) > 2.0*cv::sqrt(var.at<float>(h)))
+                        lightFrame.at<float>(h) = medianFrame.at<float>(h);                  
                 }
                 lightFrame.reshape(xSize, ySize);
 
