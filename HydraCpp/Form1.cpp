@@ -297,7 +297,7 @@ std::vector<int> Hydra::Form1::ReadImages() {
 
     if (!lightFrames.empty())
     {
-        auto t1 = std::chrono::high_resolution_clock::now();
+        auto startTime = std::chrono::high_resolution_clock::now();
         std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(6 + 2 * maxStars, -1));
         std::vector<std::vector<std::string>> qualVecS(lightFrames.size(), std::vector<std::string>(6 + 2 * maxStars));
 
@@ -333,7 +333,7 @@ std::vector<int> Hydra::Form1::ReadImages() {
             }
         }
 
-        elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t1).count();
+        elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime).count();
 
         if (!std::filesystem::exists(path + parameterDir))
             std::filesystem::create_directory(path + parameterDir);
@@ -353,7 +353,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
     if ((std::filesystem::exists(qualVecPath) && std::filesystem::exists(qualVecAlignPath)))
     {
-        auto t1 = std::chrono::high_resolution_clock::now();
+        auto startTime = std::chrono::high_resolution_clock::now();
 
         std::tuple tuple = unpack(readStringMatrix(qualVecPath));
         std::tuple alignTuple = unpack(readStringMatrix(qualVecAlignPath));
@@ -403,7 +403,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                     }
                 }
 
-                elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t1).count();
+                elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime).count();
 
                 writeStringMatrix(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
 
@@ -448,7 +448,7 @@ std::vector<int> Hydra::Form1::Stack() {
 
     if (std::filesystem::exists(stackArrayPath))
     {
-        auto t1 = std::chrono::high_resolution_clock::now();
+        auto startTime = std::chrono::high_resolution_clock::now();
 
         std::vector<std::vector<std::string>> stackInfo = readStringMatrix(stackArrayPath);
         std::vector<std::string> stackArray(stackInfo.size());
@@ -555,7 +555,7 @@ std::vector<int> Hydra::Form1::Stack() {
 
             imwrite(path + outputDir + "Stack" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", stackFrame);
 
-            elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t1).count();
+            elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime).count();
 
             cv::Mat small;
             cv::resize(stackFrame, small, cv::Size(stackFrame.cols / (scaling * samplingFactor), stackFrame.rows / (scaling * samplingFactor)), 0, 0, cv::INTER_CUBIC);
