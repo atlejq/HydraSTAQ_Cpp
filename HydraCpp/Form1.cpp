@@ -407,8 +407,6 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
                 writeStringMatrix(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
 
-                std::vector<float> xDeb(maxStars), yDeb(maxStars);
-
                 cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[0], cv::IMREAD_GRAYSCALE);
                 cv::Mat small;
                 cv::resize(maxQualFrame, small, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
@@ -420,14 +418,13 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                 }
 
                 for (int i = 0; i < offsets.size(); i++) {
-                    for (int j = 0; j < xvec[i].size(); j++) {
-                        xDeb[j] = cos(offsets[i][4]) * xvec[i][j] - sin(offsets[i][4]) * yvec[i][j] + offsets[i][5];
-                        yDeb[j] = sin(offsets[i][4]) * xvec[i][j] + cos(offsets[i][4]) * yvec[i][j] + offsets[i][6];
-                    }
-                    xDeb = clean(xDeb);
-                    yDeb = clean(yDeb);
-                    for (int i = 0; i < xDeb.size(); i++) {
-                        cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 6, cv::Scalar(0, 255, 0));
+                    std::vector<float> xDeb = clean(xvec[i]);
+                    std::vector<float> yDeb = clean(yvec[i]);
+
+                    for (int j = 0; j < xDeb.size(); j++) {
+                        xDeb[j] = cos(offsets[i][4]) * xDeb[j] - sin(offsets[i][4]) * yDeb[j] + offsets[i][5];
+                        yDeb[j] = sin(offsets[i][4]) * xDeb[j] + cos(offsets[i][4]) * yDeb[j] + offsets[i][6];
+                        cv::circle(img_rgb, cv::Point_(xDeb[j] / scaling, yDeb[j] / scaling), 6, cv::Scalar(0, 255, 0));
                     }
                 }
                 cv::imshow("Debug", img_rgb);
