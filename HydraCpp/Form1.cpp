@@ -333,9 +333,7 @@ std::vector<int> Hydra::Form1::ReadImages() {
             }
         }
 
-        auto t2 = std::chrono::high_resolution_clock::now();
-        auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-        elapsedTime = ms_int.count();
+        elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t1).count();
 
         if (!std::filesystem::exists(path + parameterDir))
             std::filesystem::create_directory(path + parameterDir);
@@ -405,9 +403,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                     }
                 }
 
-                auto t2 = std::chrono::high_resolution_clock::now();
-                auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-                elapsedTime = ms_int.count();
+                elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t1).count();
 
                 writeStringMatrix(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
 
@@ -532,14 +528,11 @@ std::vector<int> Hydra::Form1::Stack() {
                         tempFrame.at<float>(h) = (tmpVec[medianBatchSize / 2] + tmpVec[(medianBatchSize / 2) - 1]) / 2;
                     }
                 }
-                medianFrame.reshape(xSize, ySize);
-                tempFrame.reshape(xSize, ySize);
 
                 addWeighted(medianFrame, 1, tempFrame, 1 / float(stackInfo.size() / medianBatchSize), 0.0, medianFrame);
             }
 
             var = (psqr - p.mul(p)) * iterations / (iterations - 1);
-            var.reshape(xSize * ySize);
 
             if (!std::filesystem::exists(path + outputDir))
                 std::filesystem::create_directory(path + outputDir);
@@ -556,16 +549,13 @@ std::vector<int> Hydra::Form1::Stack() {
                     if (abs(lightFrame.at<float>(h) - medianFrame.at<float>(h)) > 2.0*cv::sqrt(var.at<float>(h)))
                         lightFrame.at<float>(h) = medianFrame.at<float>(h);                  
                 }
-                lightFrame.reshape(xSize, ySize);
 
                 addWeighted(stackFrame, 1, lightFrame, 1 / float(stackInfo.size()), 0.0, stackFrame);
             }
 
             imwrite(path + outputDir + "Stack" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", stackFrame);
 
-            auto t2 = std::chrono::high_resolution_clock::now();
-            auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-            elapsedTime = ms_int.count();
+            elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t1).count();
 
             cv::Mat small;
             cv::resize(stackFrame, small, cv::Size(stackFrame.cols / (scaling * samplingFactor), stackFrame.rows / (scaling * samplingFactor)), 0, 0, cv::INTER_CUBIC);
