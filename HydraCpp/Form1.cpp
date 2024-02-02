@@ -551,7 +551,6 @@ std::vector<int> Hydra::Form1::Stack() {
             for (int k = 0; k < stackInfo.size(); k++) {
                 cv::Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k]);
 
-                lightFrame.reshape(xSize * ySize);
                 for (int h = 0; h < xSize * ySize; h++)
                 {
                     if (abs(lightFrame.at<float>(h) - medianFrame.at<float>(h)) > 2.0*cv::sqrt(var.at<float>(h)))
