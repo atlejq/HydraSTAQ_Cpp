@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/test2/";
+std::string path = "C:/F/astro/matlab/m1test/";
 std::string parameterDir = "/parameters/";
 std::string outputDir = "/output/";
 std::string lightDir = "/lights/";
@@ -512,9 +512,6 @@ std::vector<int> Hydra::Form1::Stack() {
                     addWeighted(p, 1, tempArray[tempcount] / iterations, 1 , 0.0, p);
                     addWeighted(psqr, 1, tempArray[tempcount].mul(tempArray[tempcount]) / iterations, 1, 0.0, psqr);
                 }
-
-                medianFrame.reshape(xSize * ySize);
-                tempFrame.reshape(xSize * ySize);
 
                 #pragma omp parallel for num_threads(8) 
                 for (int h = 0; h < xSize * ySize; h++)
