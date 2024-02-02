@@ -381,13 +381,10 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
         if (sizesEqual)
         {
-            std::vector xRef = clean(xvecAlign[0]);
-            std::vector yRef = clean(yvecAlign[0]);
-
-            if (!xRef.empty() && xRef.size() >= topMatches)
+            if (!clean(xvecAlign[0]).empty() && clean(xvecAlign[0]).size() >= topMatches)
             {
                 n = floor(qualVec.size() * (100 - float(discardPercentage)) / 100);
-                std::vector<std::vector<float>> refTriangles = triangles(xRef, yRef);
+                std::vector<std::vector<float>> refTriangles = triangles(clean(xvecAlign[0]), clean(yvecAlign[0]));
                 std::vector<std::vector<float>> offsets(n, std::vector<float>(7));
                 std::vector<std::vector<std::string>> stackArray(n, std::vector<std::string>(8));
 
@@ -413,8 +410,8 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                 cv::Mat img_rgb(small.size(), CV_8UC3);
                 cv::cvtColor(small, img_rgb, cv::COLOR_GRAY2BGR);
 
-                for (int i = 0; i < xRef.size(); i++) {
-                    cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(0, 0, 255));
+                for (int i = 0; i < clean(xvecAlign[0]).size(); i++) {
+                    cv::circle(img_rgb, cv::Point_(clean(xvecAlign[0])[i] / scaling, clean(yvecAlign[0])[i] / scaling), 8, cv::Scalar(0, 0, 255));
                 }
 
                 for (int i = 0; i < offsets.size(); i++) {
