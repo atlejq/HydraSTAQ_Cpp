@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m1test/";
+std::string path = "C:/F/astro/matlab/m76/";
 std::string parameterDir = "/parameters/";
 std::string outputDir = "/output/";
 std::string lightDir = "/lights/";
@@ -411,7 +411,14 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                 cv::cvtColor(small, img_rgb, cv::COLOR_GRAY2BGR);
 
                 for (int i = 0; i < clean(xvecAlign[0]).size(); i++) {
-                    cv::circle(img_rgb, cv::Point_(clean(xvecAlign[0])[i] / scaling, clean(yvecAlign[0])[i] / scaling), 8, cv::Scalar(0, 0, 255));
+                    if(align=="R")
+                        cv::circle(img_rgb, cv::Point_(clean(xvecAlign[0])[i] / scaling, clean(yvecAlign[0])[i] / scaling), 8, cv::Scalar(0, 0, 255));
+                    else if (align == "G")
+                        cv::circle(img_rgb, cv::Point_(clean(xvecAlign[0])[i] / scaling, clean(yvecAlign[0])[i] / scaling), 8, cv::Scalar(0, 255, 0));
+                    else if (align == "B")
+                        cv::circle(img_rgb, cv::Point_(clean(xvecAlign[0])[i] / scaling, clean(yvecAlign[0])[i] / scaling), 8, cv::Scalar(255, 0, 0));
+                    else
+                        cv::circle(img_rgb, cv::Point_(clean(xvecAlign[0])[i] / scaling, clean(yvecAlign[0])[i] / scaling), 8, cv::Scalar(255, 255, 255));
                 }
 
                 for (int i = 0; i < offsets.size(); i++) {
@@ -421,7 +428,16 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                     for (int j = 0; j < xDeb.size(); j++) {
                         xDeb[j] = cos(offsets[i][4]) * xDeb[j] - sin(offsets[i][4]) * yDeb[j] + offsets[i][5];
                         yDeb[j] = sin(offsets[i][4]) * xDeb[j] + cos(offsets[i][4]) * yDeb[j] + offsets[i][6];
-                        cv::circle(img_rgb, cv::Point_(xDeb[j] / scaling, yDeb[j] / scaling), 6, cv::Scalar(0, 255, 0));
+                        cv::circle(img_rgb, cv::Point_(xDeb[j] / scaling, yDeb[j] / scaling), 5, cv::Scalar(0, 0, 255));
+
+                        if (filter == "R")
+                            cv::circle(img_rgb, cv::Point_(xDeb[j] / scaling, yDeb[j] / scaling), 5, cv::Scalar(0, 0, 255));
+                        else if (filter == "G")
+                            cv::circle(img_rgb, cv::Point_(xDeb[j] / scaling, yDeb[j] / scaling), 5, cv::Scalar(0, 255, 0));
+                        else if (filter == "B")
+                            cv::circle(img_rgb, cv::Point_(xDeb[j] / scaling, yDeb[j] / scaling), 5, cv::Scalar(255, 0, 0));
+                        else
+                            cv::circle(img_rgb, cv::Point_(xDeb[j] / scaling, yDeb[j] / scaling), 5, cv::Scalar(255, 255, 255));
                     }
                 }
                 cv::imshow("Debug", img_rgb);
