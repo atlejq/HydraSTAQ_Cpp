@@ -428,8 +428,6 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                     for (int j = 0; j < xDeb.size(); j++) {
                         xDeb[j] = cos(offsets[i][4]) * xDeb[j] - sin(offsets[i][4]) * yDeb[j] + offsets[i][5];
                         yDeb[j] = sin(offsets[i][4]) * xDeb[j] + cos(offsets[i][4]) * yDeb[j] + offsets[i][6];
-                        cv::circle(img_rgb, cv::Point_(xDeb[j] / scaling, yDeb[j] / scaling), 5, cv::Scalar(0, 0, 255));
-
                         if (filter == "R")
                             cv::circle(img_rgb, cv::Point_(xDeb[j] / scaling, yDeb[j] / scaling), 5, cv::Scalar(0, 0, 255));
                         else if (filter == "G")
