@@ -700,8 +700,8 @@ namespace Hydra {
 			this->Controls->Add(this->panel3);
 			this->Controls->Add(this->panel2);
 			this->Controls->Add(this->panel1);
-			this->Name = L"Form1";
-			this->Text = L"Form1";
+			this->Name = L"HydraSTAQ";
+			this->Text = L"HydraSTAQ";
 			this->Load += gcnew System::EventHandler(this, &Form1::Form1_Load);
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown1))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->numericUpDown2))->EndInit();
