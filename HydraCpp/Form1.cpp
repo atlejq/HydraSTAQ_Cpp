@@ -83,7 +83,7 @@ std::vector<float> clean(std::vector<float> v)
 {
     std::vector<float> vFiltered;
     for (int i = 0; i < v.size(); i++) {
-        if (v[i] != -1) 
+        if (v[i] != -1)
             vFiltered.push_back(v[i]);
     }
     return vFiltered;
@@ -147,7 +147,7 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(std::vector<std::vector<f
     for (int a = 0; a < refTriangles.size(); a++) {
         std::vector<int> triangleList;
         for (int b = 0; b < frameTriangles.size(); b++) {
-            if (std::abs(refTriangles[a][3] - frameTriangles[b][3]) < e) 
+            if (std::abs(refTriangles[a][3] - frameTriangles[b][3]) < e)
                 triangleList.push_back(b);
         }
         for (int c = 0; c < triangleList.size(); c++) {
@@ -260,7 +260,7 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
         std::vector<std::string> calibrationFrameArray = getFrames(calibrationPath + "/", ext);
         if (!calibrationFrameArray.empty())
         {
-            #pragma omp parallel for num_threads(8)
+#pragma omp parallel for num_threads(8)
             for (int n = 0; n < calibrationFrameArray.size(); n++)
             {
                 cv::Mat calibrationFrame = cv::imread(calibrationFrameArray[n], cv::IMREAD_ANYDEPTH);
@@ -301,7 +301,7 @@ std::vector<int> Hydra::Form1::ReadImages() {
         std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(6 + 2 * maxStars, -1));
         std::vector<std::vector<std::string>> qualVecS(lightFrames.size(), std::vector<std::string>(6 + 2 * maxStars));
 
-        #pragma omp parallel for num_threads(8)
+#pragma omp parallel for num_threads(8)
         for (int k = 0; k < lightFrames.size(); k++) {
             cv::Mat lightFrame = cv::imread(lightFrames[k], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
             if (lightFrame.data != NULL) {
@@ -317,8 +317,8 @@ std::vector<int> Hydra::Form1::ReadImages() {
                 if (starMatrix.size() > 3) {
                     sortFloatByColumn(starMatrix, 4);
                     for (int i = 0; i < std::min(maxStars, int(starMatrix.size())); i++) {
-                        qualVec[k][i+6] = starMatrix[i][0];
-                        qualVec[k][i+6+maxStars] = starMatrix[i][1];
+                        qualVec[k][i + 6] = starMatrix[i][0];
+                        qualVec[k][i + 6 + maxStars] = starMatrix[i][1];
                     }
                 }
             }
@@ -373,7 +373,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
         while (sizesEqual == true && l < qualVec.size())
         {
-            if ((qualVec[l][2] != qualVec[0][2])||(qualVec[l][3] != qualVec[0][3]))
+            if ((qualVec[l][2] != qualVec[0][2]) || (qualVec[l][3] != qualVec[0][3]))
                 sizesEqual = false;
 
             l++;
@@ -381,10 +381,13 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
         if (sizesEqual)
         {
-            if (!clean(xvecAlign[0]).empty() && clean(xvecAlign[0]).size() >= topMatches)
+            std::vector xRef = clean(xvecAlign[0]);
+            std::vector yRef = clean(yvecAlign[0]);
+
+            if (!xRef.empty() && xRef.size() >= topMatches)
             {
                 n = floor(qualVec.size() * (100 - float(discardPercentage)) / 100);
-                std::vector<std::vector<float>> refTriangles = triangles(clean(xvecAlign[0]), clean(yvecAlign[0]));
+                std::vector<std::vector<float>> refTriangles = triangles(xRef, yRef);
                 std::vector<std::vector<float>> offsets(n, std::vector<float>(7));
                 std::vector<std::vector<std::string>> stackArray(n, std::vector<std::string>(8));
 
@@ -394,8 +397,8 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                         std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[k]), clean(yvec[k]));
                         std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[0]), clean(yvec[0]));
                         std::vector<float> RTparams = alignFrames(correctedVoteMatrix, clean(xvecAlign[0]), clean(yvecAlign[0]), clean(xvec[k]), clean(yvec[k]), topMatches);
-                        offsets[k] = { float(qualVec[k][0]), float(qualVec[k][1]), float(qualVec[k][2]), float(qualVec[k][3]), RTparams[0], RTparams[1], RTparams[2]};
-                        stackArray[k] = { lightFrameArray[k], std::to_string(offsets[k][0]), std::to_string(offsets[k][1]), std::to_string(offsets[k][2]), 
+                        offsets[k] = { float(qualVec[k][0]), float(qualVec[k][1]), float(qualVec[k][2]), float(qualVec[k][3]), RTparams[0], RTparams[1], RTparams[2] };
+                        stackArray[k] = { lightFrameArray[k], std::to_string(offsets[k][0]), std::to_string(offsets[k][1]), std::to_string(offsets[k][2]),
                                           std::to_string(offsets[k][3]), std::to_string(offsets[k][4]), std::to_string(offsets[k][5]), std::to_string(offsets[k][6]) };
                     }
                 }
@@ -404,45 +407,48 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
                 writeStringMatrix(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
 
+                std::vector<float> xDeb(maxStars), yDeb(maxStars);
+
                 cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[0], cv::IMREAD_GRAYSCALE);
                 cv::Mat small;
                 cv::resize(maxQualFrame, small, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
                 cv::Mat img_rgb(small.size(), CV_8UC3);
                 cv::cvtColor(small, img_rgb, cv::COLOR_GRAY2BGR);
 
-                for (int i = 0; i < clean(xvecAlign[0]).size(); i++) {
-                    if(align=="R")
-                        cv::circle(img_rgb, cv::Point_(clean(xvecAlign[0])[i] / scaling, clean(yvecAlign[0])[i] / scaling), 8, cv::Scalar(0, 0, 255));
+                for (int i = 0; i < xRef.size(); i++) {
+                    if (align == "R")
+                        cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(0, 0, 255));
                     else if (align == "G")
-                        cv::circle(img_rgb, cv::Point_(clean(xvecAlign[0])[i] / scaling, clean(yvecAlign[0])[i] / scaling), 8, cv::Scalar(0, 255, 0));
+                        cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(0, 255, 0));
                     else if (align == "B")
-                        cv::circle(img_rgb, cv::Point_(clean(xvecAlign[0])[i] / scaling, clean(yvecAlign[0])[i] / scaling), 8, cv::Scalar(255, 0, 0));
+                        cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(255, 0, 0));
                     else
-                        cv::circle(img_rgb, cv::Point_(clean(xvecAlign[0])[i] / scaling, clean(yvecAlign[0])[i] / scaling), 8, cv::Scalar(255, 255, 255));
+                        cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(255, 255, 255));
                 }
 
                 for (int i = 0; i < offsets.size(); i++) {
-                    std::vector<float> xDeb = clean(xvec[i]);
-                    std::vector<float> yDeb = clean(yvec[i]);
-
-                    for (int j = 0; j < xDeb.size(); j++) {
-                        xDeb[j] = cos(offsets[i][4]) * xDeb[j] - sin(offsets[i][4]) * yDeb[j] + offsets[i][5];
-                        yDeb[j] = sin(offsets[i][4]) * xDeb[j] + cos(offsets[i][4]) * yDeb[j] + offsets[i][6];
+                    for (int j = 0; j < xvec[i].size(); j++) {
+                        xDeb[j] = cos(offsets[i][4]) * xvec[i][j] - sin(offsets[i][4]) * yvec[i][j] + offsets[i][5];
+                        yDeb[j] = sin(offsets[i][4]) * xvec[i][j] + cos(offsets[i][4]) * yvec[i][j] + offsets[i][6];
+                    }
+                    xDeb = clean(xDeb);
+                    yDeb = clean(yDeb);
+                    for (int i = 0; i < xDeb.size(); i++) {
                         if (filter == "R")
-                            cv::circle(img_rgb, cv::Point_(xDeb[j] / scaling, yDeb[j] / scaling), 5, cv::Scalar(0, 0, 255));
+                            cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 5, cv::Scalar(0, 0, 255));
                         else if (filter == "G")
-                            cv::circle(img_rgb, cv::Point_(xDeb[j] / scaling, yDeb[j] / scaling), 5, cv::Scalar(0, 255, 0));
+                            cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 5, cv::Scalar(0, 255, 0));
                         else if (filter == "B")
-                            cv::circle(img_rgb, cv::Point_(xDeb[j] / scaling, yDeb[j] / scaling), 5, cv::Scalar(255, 0, 0));
+                            cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 5, cv::Scalar(255, 0, 0));
                         else
-                            cv::circle(img_rgb, cv::Point_(xDeb[j] / scaling, yDeb[j] / scaling), 5, cv::Scalar(255, 255, 255));
+                            cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 5, cv::Scalar(255, 255, 255));
                     }
                 }
                 cv::imshow("Debug", img_rgb);
             }
         }
     }
-    return { n, elapsedTime};
+    return { n, elapsedTime };
     cv::waitKey(0);
     cv::destroyAllWindows();
 }
@@ -509,15 +515,15 @@ std::vector<int> Hydra::Form1::Stack() {
             shuffle(m.begin(), m.end(), std::default_random_engine(seed));
 
             for (int k = 0; k < batches; k++) {
-                #pragma omp parallel for num_threads(8)
+#pragma omp parallel for num_threads(8)
                 for (int tempcount = 0; tempcount < medianBatchSize; tempcount++) {
                     int i = m[k * medianBatchSize + tempcount];
                     tempArray[tempcount] = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], RTparams[i]);;
-                    addWeighted(p, 1, tempArray[tempcount] / iterations, 1 , 0.0, p);
+                    addWeighted(p, 1, tempArray[tempcount] / iterations, 1, 0.0, p);
                     addWeighted(psqr, 1, tempArray[tempcount].mul(tempArray[tempcount]) / iterations, 1, 0.0, psqr);
                 }
 
-                #pragma omp parallel for num_threads(8) 
+#pragma omp parallel for num_threads(8) 
                 for (int h = 0; h < xSize * ySize; h++)
                 {
                     std::vector<float> tmpVec(medianBatchSize);
@@ -548,14 +554,14 @@ std::vector<int> Hydra::Form1::Stack() {
             imwrite(path + outputDir + "Median" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", medianFrame);
             imwrite(path + outputDir + "Mean" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", p);
 
-            #pragma omp parallel for num_threads(8) 
+#pragma omp parallel for num_threads(8) 
             for (int k = 0; k < stackInfo.size(); k++) {
                 cv::Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k]);
 
                 for (int h = 0; h < xSize * ySize; h++)
                 {
-                    if (abs(lightFrame.at<float>(h) - medianFrame.at<float>(h)) > 2.0*cv::sqrt(var.at<float>(h)))
-                        lightFrame.at<float>(h) = medianFrame.at<float>(h);                  
+                    if (abs(lightFrame.at<float>(h) - medianFrame.at<float>(h)) > 2.0 * cv::sqrt(var.at<float>(h)))
+                        lightFrame.at<float>(h) = medianFrame.at<float>(h);
                 }
 
                 addWeighted(stackFrame, 1, lightFrame, 1 / float(stackInfo.size()), 0.0, stackFrame);
