@@ -551,8 +551,8 @@ std::vector<int> Hydra::Form1::Stack() {
             if (!std::filesystem::exists(path + outputDir))
                 std::filesystem::create_directory(path + outputDir);
 
-            imwrite(path + outputDir + "Median" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", medianFrame);
-            imwrite(path + outputDir + "Mean" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", p);
+            imwrite(path + outputDir + "Median" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 100)) + ".tif", medianFrame);
+            imwrite(path + outputDir + "Mean" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 100)) + ".tif", p);
 
             #pragma omp parallel for num_threads(8) 
             for (int k = 0; k < stackInfo.size(); k++) {
@@ -567,7 +567,7 @@ std::vector<int> Hydra::Form1::Stack() {
                 addWeighted(stackFrame, 1, lightFrame, 1 / float(stackInfo.size()), 0.0, stackFrame);
             }
 
-            imwrite(path + outputDir + "Stack" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 10)) + ".tif", stackFrame);
+            imwrite(path + outputDir + "Stack" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 100)) + ".tif", stackFrame);
 
             elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime).count();
 
