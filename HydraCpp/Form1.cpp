@@ -260,6 +260,7 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
         std::vector<std::string> calibrationFrameArray = getFrames(calibrationPath + "/", ext);
         if (!calibrationFrameArray.empty())
         {
+            cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
             #pragma omp parallel for num_threads(8)
             for (int n = 0; n < calibrationFrameArray.size(); n++)
             {
