@@ -9,7 +9,7 @@ extern std::string lightDir;
 extern std::string darkDir;
 extern std::string flatDir;
 extern std::string flatDarksDir;
-extern std::string darkGroup;
+extern std::string darksGroup;
 extern std::string flatDarksGroup;
 extern std::string ext;
 extern int detectionThreshold;
@@ -889,13 +889,13 @@ namespace Hydra {
 		radioButton20->Enabled = true;
 	}
 	private: System::Void radioButton12_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-		darkGroup = "LRGB";
+		darksGroup = "LRGB";
 	}
 	private: System::Void radioButton13_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-		darkGroup = "RGB";
+		darksGroup = "RGB";
 	}
 	private: System::Void radioButton14_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-		darkGroup = filter;
+		darksGroup = filter;
 	}
 	private: System::Void radioButton15_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 		flatDarksGroup = "LRGB";

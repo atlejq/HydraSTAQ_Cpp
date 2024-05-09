@@ -8,7 +8,7 @@ std::string lightDir = "/lights/";
 std::string darkDir = "/darks/";
 std::string flatDir = "/flats/";
 std::string flatDarksDir = "/flatDarks/";
-std::string darkGroup = "RGB";
+std::string darksGroup = "RGB";
 std::string flatDarksGroup = "LRGB";
 std::string ext = ".png";
 int detectionThreshold = 50;
@@ -484,7 +484,29 @@ std::vector<int> Hydra::Form1::Stack() {
         int xSize = stoi(stackInfo[0][3]);
         int ySize = stoi(stackInfo[0][4]);
 
-        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkGroup, 0);
+        std::string darkFilter;
+
+        if (darksGroup == "LRGB")
+            darkFilter = "LRGB";
+        else if (darksGroup == "RGB" && filter == "L")
+            darkFilter = "L";
+        else if (darksGroup == "RGB" && filter != "L")
+            darkFilter = "RGB";
+        else
+            darkFilter = filter;
+
+        std::string flatDarkFilter;
+
+        if (flatDarksGroup == "LRGB")
+            flatDarkFilter = "LRGB";
+        else if (flatDarksGroup == "RGB" && filter == "L")
+            flatDarkFilter = "L";
+        else if (flatDarksGroup == "RGB" && filter != "L")
+            flatDarkFilter = "RGB";
+        else
+            flatDarkFilter = filter;
+
+        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkFilter, 0);
         cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + flatDarksGroup, 0);
 
         double minVal, maxVal;
