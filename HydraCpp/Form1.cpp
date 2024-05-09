@@ -103,6 +103,21 @@ void sortIntByColumn(std::vector<std::vector<int>>& data, size_t column) {
         });
 }
 
+std::string filterSelector(std::string input){
+    std::string filterString;
+
+    if (input == "LRGB")
+        filterString = "LRGB";
+    else if (input == "RGB" && filter == "L")
+        filterString = "L";
+    else if (input == "RGB" && filter != "L")
+        filterString = "RGB";
+    else
+        filterString = filter;
+    
+    return filterString;
+}
+
 //Function for enumerating star triangles
 std::vector<std::vector<float>> triangles(std::vector<float> x, std::vector<float> y) {
     std::vector<std::vector<float>> triangleParameters;
@@ -484,30 +499,8 @@ std::vector<int> Hydra::Form1::Stack() {
         int xSize = stoi(stackInfo[0][3]);
         int ySize = stoi(stackInfo[0][4]);
 
-        std::string darkFilter;
-
-        if (darksGroup == "LRGB")
-            darkFilter = "LRGB";
-        else if (darksGroup == "RGB" && filter == "L")
-            darkFilter = "L";
-        else if (darksGroup == "RGB" && filter != "L")
-            darkFilter = "RGB";
-        else
-            darkFilter = filter;
-
-        std::string flatDarkFilter;
-
-        if (flatDarksGroup == "LRGB")
-            flatDarkFilter = "LRGB";
-        else if (flatDarksGroup == "RGB" && filter == "L")
-            flatDarkFilter = "L";
-        else if (flatDarksGroup == "RGB" && filter != "L")
-            flatDarkFilter = "RGB";
-        else
-            flatDarkFilter = filter;
-
-        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + darkFilter, 0);
-        cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + flatDarksGroup, 0);
+        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
+        cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
 
         double minVal, maxVal;
         cv::minMaxLoc(calibratedFlatFrame, &minVal, &maxVal);
