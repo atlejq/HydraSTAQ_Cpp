@@ -502,6 +502,9 @@ std::vector<int> Hydra::Form1::Stack() {
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
         cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
 
+        //cv::Scalar mean, stddev;
+        //cv::meanStdDev(masterDarkFrame, mean, stddev);
+
         double minVal, maxVal;
         cv::minMaxLoc(calibratedFlatFrame, &minVal, &maxVal);
 
