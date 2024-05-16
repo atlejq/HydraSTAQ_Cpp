@@ -502,8 +502,23 @@ std::vector<int> Hydra::Form1::Stack() {
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
         cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
 
-        //cv::Scalar mean, stddev;
-        //cv::meanStdDev(masterDarkFrame, mean, stddev);
+        cv::Scalar mean, stddev;
+        cv::meanStdDev(masterDarkFrame, mean, stddev);
+
+        float upperThreshold = 10*mean[0];
+
+        std::vector<std::vector<int>> outlierPixels;
+
+        // Iterate through each pixel and check if it's outside the thresholds
+        for (int y = 0; y < masterDarkFrame.rows; y++) {
+            for (int x = 0; x < masterDarkFrame.cols; x++) {
+                float pixelValue = masterDarkFrame.at<float>(y, x);
+                if (pixelValue > upperThreshold) {
+                    outlierPixels.push_back({x,y});
+                }
+            }
+        }
+     
 
         double minVal, maxVal;
         cv::minMaxLoc(calibratedFlatFrame, &minVal, &maxVal);
