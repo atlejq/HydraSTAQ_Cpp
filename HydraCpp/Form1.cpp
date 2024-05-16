@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m1test/";
+std::string path = "C:/F/astro/matlab/m76/";
 std::string parameterDir = "/parameters/";
 std::string outputDir = "/output/";
 std::string lightDir = "/lights/";
@@ -303,9 +303,9 @@ cv::Mat removeHotPixels(cv::Mat lightFrame, std::vector <std::vector<int>> hotPi
             if (x > 0 || y > 0 || x < lightFrame.cols - 1 || y < lightFrame.rows - 1) 
             {
                 int sum = 0;
-                for (int dy = -1; dy <= 1; ++dy) {
-                    for (int dx = -1; dx <= 1; ++dx) {
-                        if (dx != 0 && dy != 0) 
+                for (int dy = -1; dy <= 1; dy++) {
+                    for (int dx = -1; dx <= 1; dx++) {
+                        if (!(dx == 0 && dy == 0))
                             sum += lightFrame.at<float>(y + dy, x + dx);
                     }
                 }
@@ -324,7 +324,7 @@ cv::Mat processFrame(std::string framePath, cv::Mat masterDarkFrame, cv::Mat cal
     cv::Mat lightFrame = cv::imread(framePath, cv::IMREAD_GRAYSCALE);
     lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
     lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame) / calibratedFlatFrame;
-    //lightFrame = removeHotPixels(lightFrame, hotPixels);
+    lightFrame = removeHotPixels(lightFrame, hotPixels);
     cv::resize(lightFrame, lightFrame, cv::Size(samplingFactor * lightFrame.cols, samplingFactor * lightFrame.rows), 0, 0, cv::INTER_CUBIC);
     cv::Mat M = (cv::Mat_<float>(2, 3) << cos(RTparams[0]), -sin(RTparams[0]), RTparams[1], sin(RTparams[0]), cos(RTparams[0]), RTparams[2]);
     warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
@@ -532,15 +532,12 @@ std::vector<int> Hydra::Form1::Stack() {
         cv::Scalar mean, stddev;
         cv::meanStdDev(masterDarkFrame, mean, stddev);
 
-        float upperThreshold = 10*mean[0];
-
         std::vector<std::vector<int>> hotPixels;
 
-        // Iterate through each pixel and check if it's outside the thresholds
         for (int y = 0; y < masterDarkFrame.rows; y++) {
             for (int x = 0; x < masterDarkFrame.cols; x++) {
                 float pixelValue = masterDarkFrame.at<float>(y, x);
-                if (pixelValue > upperThreshold) {
+                if (pixelValue > 10 * mean[0]) {
                     hotPixels.push_back({x,y});
                 }
             }
