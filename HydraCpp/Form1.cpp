@@ -309,11 +309,9 @@ cv::Mat removeHotPixels(cv::Mat lightFrame, std::vector <std::vector<int>> hotPi
                             sum += lightFrame.at<float>(y + dy, x + dx);
                     }
                 }
-                sum = sum / 8;
 
-                lightFrame.at<float>(y, x) = sum;
+                lightFrame.at<float>(y, x) = sum/8;
             }
-
     }
     return lightFrame;
 }
