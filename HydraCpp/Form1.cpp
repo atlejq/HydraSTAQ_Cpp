@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m76/";
+std::string path = "C:/F/astro/matlab/m1test/";
 std::string parameterDir = "/parameters/";
 std::string outputDir = "/output/";
 std::string lightDir = "/lights/";
@@ -292,12 +292,39 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
     return masterFrame;
 }
 
+//Function to remove hotpixels
+cv::Mat removeHotPixels(cv::Mat lightFrame, std::vector <std::vector<int>> hotPixels)
+{
+    for (int i = 0; i < hotPixels.size(); i++)
+    { 
+        int x = hotPixels[i][0];
+        int y = hotPixels[i][1];
+
+            if (x > 0 || y > 0 || x < lightFrame.cols - 1 || y < lightFrame.rows - 1) 
+            {
+                int sum = 0;
+                for (int dy = -1; dy <= 1; ++dy) {
+                    for (int dx = -1; dx <= 1; ++dx) {
+                        if (dx != 0 && dy != 0) 
+                            sum += lightFrame.at<float>(y + dy, x + dx);
+                    }
+                }
+                sum = sum / 8;
+
+                lightFrame.at<float>(y, x) = sum;
+            }
+
+    }
+    return lightFrame;
+}
+
 //Function to rotate images
-cv::Mat processFrame(std::string framePath, cv::Mat masterDarkFrame, cv::Mat calibratedFlatFrame, float backGroundCorrection, std::vector<float> RTparams)
+cv::Mat processFrame(std::string framePath, cv::Mat masterDarkFrame, cv::Mat calibratedFlatFrame, float backGroundCorrection, std::vector<float> RTparams, std::vector<std::vector<int>> hotPixels)
 {
     cv::Mat lightFrame = cv::imread(framePath, cv::IMREAD_GRAYSCALE);
     lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
     lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame) / calibratedFlatFrame;
+    //lightFrame = removeHotPixels(lightFrame, hotPixels);
     cv::resize(lightFrame, lightFrame, cv::Size(samplingFactor * lightFrame.cols, samplingFactor * lightFrame.rows), 0, 0, cv::INTER_CUBIC);
     cv::Mat M = (cv::Mat_<float>(2, 3) << cos(RTparams[0]), -sin(RTparams[0]), RTparams[1], sin(RTparams[0]), cos(RTparams[0]), RTparams[2]);
     warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
@@ -507,18 +534,17 @@ std::vector<int> Hydra::Form1::Stack() {
 
         float upperThreshold = 10*mean[0];
 
-        std::vector<std::vector<int>> outlierPixels;
+        std::vector<std::vector<int>> hotPixels;
 
         // Iterate through each pixel and check if it's outside the thresholds
         for (int y = 0; y < masterDarkFrame.rows; y++) {
             for (int x = 0; x < masterDarkFrame.cols; x++) {
                 float pixelValue = masterDarkFrame.at<float>(y, x);
                 if (pixelValue > upperThreshold) {
-                    outlierPixels.push_back({x,y});
+                    hotPixels.push_back({x,y});
                 }
             }
-        }
-     
+        }    
 
         double minVal, maxVal;
         cv::minMaxLoc(calibratedFlatFrame, &minVal, &maxVal);
@@ -552,7 +578,7 @@ std::vector<int> Hydra::Form1::Stack() {
                 #pragma omp parallel for num_threads(8)
                 for (int tempcount = 0; tempcount < medianBatchSize; tempcount++) {
                     int i = m[k * medianBatchSize + tempcount];
-                    tempArray[tempcount] = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], RTparams[i]);;
+                    tempArray[tempcount] = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], RTparams[i], hotPixels);;
                     addWeighted(p, 1, tempArray[tempcount] / iterations, 1, 0.0, p);
                     addWeighted(psqr, 1, tempArray[tempcount].mul(tempArray[tempcount]) / iterations, 1, 0.0, psqr);
                 }
@@ -590,7 +616,7 @@ std::vector<int> Hydra::Form1::Stack() {
 
             #pragma omp parallel for num_threads(8) 
             for (int k = 0; k < stackInfo.size(); k++) {
-                cv::Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k]);
+                cv::Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);
 
                 for (int h = 0; h < xSize * ySize; h++)
                 {
