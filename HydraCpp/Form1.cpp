@@ -259,6 +259,7 @@ cv::Mat addCircles(cv::Mat img, std::vector<float> xcoords, std::vector<float> y
 
 //Function to fetch a calibration frame
 cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, float defaultValue) {
+   
     cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(defaultValue));
 
     if (std::filesystem::exists(calibrationPath + "/" + "masterFrame.tif"))
@@ -272,7 +273,7 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
         std::vector<std::string> calibrationFrameArray = getFrames(calibrationPath + "/", ext);
         if (!calibrationFrameArray.empty())
         {
-            cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+            cv::Mat tmpMasterFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
             #pragma omp parallel for num_threads(8)
             for (int n = 0; n < calibrationFrameArray.size(); n++)
             {
@@ -280,10 +281,11 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
                 if (calibrationFrame.cols == masterFrame.cols && calibrationFrame.rows == masterFrame.rows)
                 {
                     calibrationFrame.convertTo(calibrationFrame, CV_32FC1, 1.0 / pow(255, calibrationFrame.elemSize()));
-                    addWeighted(masterFrame, 1, calibrationFrame, 1 / float(calibrationFrameArray.size()), 0.0, masterFrame);
+                    addWeighted(tmpMasterFrame, 1, calibrationFrame, 1 / float(calibrationFrameArray.size()), 0.0, tmpMasterFrame);
                 }
             }
-            imwrite(calibrationPath + "/" + "masterFrame" + ".tif", masterFrame);
+            imwrite(calibrationPath + "/" + "masterFrame" + ".tif", tmpMasterFrame);
+            masterFrame = tmpMasterFrame;
         }
     }
     return masterFrame;
@@ -499,7 +501,6 @@ std::vector<int> Hydra::Form1::Stack() {
         int ySize = stoi(stackInfo[0][4]);
 
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
-        cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
 
         cv::Scalar mean, stddev;
         cv::meanStdDev(masterDarkFrame, mean, stddev);
