@@ -122,22 +122,21 @@ std::vector<std::vector<float>> triangles(std::vector<float> x, std::vector<floa
 
 //Function for computing angular and translational offsets between vectors
 std::vector<float> findRT(Eigen::MatrixXf A, Eigen::MatrixXf B) {
-    Eigen::Vector2f centroid_A = A.rowwise().mean().reshaped(-1, 1);
-    Eigen::Vector2f centroid_B = B.rowwise().mean().reshaped(-1, 1);
-    Eigen::MatrixXf Am = A - centroid_A.replicate(1, A.cols());
-    Eigen::MatrixXf Bm = B - centroid_B.replicate(1, B.cols());
-    Eigen::MatrixXf H = Am * Bm.transpose();
+    Eigen::Vector2f centroid_A = A.rowwise().mean();
+    Eigen::Vector2f centroid_B = B.rowwise().mean();
+    Eigen::MatrixXf H = (A.colwise() - centroid_A) * (B.colwise() - centroid_B).transpose();
     Eigen::JacobiSVD<Eigen::MatrixXf> svd(H, Eigen::ComputeThinU | Eigen::ComputeThinV);
     Eigen::MatrixXf U = svd.matrixU();
     Eigen::MatrixXf V = svd.matrixV();
-    Eigen::MatrixXf R = V * U.transpose();
+    Eigen::MatrixXf R = svd.matrixV() * svd.matrixU().transpose();
     if (R.determinant() < 0) {
         V.col(1) *= -1;
-        R = V * U.transpose();
+        R = V * svd.matrixU().transpose();
     }
     Eigen::Vector2f t = -R * centroid_A + centroid_B;
     return { std::atan2(R(1, 0), R(0, 0)), t[0], t[1] };
 }
+
 
 //Function for computing the "vote matrix"
 std::vector<std::vector<float>> getCorrectedVoteMatrix(std::vector<std::vector<float>> refTriangles, std::vector<std::vector<float>> frameTriangles, std::vector<float> refVectorX, std::vector<float> yvec) {
@@ -500,6 +499,7 @@ std::vector<int> Hydra::Form1::Stack() {
         int xSize = stoi(stackInfo[0][3]);
         int ySize = stoi(stackInfo[0][4]);
 
+        cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
         cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
 
         cv::Scalar mean, stddev;
