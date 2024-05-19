@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m76/";
+std::string path = "C:/F/astro/matlab/m1test/";
 std::string parameterDir = "/parameters/";
 std::string outputDir = "/output/";
 std::string lightDir = "/lights/";
@@ -89,17 +89,10 @@ std::vector<float> clean(std::vector<float> v)
     return vFiltered;
 }
 
-void sortFloatByColumn(std::vector<std::vector<float>>& data, size_t column) {
-    std::sort(data.begin(), data.end(), [column](std::vector<float> const& v1, std::vector<float> const& v2)
-        {
-            return v1[column] > v2[column];
-        });
-}
-
-void sortIntByColumn(std::vector<std::vector<int>>& data, size_t column) {
-    std::sort(data.begin(), data.end(), [column](std::vector<int> const& v1, std::vector<int> const& v2)
-        {
-            return v1[column] > v2[column];
+template <typename T>
+void sortByColumn(std::vector<std::vector<T>>& data, size_t column) {
+    std::sort(data.begin(), data.end(), [column](const std::vector<T>& v1, const std::vector<T>& v2) {
+        return v1[column] > v2[column];
         });
 }
 
@@ -197,7 +190,7 @@ std::vector<float> alignFrames(std::vector<std::vector<float>> corrVote, std::ve
         votePairs.push_back({ i, maxIndex, maxValue });
     }
 
-    sortIntByColumn(votePairs, 2);
+    sortByColumn(votePairs, 2);
 
     std::vector<std::vector<int>> rankPairs(votePairs.begin(), votePairs.end());
     Eigen::MatrixXf referenceM(2, topMatches), frameM(2, topMatches);
@@ -356,7 +349,7 @@ std::vector<int> Hydra::Form1::ReadImages() {
                 qualVec[k][5] = lightFrame.elemSize();
 
                 if (starMatrix.size() > 3) {
-                    sortFloatByColumn(starMatrix, 4);
+                    sortByColumn(starMatrix, 4);
                     for (int i = 0; i < std::min(maxStars, int(starMatrix.size())); i++) {
                         qualVec[k][i + 6] = starMatrix[i][0];
                         qualVec[k][i + 6 + maxStars] = starMatrix[i][1];
@@ -365,7 +358,7 @@ std::vector<int> Hydra::Form1::ReadImages() {
             }
         }
 
-        sortFloatByColumn(qualVec, 1);
+        sortByColumn(qualVec, 1);
 
         for (int k = 0; k < qualVec.size(); k++) {
             qualVecS[k][0] = lightFrames[int(qualVec[k][0])];
