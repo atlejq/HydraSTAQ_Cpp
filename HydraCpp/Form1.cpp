@@ -22,8 +22,7 @@ float samplingFactor = 1;
 std::string filter = "R";
 std::string align = "R";
 
-std::vector<std::vector<std::string>> readStringMatrix(std::string path)
-{
+std::vector<std::vector<std::string>> readStringMatrix(std::string path) {
     std::vector<std::vector<std::string>> commaSeparatedArray;
     std::string line;
     std::ifstream commaSeparatedArrayStream(path);
@@ -44,8 +43,7 @@ std::vector<std::vector<std::string>> readStringMatrix(std::string path)
     return commaSeparatedArray;
 }
 
-void writeStringMatrix(std::string path, std::vector<std::vector<std::string>> stringArray)
-{
+void writeStringMatrix(std::string path, std::vector<std::vector<std::string>> stringArray) {
     std::ofstream stringFileStream(path);
     for (int i = 0; i < stringArray.size(); i++)
     {
@@ -60,8 +58,7 @@ void writeStringMatrix(std::string path, std::vector<std::vector<std::string>> s
     stringFileStream.close();
 }
 
-std::tuple<std::vector<std::string>, std::vector<std::vector<float>>, std::vector<std::vector<float>>, std::vector<std::vector<float>>> unpack(std::vector<std::vector<std::string>> inputArray)
-{
+std::tuple<std::vector<std::string>, std::vector<std::vector<float>>, std::vector<std::vector<float>>, std::vector<std::vector<float>>> unpack(std::vector<std::vector<std::string>> inputArray) {
     std::vector<std::string> lightFrameArray(inputArray.size());
     std::vector<std::vector<float>> qualVec(inputArray.size()), xvec(inputArray.size(), std::vector<float>(maxStars)), yvec(inputArray.size(), std::vector<float>(maxStars));
 
@@ -79,8 +76,7 @@ std::tuple<std::vector<std::string>, std::vector<std::vector<float>>, std::vecto
     return std::make_tuple(lightFrameArray, qualVec, xvec, yvec);
 }
 
-std::vector<float> clean(std::vector<float> v)
-{
+std::vector<float> clean(std::vector<float> v) {
     std::vector<float> vFiltered;
     for (int i = 0; i < v.size(); i++) {
         if (v[i] != -1)
@@ -89,14 +85,13 @@ std::vector<float> clean(std::vector<float> v)
     return vFiltered;
 }
 
-template <typename T>
-void sortByColumn(std::vector<std::vector<T>>& data, size_t column) {
+template <typename T> void sortByColumn(std::vector<std::vector<T>>& data, size_t column) {
     std::sort(data.begin(), data.end(), [column](const std::vector<T>& v1, const std::vector<T>& v2) {
         return v1[column] > v2[column];
         });
 }
 
-std::string filterSelector(std::string input){
+std::string filterSelector(std::string input) {
     std::string filterString;
 
     if (input == "LRGB")
@@ -252,9 +247,22 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
     return starMatrix;
 }
 
+cv::Mat addCircles(cv::Mat img, std::vector<float> xcoords, std::vector<float> ycoords, int size) {
+    for (int i = 0; i < xcoords.size(); i++) {
+        if (align == "R")
+            cv::circle(img, cv::Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, cv::Scalar(0, 0, 255));
+        else if (align == "G")
+            cv::circle(img, cv::Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, cv::Scalar(0, 255, 0));
+        else if (align == "B")
+            cv::circle(img, cv::Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, cv::Scalar(255, 0, 0));
+        else
+            cv::circle(img, cv::Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, cv::Scalar(255, 255, 255));
+    }
+    return img;
+}
+
 //Function to fetch a calibration frame
-cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, float defaultValue)
-{
+cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, float defaultValue) {
     cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(defaultValue));
 
     if (std::filesystem::exists(calibrationPath + "/" + "masterFrame.tif"))
@@ -286,13 +294,11 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
 }
 
 //Function to remove hotpixels
-cv::Mat removeHotPixels(cv::Mat lightFrame, std::vector <std::vector<int>> hotPixels)
-{
+cv::Mat removeHotPixels(cv::Mat lightFrame, std::vector <std::vector<int>> hotPixels) {
     for (int i = 0; i < hotPixels.size(); i++)
     { 
         int x = hotPixels[i][0];
         int y = hotPixels[i][1];
-
             if (x > 0 || y > 0 || x < lightFrame.cols - 1 || y < lightFrame.rows - 1) 
             {
                 int sum = 0;
@@ -302,7 +308,6 @@ cv::Mat removeHotPixels(cv::Mat lightFrame, std::vector <std::vector<int>> hotPi
                             sum += lightFrame.at<float>(y + dy, x + dx);
                     }
                 }
-
                 lightFrame.at<float>(y, x) = sum/8;
             }
     }
@@ -310,8 +315,7 @@ cv::Mat removeHotPixels(cv::Mat lightFrame, std::vector <std::vector<int>> hotPi
 }
 
 //Function to rotate images
-cv::Mat processFrame(std::string framePath, cv::Mat masterDarkFrame, cv::Mat calibratedFlatFrame, float backGroundCorrection, std::vector<float> RTparams, std::vector<std::vector<int>> hotPixels)
-{
+cv::Mat processFrame(std::string framePath, cv::Mat masterDarkFrame, cv::Mat calibratedFlatFrame, float backGroundCorrection, std::vector<float> RTparams, std::vector<std::vector<int>> hotPixels) {
     cv::Mat lightFrame = cv::imread(framePath, cv::IMREAD_GRAYSCALE);
     lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
     lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame) / calibratedFlatFrame;
@@ -448,17 +452,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                 cv::resize(maxQualFrame, small, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
                 cv::Mat img_rgb(small.size(), CV_8UC3);
                 cv::cvtColor(small, img_rgb, cv::COLOR_GRAY2BGR);
-
-                for (int i = 0; i < xRef.size(); i++) {
-                    if (align == "R")
-                        cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(0, 0, 255));
-                    else if (align == "G")
-                        cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(0, 255, 0));
-                    else if (align == "B")
-                        cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(255, 0, 0));
-                    else
-                        cv::circle(img_rgb, cv::Point_(xRef[i] / scaling, yRef[i] / scaling), 8, cv::Scalar(255, 255, 255));
-                }
+                img_rgb = addCircles(img_rgb, xRef, yRef, 8);
 
                 for (int i = 0; i < offsets.size(); i++) {
                     for (int j = 0; j < xvec[i].size(); j++) {
@@ -467,16 +461,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                     }
                     xDeb = clean(xDeb);
                     yDeb = clean(yDeb);
-                    for (int i = 0; i < xDeb.size(); i++) {
-                        if (filter == "R")
-                            cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 5, cv::Scalar(0, 0, 255));
-                        else if (filter == "G")
-                            cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 5, cv::Scalar(0, 255, 0));
-                        else if (filter == "B")
-                            cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 5, cv::Scalar(255, 0, 0));
-                        else
-                            cv::circle(img_rgb, cv::Point_(xDeb[i] / scaling, yDeb[i] / scaling), 5, cv::Scalar(255, 255, 255));
-                    }
+                    img_rgb = addCircles(img_rgb, xDeb, yDeb, 5);
                 }
                 cv::imshow("Debug", img_rgb);
             }
