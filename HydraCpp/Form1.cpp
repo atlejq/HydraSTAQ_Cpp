@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m1test/";
+std::string path = "C:/F/astro/matlab/m76/";
 std::string parameterDir = "/parameters/";
 std::string outputDir = "/output/";
 std::string lightDir = "/lights/";
@@ -113,8 +113,7 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
                 std::vector<double> d = { sqrt(pow(x[i] - x[j], 2) + pow(y[i] - y[j], 2)), sqrt(pow(x[j] - x[k], 2) + pow(y[j] - y[k], 2)), sqrt(pow(x[i] - x[k], 2) + pow(y[i] - y[k], 2)) };
                 if (*std::min_element(d.begin(), d.end()) > minEdge) {
                     std::sort(d.begin(), d.end());
-                    //triangleParameters.push_back({ float(i), float(j), float(k), float(d[1] / d[2]), float(d[0] / d[2]) });
-                    triangleParameters.push_back({ static_cast<float>(i), static_cast<float>(j), static_cast<float>(k), d[1] / d[2], d[0] / d[2] });
+                    triangleParameters.push_back({ float(i), float(j), float(k), float(d[1] / d[2]), float(d[0] / d[2]) });
                 }
             }
         }
@@ -123,7 +122,7 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
 }
 
 //Function for computing angular and translational offsets between vectors
-std::vector<float> findRT(Eigen::MatrixXf A, Eigen::MatrixXf B) {
+std::vector<float> findRT(const Eigen::MatrixXf A, const Eigen::MatrixXf B) {
     Eigen::Vector2f centroid_A = A.rowwise().mean();
     Eigen::Vector2f centroid_B = B.rowwise().mean();
     Eigen::MatrixXf H = (A.colwise() - centroid_A) * (B.colwise() - centroid_B).transpose();
@@ -139,9 +138,8 @@ std::vector<float> findRT(Eigen::MatrixXf A, Eigen::MatrixXf B) {
     return { std::atan2(R(1, 0), R(0, 0)), t[0], t[1] };
 }
 
-
 //Function for computing the "vote matrix"
-std::vector<std::vector<float>> getCorrectedVoteMatrix(std::vector<std::vector<float>> refTriangles, std::vector<std::vector<float>> frameTriangles, std::vector<float> refVectorX, std::vector<float> yvec) {
+std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::vector<float>>& refTriangles, const std::vector<std::vector<float>>& frameTriangles, const std::vector<float>& refVectorX, const std::vector<float>& yvec) {
     float e = 0.005;
     std::vector<std::vector<float>> vote(refVectorX.size(), std::vector<float>(yvec.size(), 0)), corrVote(refVectorX.size(), std::vector<float>(yvec.size(), 0));
     for (int a = 0; a < refTriangles.size(); a++) {
@@ -159,6 +157,7 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(std::vector<std::vector<f
             }
         }
     }
+
     for (int row = 0; row < vote.size(); row++) {
         double maxRowVote = *std::max_element(vote[row].begin(), vote[row].end());
         int ind = std::distance(vote[row].begin(), std::max_element(vote[row].begin(), vote[row].end()));
@@ -168,7 +167,7 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(std::vector<std::vector<f
 }
 
 //Function for aligning frames
-std::vector<float> alignFrames(std::vector<std::vector<float>> corrVote, std::vector<float> refVectorX, std::vector<float> refVectorY, std::vector<float> xvec, std::vector<float> yvec, int topMatches) {
+std::vector<float> alignFrames(const std::vector<std::vector<float>>& corrVote, const std::vector<float>& refVectorX, const std::vector<float>& refVectorY, const std::vector<float>& xvec, const std::vector<float>& yvec, const int& topMatches) {
     std::vector<std::vector<int>> votePairs;
     for (int i = 0; i < corrVote[0].size(); i++) {
         int maxIndex = 0;
