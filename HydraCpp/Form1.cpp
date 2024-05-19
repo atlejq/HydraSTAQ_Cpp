@@ -103,16 +103,18 @@ std::string filterSelector(std::string input) {
 }
 
 //Function for enumerating star triangles
-std::vector<std::vector<float>> triangles(std::vector<float> x, std::vector<float> y) {
+std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std::vector<float>& y) {
     std::vector<std::vector<float>> triangleParameters;
-    float minEdge = 50;
-    for (int i = 0; i < x.size() - 2; i++) {
-        for (int j = i + 1; j < x.size() - 1; j++) {
-            for (int k = j + 1; k < x.size(); k++) {
+    const float minEdge = 50;
+    const int n = x.size();
+    for (int i = 0; i < n - 2; i++) {
+        for (int j = i + 1; j < n - 1; j++) {
+            for (int k = j + 1; k < n; k++) {
                 std::vector<double> d = { sqrt(pow(x[i] - x[j], 2) + pow(y[i] - y[j], 2)), sqrt(pow(x[j] - x[k], 2) + pow(y[j] - y[k], 2)), sqrt(pow(x[i] - x[k], 2) + pow(y[i] - y[k], 2)) };
                 if (*std::min_element(d.begin(), d.end()) > minEdge) {
                     std::sort(d.begin(), d.end());
-                    triangleParameters.push_back({ float(i), float(j), float(k), float(d[1] / d[2]), float(d[0] / d[2]) });
+                    //triangleParameters.push_back({ float(i), float(j), float(k), float(d[1] / d[2]), float(d[0] / d[2]) });
+                    triangleParameters.push_back({ static_cast<float>(i), static_cast<float>(j), static_cast<float>(k), d[1] / d[2], d[0] / d[2] });
                 }
             }
         }
