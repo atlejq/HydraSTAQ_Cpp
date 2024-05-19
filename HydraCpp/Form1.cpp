@@ -92,18 +92,14 @@ template <typename T> void sortByColumn(std::vector<std::vector<T>>& data, size_
 }
 
 std::string filterSelector(std::string input) {
-    std::string filterString;
-
     if (input == "LRGB")
-        filterString = "LRGB";
+        return "LRGB";
     else if (input == "RGB" && filter == "L")
-        filterString = "L";
+        return "L";
     else if (input == "RGB" && filter != "L")
-        filterString = "RGB";
+        return "RGB";
     else
-        filterString = filter;
-    
-    return filterString;
+        return filter;
 }
 
 //Function for enumerating star triangles
