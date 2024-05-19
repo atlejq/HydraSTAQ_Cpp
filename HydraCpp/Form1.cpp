@@ -22,7 +22,7 @@ float samplingFactor = 1;
 std::string filter = "R";
 std::string align = "R";
 
-std::vector<std::vector<std::string>> readStringMatrix(std::string path) {
+std::vector<std::vector<std::string>> readStringMatrix(const std::string& path) {
     std::vector<std::vector<std::string>> commaSeparatedArray;
     std::string line;
     std::ifstream commaSeparatedArrayStream(path);
@@ -324,6 +324,41 @@ cv::Mat processFrame(std::string framePath, cv::Mat masterDarkFrame, cv::Mat cal
     return lightFrame;
 }
 
+cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
+    int rows = imageStack[0].rows;
+    int cols = imageStack[0].cols;
+    int totalPixels = rows * cols;
+    int numImages = imageStack.size();
+
+    cv::Mat medianImage(rows, cols, CV_32FC1);
+
+    #pragma omp parallel num_threads(8)
+    {
+        std::vector<float> pixelValues(numImages);
+
+        #pragma omp for
+        for (int i = 0; i < totalPixels; ++i) {
+
+            for (int imgIdx = 0; imgIdx < numImages; ++imgIdx) {
+                pixelValues[imgIdx] = imageStack[imgIdx].at<float>(i);
+            }
+
+            int midIndex = numImages / 2;
+            if (numImages % 2 == 0) {
+                std::partial_sort(pixelValues.begin(), pixelValues.begin() + midIndex + 1, pixelValues.end());
+                medianImage.at<float>(i) = (pixelValues[midIndex] + pixelValues[midIndex - 1]) / 2.0f;
+            }
+            else {
+                std::partial_sort(pixelValues.begin(), pixelValues.begin() + midIndex + 1, pixelValues.end());
+                medianImage.at<float>(i) = pixelValues[midIndex];
+            }
+        }
+    }
+
+    return medianImage;
+}
+
+
 //Function to read images
 std::vector<int> Hydra::Form1::ReadImages() {
     int elapsedTime = 0;
@@ -539,7 +574,7 @@ std::vector<int> Hydra::Form1::Stack() {
             xSize = int(xSize * samplingFactor);
             ySize = int(ySize * samplingFactor);
 
-            cv::Mat p(ySize, xSize, CV_32FC1, cv::Scalar(0)), psqr(ySize, xSize, CV_32FC1, cv::Scalar(0)), var(ySize, xSize, CV_32FC1, cv::Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0)), tempFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+            cv::Mat p(ySize, xSize, CV_32FC1, cv::Scalar(0)), psqr(ySize, xSize, CV_32FC1, cv::Scalar(0)), var(ySize, xSize, CV_32FC1, cv::Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
             std::vector<cv::Mat> tempArray(medianBatchSize, cv::Mat(ySize, xSize, CV_32FC1));
 
             unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -554,31 +589,7 @@ std::vector<int> Hydra::Form1::Stack() {
                     addWeighted(psqr, 1, tempArray[tempcount].mul(tempArray[tempcount]) / iterations, 1, 0.0, psqr);
                 }
 
-                #pragma omp parallel num_threads(8)
-                {
-                    // Each thread gets its own tmpVec
-                    std::vector<float> tmpVec(medianBatchSize);
-
-                    #pragma omp for
-                    for (int h = 0; h < xSize * ySize; h++)
-                    {
-                        for (int f = 0; f < medianBatchSize; f++)
-                        {
-                            tmpVec[f] = tempArray[f].at<float>(h);
-                        }
-                        if (medianBatchSize % 2 != 0)
-                        {
-                            std::partial_sort(tmpVec.begin(), tmpVec.begin() + medianBatchSize / 2, tmpVec.end());
-                            tempFrame.at<float>(h) = tmpVec[(medianBatchSize / 2) - 1];
-                        }
-                        else
-                        {
-                            std::partial_sort(tmpVec.begin(), tmpVec.begin() + medianBatchSize / 2 + 1, tmpVec.end());
-                            tempFrame.at<float>(h) = (tmpVec[medianBatchSize / 2] + tmpVec[(medianBatchSize / 2) - 1]) / 2;
-                        }
-                    }
-                }
-                addWeighted(medianFrame, 1, tempFrame, 1 / float(stackInfo.size() / medianBatchSize), 0.0, medianFrame);
+                addWeighted(medianFrame, 1, computeMedianImage(tempArray), 1 / float(batches), 0.0, medianFrame);
             }
 
             var = (psqr - p.mul(p)) * iterations / (iterations - 1);
