@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m76/";
+std::string path = "C:/F/astro/matlab/m1test/";
 std::string parameterDir = "/parameters/";
 std::string outputDir = "/output/";
 std::string lightDir = "/lights/";
@@ -554,26 +554,30 @@ std::vector<int> Hydra::Form1::Stack() {
                     addWeighted(psqr, 1, tempArray[tempcount].mul(tempArray[tempcount]) / iterations, 1, 0.0, psqr);
                 }
 
-                #pragma omp parallel for num_threads(8) 
-                for (int h = 0; h < xSize * ySize; h++)
+                #pragma omp parallel num_threads(8)
                 {
+                    // Each thread gets its own tmpVec
                     std::vector<float> tmpVec(medianBatchSize);
-                    for (int f = 0; f < medianBatchSize; f++)
+
+                    #pragma omp for
+                    for (int h = 0; h < xSize * ySize; h++)
                     {
-                        tmpVec[f] = tempArray[f].at<float>(h);
-                    }
-                    if (medianBatchSize % 2 != 0)
-                    {
-                        std::partial_sort(tmpVec.begin(), tmpVec.begin() + medianBatchSize / 2, tmpVec.end());
-                        tempFrame.at<float>(h) = tmpVec[(medianBatchSize / 2) - 1];
-                    }
-                    else
-                    {
-                        std::partial_sort(tmpVec.begin(), tmpVec.begin() + medianBatchSize / 2 + 1, tmpVec.end());
-                        tempFrame.at<float>(h) = (tmpVec[medianBatchSize / 2] + tmpVec[(medianBatchSize / 2) - 1]) / 2;
+                        for (int f = 0; f < medianBatchSize; f++)
+                        {
+                            tmpVec[f] = tempArray[f].at<float>(h);
+                        }
+                        if (medianBatchSize % 2 != 0)
+                        {
+                            std::partial_sort(tmpVec.begin(), tmpVec.begin() + medianBatchSize / 2, tmpVec.end());
+                            tempFrame.at<float>(h) = tmpVec[(medianBatchSize / 2) - 1];
+                        }
+                        else
+                        {
+                            std::partial_sort(tmpVec.begin(), tmpVec.begin() + medianBatchSize / 2 + 1, tmpVec.end());
+                            tempFrame.at<float>(h) = (tmpVec[medianBatchSize / 2] + tmpVec[(medianBatchSize / 2) - 1]) / 2;
+                        }
                     }
                 }
-
                 addWeighted(medianFrame, 1, tempFrame, 1 / float(stackInfo.size() / medianBatchSize), 0.0, medianFrame);
             }
 
