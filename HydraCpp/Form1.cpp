@@ -29,36 +29,37 @@ std::vector<std::vector<std::string>> readStringMatrix(const std::string& path) 
     if (commaSeparatedArrayStream.is_open())
     {
         while (std::getline(commaSeparatedArrayStream, line)) {
-            int pos = 0;
             std::vector<std::string> commaSeparatedLine;
-            while (pos > -1) {
-                pos = line.find(",");
-                commaSeparatedLine.push_back(line.substr(0, pos));
-                line.erase(0, pos + 1);
+            std::string::size_type start = 0;
+            std::string::size_type end;
+
+            while ((end = line.find(',', start)) != std::string::npos) {
+                commaSeparatedLine.push_back(line.substr(start, end - start));
+                start = end + 1;
             }
+
+            commaSeparatedLine.push_back(line.substr(start));
             commaSeparatedArray.push_back(commaSeparatedLine);
         }
-        commaSeparatedArrayStream.close();
     }
     return commaSeparatedArray;
 }
 
-void writeStringMatrix(std::string path, std::vector<std::vector<std::string>> stringArray) {
+void writeStringMatrix(const std::string& path, const std::vector<std::vector<std::string>>& stringArray) {
     std::ofstream stringFileStream(path);
-    for (int i = 0; i < stringArray.size(); i++)
-    {
-        for (int j = 0; j < stringArray[0].size(); j++)
-        {
-            stringFileStream << stringArray[i][j];
-            if (j < stringArray[0].size() - 1)
+
+    for (const auto& row : stringArray) {
+        for (size_t j = 0; j < row.size(); ++j) {
+            stringFileStream << row[j];
+            if (j < row.size() - 1) {
                 stringFileStream << ",";
+            }
         }
         stringFileStream << "\n";
     }
-    stringFileStream.close();
 }
 
-std::tuple<std::vector<std::string>, std::vector<std::vector<float>>, std::vector<std::vector<float>>, std::vector<std::vector<float>>> unpack(std::vector<std::vector<std::string>> inputArray) {
+std::tuple<std::vector<std::string>, std::vector<std::vector<float>>, std::vector<std::vector<float>>, std::vector<std::vector<float>>> unpack(const std::vector<std::vector<std::string>>& inputArray) {
     std::vector<std::string> lightFrameArray(inputArray.size());
     std::vector<std::vector<float>> qualVec(inputArray.size()), xvec(inputArray.size(), std::vector<float>(maxStars)), yvec(inputArray.size(), std::vector<float>(maxStars));
 
@@ -76,7 +77,7 @@ std::tuple<std::vector<std::string>, std::vector<std::vector<float>>, std::vecto
     return std::make_tuple(lightFrameArray, qualVec, xvec, yvec);
 }
 
-std::vector<float> clean(std::vector<float> v) {
+std::vector<float> clean(const std::vector<float>& v) {
     std::vector<float> vFiltered;
     for (int i = 0; i < v.size(); i++) {
         if (v[i] != -1)
@@ -122,7 +123,7 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
 }
 
 //Function for computing angular and translational offsets between vectors
-std::vector<float> findRT(const Eigen::MatrixXf A, const Eigen::MatrixXf B) {
+std::vector<float> findRT(const Eigen::MatrixXf& A, const Eigen::MatrixXf& B) {
     Eigen::Vector2f centroid_A = A.rowwise().mean();
     Eigen::Vector2f centroid_B = B.rowwise().mean();
     Eigen::MatrixXf H = (A.colwise() - centroid_A) * (B.colwise() - centroid_B).transpose();
@@ -197,7 +198,7 @@ std::vector<float> alignFrames(const std::vector<std::vector<float>>& corrVote, 
 }
 
 //Function to get all the file names in the given directory.
-std::vector<std::string> getFrames(std::string path, std::string ext) {
+std::vector<std::string> getFrames(const std::string& path, const std::string& ext) {
     std::vector<std::string> filenames;
 
     if (std::filesystem::exists(path))
@@ -212,7 +213,7 @@ std::vector<std::string> getFrames(std::string path, std::string ext) {
 }
 
 //Function to analyze the star field in the given light frame.
-std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
+std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, const float& t) {
     std::vector<std::vector<float>> starMatrix;
 
     if ((lightFrame.elemSize() == 1 || lightFrame.elemSize() == 2) && lightFrame.channels() == 1)
@@ -243,7 +244,7 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, float t) {
     return starMatrix;
 }
 
-cv::Mat addCircles(cv::Mat img, std::vector<float> xcoords, std::vector<float> ycoords, int size) {
+cv::Mat addCircles(cv::Mat img, const std::vector<float>& xcoords, const std::vector<float>& ycoords, const int& size) {
     for (int i = 0; i < xcoords.size(); i++) {
         if (align == "R")
             cv::circle(img, cv::Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, cv::Scalar(0, 0, 255));
@@ -258,7 +259,7 @@ cv::Mat addCircles(cv::Mat img, std::vector<float> xcoords, std::vector<float> y
 }
 
 //Function to fetch a calibration frame
-cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, float defaultValue) {
+cv::Mat getCalibrationFrame(const int& ySize, const int& xSize, const std::string& calibrationPath, const float& defaultValue) {
    
     cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(defaultValue));
 
@@ -292,7 +293,7 @@ cv::Mat getCalibrationFrame(int ySize, int xSize, std::string calibrationPath, f
 }
 
 //Function to remove hotpixels
-cv::Mat removeHotPixels(cv::Mat lightFrame, std::vector <std::vector<int>> hotPixels) {
+cv::Mat removeHotPixels(cv::Mat lightFrame, const std::vector <std::vector<int>>& hotPixels) {
     for (int i = 0; i < hotPixels.size(); i++)
     { 
         int x = hotPixels[i][0];
@@ -313,7 +314,7 @@ cv::Mat removeHotPixels(cv::Mat lightFrame, std::vector <std::vector<int>> hotPi
 }
 
 //Function to rotate images
-cv::Mat processFrame(std::string framePath, cv::Mat masterDarkFrame, cv::Mat calibratedFlatFrame, float backGroundCorrection, std::vector<float> RTparams, std::vector<std::vector<int>> hotPixels) {
+cv::Mat processFrame(const std::string& framePath, const cv::Mat& masterDarkFrame, const cv::Mat& calibratedFlatFrame, const float& backGroundCorrection, const std::vector<float>& RTparams, const std::vector<std::vector<int>>& hotPixels) {
     cv::Mat lightFrame = cv::imread(framePath, cv::IMREAD_GRAYSCALE);
     lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
     lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame) / calibratedFlatFrame;
