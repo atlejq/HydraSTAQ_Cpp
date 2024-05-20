@@ -260,7 +260,6 @@ static cv::Mat addCircles(cv::Mat img, const std::vector<float>& xcoords, const 
 
 //Function to fetch a calibration frame
 static cv::Mat getCalibrationFrame(const int& ySize, const int& xSize, const std::string& calibrationPath, const float& defaultValue) {
-   
     cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(defaultValue));
 
     if (std::filesystem::exists(calibrationPath + "masterFrame.tif"))
