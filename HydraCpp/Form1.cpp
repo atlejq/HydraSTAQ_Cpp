@@ -260,7 +260,6 @@ cv::Mat addCircles(cv::Mat img, const std::vector<float>& xcoords, const std::ve
 
 //Function to fetch a calibration frame
 cv::Mat getCalibrationFrame(const int& ySize, const int& xSize, const std::string& calibrationPath, const float& defaultValue) {
-
     cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(defaultValue));
 
     if (std::filesystem::exists(calibrationPath + "/" + "masterFrame.tif"))
@@ -359,7 +358,6 @@ cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
     return medianImage;
 }
 
-
 //Function to read images
 std::vector<int> Hydra::Form1::ReadImages() {
     int elapsedTime = 0;
@@ -374,7 +372,7 @@ std::vector<int> Hydra::Form1::ReadImages() {
         std::vector<std::vector<std::string>> qualVecS(lightFrames.size(), std::vector<std::string>(6 + 2 * maxStars));
 
         #pragma omp parallel for num_threads(8)
-        for (int k = 0; k < lightFrames.size(); k++) {
+        for (int k = 0; k < n; k++) {
             cv::Mat lightFrame = cv::imread(lightFrames[k], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
             if (lightFrame.data != NULL) {
                 std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
