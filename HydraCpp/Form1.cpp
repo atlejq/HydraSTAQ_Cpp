@@ -300,7 +300,7 @@ cv::Mat removeHotPixels(cv::Mat lightFrame, const std::vector <std::vector<int>>
         int y = hotPixels[i][1];
         if (x > 0 || y > 0 || x < lightFrame.cols - 1 || y < lightFrame.rows - 1)
         {
-            int sum = 0;
+            float sum = 0;
             for (int dy = -1; dy <= 1; dy++) {
                 for (int dx = -1; dx <= 1; dx++) {
                     if (!(dx == 0 && dy == 0))
