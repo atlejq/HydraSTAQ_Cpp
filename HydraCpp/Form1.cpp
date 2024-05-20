@@ -92,7 +92,7 @@ template <typename T> void sortByColumn(std::vector<std::vector<T>>& data, size_
         });
 }
 
-std::string filterSelector(std::string input) {
+std::string filterSelector(const std::string& input) {
     if (input == "LRGB")
         return "LRGB";
     else if (input == "RGB" && filter == "L")
@@ -128,12 +128,12 @@ std::vector<float> findRT(const Eigen::MatrixXf& A, const Eigen::MatrixXf& B) {
     Eigen::Vector2f centroid_B = B.rowwise().mean();
     Eigen::MatrixXf H = (A.colwise() - centroid_A) * (B.colwise() - centroid_B).transpose();
     Eigen::JacobiSVD<Eigen::MatrixXf> svd(H, Eigen::ComputeThinU | Eigen::ComputeThinV);
-    Eigen::MatrixXf U = svd.matrixU();
     Eigen::MatrixXf V = svd.matrixV();
-    Eigen::MatrixXf R = svd.matrixV() * svd.matrixU().transpose();
+    Eigen::MatrixXf U = svd.matrixU();
+    Eigen::MatrixXf R = V * U.transpose();
     if (R.determinant() < 0) {
         V.col(1) *= -1;
-        R = V * svd.matrixU().transpose();
+        R = V * U.transpose();
     }
     Eigen::Vector2f t = -R * centroid_A + centroid_B;
     return { std::atan2(R(1, 0), R(0, 0)), t[0], t[1] };
@@ -263,9 +263,9 @@ cv::Mat getCalibrationFrame(const int& ySize, const int& xSize, const std::strin
    
     cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(defaultValue));
 
-    if (std::filesystem::exists(calibrationPath + "/" + "masterFrame.tif"))
+    if (std::filesystem::exists(calibrationPath + "masterFrame.tif"))
     {
-        cv::Mat tmpCalibrationFrame = cv::imread(calibrationPath + "/" + "masterFrame.tif", cv::IMREAD_ANYDEPTH);
+        cv::Mat tmpCalibrationFrame = cv::imread(calibrationPath + "masterFrame.tif", cv::IMREAD_ANYDEPTH);
         if (tmpCalibrationFrame.cols == masterFrame.cols && tmpCalibrationFrame.rows == masterFrame.rows)
             masterFrame = tmpCalibrationFrame;
     }
@@ -358,7 +358,6 @@ cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
 
     return medianImage;
 }
-
 
 //Function to read images
 std::vector<int> Hydra::Form1::ReadImages() {
@@ -601,11 +600,13 @@ std::vector<int> Hydra::Form1::Stack() {
             imwrite(path + outputDir + "Median" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 100)) + ".tif", medianFrame);
             imwrite(path + outputDir + "Mean" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 100)) + ".tif", p);
 
+            int totalPixels = xSize * ySize;
+
             #pragma omp parallel for num_threads(8) 
             for (int k = 0; k < stackInfo.size(); k++) {
                 cv::Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);
 
-                for (int h = 0; h < xSize * ySize; h++)
+                for (int h = 0; h < totalPixels; h++)
                 {
                     if (abs(lightFrame.at<float>(h) - medianFrame.at<float>(h)) > 2.0 * cv::sqrt(var.at<float>(h)))
                         lightFrame.at<float>(h) = medianFrame.at<float>(h);
