@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
-std::string path = "C:/F/astro/matlab/m1test/";
+std::string path = "";
 std::string parameterDir = "/parameters/";
 std::string outputDir = "/output/";
 std::string lightDir = "/lights/";
@@ -47,7 +47,6 @@ std::vector<std::vector<std::string>> readStringMatrix(const std::string& path) 
 
 void writeStringMatrix(const std::string& path, const std::vector<std::vector<std::string>>& stringArray) {
     std::ofstream stringFileStream(path);
-
     for (const auto& row : stringArray) {
         for (size_t j = 0; j < row.size(); ++j) {
             stringFileStream << row[j];
@@ -74,6 +73,7 @@ std::tuple<std::vector<std::string>, std::vector<std::vector<float>>, std::vecto
             yvec[i][j] = stof(inputArray[i][j + 6 + maxStars]);
         }
     }
+
     return std::make_tuple(lightFrameArray, qualVec, xvec, yvec);
 }
 
@@ -338,7 +338,6 @@ cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
 
         #pragma omp for
         for (int i = 0; i < totalPixels; ++i) {
-
             for (int imgIdx = 0; imgIdx < numImages; ++imgIdx) {
                 pixelValues[imgIdx] = imageStack[imgIdx].at<float>(i);
             }
@@ -587,7 +586,6 @@ std::vector<int> Hydra::Form1::Stack() {
                     addWeighted(p, 1, tempArray[tempcount] / iterations, 1, 0.0, p);
                     addWeighted(psqr, 1, tempArray[tempcount].mul(tempArray[tempcount]) / iterations, 1, 0.0, psqr);
                 }
-
                 addWeighted(medianFrame, 1, computeMedianImage(tempArray), 1 / float(batches), 0.0, medianFrame);
             }
 
