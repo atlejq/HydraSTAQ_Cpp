@@ -274,7 +274,7 @@ cv::Mat getCalibrationFrame(const int& ySize, const int& xSize, const std::strin
         if (!calibrationFrameArray.empty())
         {
             cv::Mat tmpMasterFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
-            #pragma omp parallel for num_threads(8)
+            #pragma omp parallel for num_threads(16)
             for (int n = 0; n < calibrationFrameArray.size(); n++)
             {
                 cv::Mat calibrationFrame = cv::imread(calibrationFrameArray[n], cv::IMREAD_ANYDEPTH);
@@ -332,7 +332,7 @@ cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
 
     cv::Mat medianImage(rows, cols, CV_32FC1);
 
-    #pragma omp parallel num_threads(8)
+    #pragma omp parallel num_threads(16)
     {
         std::vector<float> pixelValues(numImages);
 
@@ -370,7 +370,7 @@ std::vector<int> Hydra::Form1::ReadImages() {
         std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(6 + 2 * maxStars, -1));
         std::vector<std::vector<std::string>> qualVecS(lightFrames.size(), std::vector<std::string>(6 + 2 * maxStars));
 
-        #pragma omp parallel for num_threads(8)
+        #pragma omp parallel for num_threads(16)
         for (int k = 0; k < n; k++) {
             cv::Mat lightFrame = cv::imread(lightFrames[k], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
             if (lightFrame.data != NULL) {
@@ -579,7 +579,7 @@ std::vector<int> Hydra::Form1::Stack() {
             shuffle(m.begin(), m.end(), std::default_random_engine(seed));
 
             for (int k = 0; k < batches; k++) {
-                #pragma omp parallel for num_threads(8)
+                #pragma omp parallel for num_threads(16)
                 for (int tempcount = 0; tempcount < medianBatchSize; tempcount++) {
                     int i = m[k * medianBatchSize + tempcount];
                     tempArray[tempcount] = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], RTparams[i], hotPixels);;
@@ -597,7 +597,7 @@ std::vector<int> Hydra::Form1::Stack() {
             imwrite(path + outputDir + "Median" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 100)) + ".tif", medianFrame);
             imwrite(path + outputDir + "Mean" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 100)) + ".tif", p);
 
-            #pragma omp parallel for num_threads(8) 
+            #pragma omp parallel for num_threads(16) 
             for (int k = 0; k < stackInfo.size(); k++) {
                 cv::Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);
 
