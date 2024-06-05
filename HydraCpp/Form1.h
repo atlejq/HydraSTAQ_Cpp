@@ -751,7 +751,7 @@ namespace Hydra {
 				std::vector<int> k = ComputeOffsets();
 				textBox1->Clear();
 				if (k[0] == 0)
-					textBox1->AppendText("No registered frames found in this folder.");
+					textBox1->AppendText("No frame registration data found in this folder.");
 				else
 					textBox1->AppendText("Computed offsets for " + k[0].ToString() + " frames in " + k[1].ToString() + " milliseconds.");
 			}
@@ -771,9 +771,6 @@ namespace Hydra {
 	}
 
 	private: System::Void Form1_Load(System::Object^ sender, System::EventArgs^ e) {
-	}
-
-	private: System::Void textBox1_TextChanged(System::Object^ sender, System::EventArgs^ e) {
 	}
 
 	private: System::Void radioButton1_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
