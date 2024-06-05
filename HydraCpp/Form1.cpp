@@ -359,7 +359,7 @@ cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
 }
 
 //Function to read images
-std::vector<int> Hydra::Form1::ReadImages() {
+std::vector<int> Hydra::Form1::RegisterFrames() {
     int elapsedTime = 0;
 
     std::vector<std::string> lightFrames = getFrames(path + lightDir + filter, ext);

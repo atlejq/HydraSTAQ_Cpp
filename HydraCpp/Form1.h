@@ -46,7 +46,7 @@ namespace Hydra {
 			//
 		}
 
-	public:std::vector<int> ReadImages();
+	public:std::vector<int> RegisterFrames();
 
 	public:std::vector<int> ComputeOffsets();
 
@@ -318,7 +318,7 @@ namespace Hydra {
 			this->radioButton9->Size = System::Drawing::Size(62, 20);
 			this->radioButton9->TabIndex = 28;
 			this->radioButton9->TabStop = true;
-			this->radioButton9->Text = L"Read";
+			this->radioButton9->Text = L"Register";
 			this->radioButton9->UseVisualStyleBackColor = true;
 			this->radioButton9->CheckedChanged += gcnew System::EventHandler(this, &Form1::radioButton9_CheckedChanged);
 			// 
@@ -726,31 +726,47 @@ namespace Hydra {
 		}
 #pragma endregion
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
-
-		if ((radioButton9->Checked))
+		if (path == "")
 		{
-			detectionThreshold = int((numericUpDown1->Value));
-			std::vector<int> k = ReadImages();
 			textBox1->Clear();
-			textBox1->AppendText("Read " + k[0].ToString() + " frames in " + k[1].ToString() + " milliseconds.");
+			textBox1->AppendText("Choose a folder.");
 		}
-
-		if ((radioButton10->Checked))
+		else
 		{
-			topMatches = int((numericUpDown2->Value));
-			discardPercentage = int((numericUpDown3->Value));
-			std::vector<int> k = ComputeOffsets();
-			textBox1->Clear();
-			textBox1->AppendText("Aligned " + k[0].ToString() + " frames in " + k[1].ToString() + " milliseconds.");
-		}
+			if ((radioButton9->Checked))
+			{
+				detectionThreshold = int((numericUpDown1->Value));
+				std::vector<int> k = RegisterFrames();
+				textBox1->Clear();
+				if (k[0] == 0)
+					textBox1->AppendText("No light frames found in this folder.");
+				else
+					textBox1->AppendText("Registered " + k[0].ToString() + " frames in " + k[1].ToString() + " milliseconds.");
+			}
 
-		if ((radioButton11->Checked))
-		{
-			medianBatchSize = int((numericUpDown4->Value));
-			samplingFactor = float((numericUpDown5->Value));
-			std::vector<int> k = Stack();
-			textBox1->Clear();
-			textBox1->AppendText("Stacked " + k[0].ToString() + " frames in " + k[1].ToString() + " milliseconds.");
+			if ((radioButton10->Checked))
+			{
+				topMatches = int((numericUpDown2->Value));
+				discardPercentage = int((numericUpDown3->Value));
+				std::vector<int> k = ComputeOffsets();
+				textBox1->Clear();
+				if (k[0] == 0)
+					textBox1->AppendText("No registered frames found in this folder.");
+				else
+					textBox1->AppendText("Computed offsets for " + k[0].ToString() + " frames in " + k[1].ToString() + " milliseconds.");
+			}
+
+			if ((radioButton11->Checked))
+			{
+				medianBatchSize = int((numericUpDown4->Value));
+				samplingFactor = float((numericUpDown5->Value));
+				std::vector<int> k = Stack();
+				textBox1->Clear();
+				if (k[0] == 0)
+					textBox1->AppendText("No offsets for frame alignment found in this folder.");
+				else
+					textBox1->AppendText("Stacked " + k[0].ToString() + " frames in " + k[1].ToString() + " milliseconds.");
+			}
 		}
 	}
 
