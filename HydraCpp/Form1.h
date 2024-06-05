@@ -222,7 +222,7 @@ namespace Hydra {
 				// radioButton2
 				// 
 				this->radioButton2->AutoSize = true;
-				this->radioButton2->Location = System::Drawing::Point(58, 8);
+				this->radioButton2->Location = System::Drawing::Point(59, 8);
 				this->radioButton2->Name = L"radioButton2";
 				this->radioButton2->Size = System::Drawing::Size(38, 20);
 				this->radioButton2->TabIndex = 10;
@@ -234,7 +234,7 @@ namespace Hydra {
 				// radioButton3
 				// 
 				this->radioButton3->AutoSize = true;
-				this->radioButton3->Location = System::Drawing::Point(102, 8);
+				this->radioButton3->Location = System::Drawing::Point(104, 8);
 				this->radioButton3->Name = L"radioButton3";
 				this->radioButton3->Size = System::Drawing::Size(37, 20);
 				this->radioButton3->TabIndex = 11;
@@ -246,7 +246,7 @@ namespace Hydra {
 				// radioButton4
 				// 
 				this->radioButton4->AutoSize = true;
-				this->radioButton4->Location = System::Drawing::Point(147, 8);
+				this->radioButton4->Location = System::Drawing::Point(150, 8);
 				this->radioButton4->Name = L"radioButton4";
 				this->radioButton4->Size = System::Drawing::Size(35, 20);
 				this->radioButton4->TabIndex = 12;
@@ -260,7 +260,7 @@ namespace Hydra {
 				this->radioButton5->AutoSize = true;
 				this->radioButton5->Checked = true;
 				this->radioButton5->Enabled = false;
-				this->radioButton5->Location = System::Drawing::Point(14, 6);
+				this->radioButton5->Location = System::Drawing::Point(14, 7);
 				this->radioButton5->Name = L"radioButton5";
 				this->radioButton5->Size = System::Drawing::Size(38, 20);
 				this->radioButton5->TabIndex = 13;
@@ -273,7 +273,7 @@ namespace Hydra {
 				// 
 				this->radioButton6->AutoSize = true;
 				this->radioButton6->Enabled = false;
-				this->radioButton6->Location = System::Drawing::Point(58, 6);
+				this->radioButton6->Location = System::Drawing::Point(59, 7);
 				this->radioButton6->Name = L"radioButton6";
 				this->radioButton6->Size = System::Drawing::Size(38, 20);
 				this->radioButton6->TabIndex = 14;
@@ -286,7 +286,7 @@ namespace Hydra {
 				// 
 				this->radioButton7->AutoSize = true;
 				this->radioButton7->Enabled = false;
-				this->radioButton7->Location = System::Drawing::Point(102, 6);
+				this->radioButton7->Location = System::Drawing::Point(104, 7);
 				this->radioButton7->Name = L"radioButton7";
 				this->radioButton7->Size = System::Drawing::Size(37, 20);
 				this->radioButton7->TabIndex = 15;
@@ -299,7 +299,7 @@ namespace Hydra {
 				// 
 				this->radioButton8->AutoSize = true;
 				this->radioButton8->Enabled = false;
-				this->radioButton8->Location = System::Drawing::Point(146, 6);
+				this->radioButton8->Location = System::Drawing::Point(149, 7);
 				this->radioButton8->Name = L"radioButton8";
 				this->radioButton8->Size = System::Drawing::Size(35, 20);
 				this->radioButton8->TabIndex = 16;
@@ -314,7 +314,7 @@ namespace Hydra {
 				this->radioButton9->Checked = true;
 				this->radioButton9->Location = System::Drawing::Point(8, 9);
 				this->radioButton9->Name = L"radioButton9";
-				this->radioButton9->Size = System::Drawing::Size(62, 20);
+				this->radioButton9->Size = System::Drawing::Size(79, 20);
 				this->radioButton9->TabIndex = 28;
 				this->radioButton9->TabStop = true;
 				this->radioButton9->Text = L"Register";
@@ -609,7 +609,7 @@ namespace Hydra {
 				this->panel1->Controls->Add(this->radioButton4);
 				this->panel1->Location = System::Drawing::Point(543, 11);
 				this->panel1->Name = L"panel1";
-				this->panel1->Size = System::Drawing::Size(185, 35);
+				this->panel1->Size = System::Drawing::Size(192, 35);
 				this->panel1->TabIndex = 21;
 				// 
 				// panel2
@@ -618,9 +618,9 @@ namespace Hydra {
 				this->panel2->Controls->Add(this->radioButton6);
 				this->panel2->Controls->Add(this->radioButton7);
 				this->panel2->Controls->Add(this->radioButton8);
-				this->panel2->Location = System::Drawing::Point(543, 58);
+				this->panel2->Location = System::Drawing::Point(543, 57);
 				this->panel2->Name = L"panel2";
-				this->panel2->Size = System::Drawing::Size(185, 34);
+				this->panel2->Size = System::Drawing::Size(192, 34);
 				this->panel2->TabIndex = 22;
 				// 
 				// panel3
@@ -721,6 +721,7 @@ namespace Hydra {
 				this->panel6->PerformLayout();
 				this->ResumeLayout(false);
 				this->PerformLayout();
+
 			}
 	#pragma endregion
 		private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {

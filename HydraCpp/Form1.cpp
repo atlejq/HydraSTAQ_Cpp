@@ -325,6 +325,7 @@ cv::Mat processFrame(const std::string& framePath, const cv::Mat& masterDarkFram
     return lightFrame;
 }
 
+//Function to compute median image
 cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
     int rows = imageStack[0].rows;
     int cols = imageStack[0].cols;
