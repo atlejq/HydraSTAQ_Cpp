@@ -125,12 +125,9 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
 
 //Function for computing angular and translational offsets between vectors
 std::vector<float> findRT(const cv::Mat& A, const cv::Mat& B) {
-
-    cv::Mat centroid_A, centroid_B;
+    cv::Mat centroid_A, centroid_B, A_centered, B_centered;
     cv::reduce(A, centroid_A, 1, cv::REDUCE_AVG);
     cv::reduce(B, centroid_B, 1, cv::REDUCE_AVG);
-
-    cv::Mat A_centered, B_centered;
     cv::subtract(A, cv::repeat(centroid_A, 1, A.cols), A_centered);
     cv::subtract(B, cv::repeat(centroid_B, 1, B.cols), B_centered);
 
@@ -148,8 +145,7 @@ std::vector<float> findRT(const cv::Mat& A, const cv::Mat& B) {
 
     cv::Mat t = -R * centroid_A + centroid_B;
 
-    float angle = std::atan2(R.at<float>(1, 0), R.at<float>(0, 0));
-    return { angle, t.at<float>(0, 0), t.at<float>(1, 0) };
+    return { std::atan2(R.at<float>(1, 0), R.at<float>(0, 0)), t.at<float>(0, 0), t.at<float>(1, 0) };
 }
 
 //Function for computing the "vote matrix"
