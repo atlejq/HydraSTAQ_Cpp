@@ -12,7 +12,6 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <omp.h>
-#include <Eigen/Dense>
 #include <chrono>
 #include <vector>
 #include <algorithm>

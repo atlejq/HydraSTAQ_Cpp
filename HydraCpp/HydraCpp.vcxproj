@@ -121,7 +121,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\opencv\build\include\; C:\eigen\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\opencv\build\include\</AdditionalIncludeDirectories>
       <OpenMPSupport>Yes</OpenMPSupport>
     </ClCompile>
     <Link>
@@ -177,7 +177,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\opencv\build\include\; C:\eigen\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\opencv\build\include\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <OpenMPSupport>Yes</OpenMPSupport>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>

@@ -124,20 +124,32 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
 }
 
 //Function for computing angular and translational offsets between vectors
-std::vector<float> findRT(const Eigen::MatrixXf& A, const Eigen::MatrixXf& B) {
-    Eigen::Vector2f centroid_A = A.rowwise().mean();
-    Eigen::Vector2f centroid_B = B.rowwise().mean();
-    Eigen::MatrixXf H = (A.colwise() - centroid_A) * (B.colwise() - centroid_B).transpose();
-    Eigen::JacobiSVD<Eigen::MatrixXf> svd(H, Eigen::ComputeThinU | Eigen::ComputeThinV);
-    Eigen::MatrixXf U = svd.matrixU();
-    Eigen::MatrixXf V = svd.matrixV();
-    Eigen::MatrixXf R = svd.matrixV() * svd.matrixU().transpose();
-    if (R.determinant() < 0) {
+std::vector<float> findRT(const cv::Mat& A, const cv::Mat& B) {
+
+    cv::Mat centroid_A, centroid_B;
+    cv::reduce(A, centroid_A, 1, cv::REDUCE_AVG);
+    cv::reduce(B, centroid_B, 1, cv::REDUCE_AVG);
+
+    cv::Mat A_centered, B_centered;
+    cv::subtract(A, cv::repeat(centroid_A, 1, A.cols), A_centered);
+    cv::subtract(B, cv::repeat(centroid_B, 1, B.cols), B_centered);
+
+    cv::Mat H = A_centered * B_centered.t();
+
+    cv::Mat U, S, Vt;
+    cv::SVD::compute(H, S, U, Vt);
+    cv::Mat V = Vt.t();
+    cv::Mat R = V * U.t();
+    
+    if (cv::determinant(R) < 0) {
         V.col(1) *= -1;
-        R = V * svd.matrixU().transpose();
+        R = V * U.t();
     }
-    Eigen::Vector2f t = -R * centroid_A + centroid_B;
-    return { std::atan2(R(1, 0), R(0, 0)), t[0], t[1] };
+
+    cv::Mat t = -R * centroid_A + centroid_B;
+
+    float angle = std::atan2(R.at<float>(1, 0), R.at<float>(0, 0));
+    return { angle, t.at<float>(0, 0), t.at<float>(1, 0) };
 }
 
 //Function for computing the "vote matrix"
@@ -186,14 +198,18 @@ std::vector<float> alignFrames(const std::vector<std::vector<float>>& corrVote, 
     sortByColumn(votePairs, 2);
 
     std::vector<std::vector<int>> rankPairs(votePairs.begin(), votePairs.end());
-    Eigen::MatrixXf referenceM(2, topMatches), frameM(2, topMatches);
+
+    cv::Mat referenceM(2, topMatches, CV_32F);
+    cv::Mat frameM(2, topMatches, CV_32F);
 
     for (int i = 0; i < topMatches; i++) {
-        referenceM(0, i) = refVectorX[rankPairs[i][1]];
-        referenceM(1, i) = refVectorY[rankPairs[i][1]];
-        frameM(0, i) = xvec[rankPairs[i][0]];
-        frameM(1, i) = yvec[rankPairs[i][0]];
+        referenceM.at<float>(0, i) = refVectorX[rankPairs[i][1]];
+        referenceM.at<float>(1, i) = refVectorY[rankPairs[i][1]];
+        frameM.at<float>(0, i) = xvec[rankPairs[i][0]];
+        frameM.at<float>(1, i) = yvec[rankPairs[i][0]];
     }
+
+
     std::vector<float> RTparams = findRT(frameM, referenceM);
     return RTparams;
 }
@@ -325,6 +341,7 @@ cv::Mat processFrame(const std::string& framePath, const cv::Mat& masterDarkFram
     return lightFrame;
 }
 
+//Function to compute median image
 cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
     int rows = imageStack[0].rows;
     int cols = imageStack[0].cols;
