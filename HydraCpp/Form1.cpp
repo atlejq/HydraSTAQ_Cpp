@@ -49,7 +49,7 @@ std::vector<std::vector<std::string>> readStringMatrix(const std::string& path) 
 void writeStringMatrix(const std::string& path, const std::vector<std::vector<std::string>>& stringArray) {
     std::ofstream stringFileStream(path);
     for (const auto& row : stringArray) {
-        for (size_t j = 0; j < row.size(); ++j) {
+        for (size_t j = 0; j < row.size(); j++) {
             stringFileStream << row[j];
             if (j < row.size() - 1) {
                 stringFileStream << ",";
@@ -344,8 +344,8 @@ cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
         std::vector<float> pixelValues(numImages);
 
         #pragma omp for
-        for (int i = 0; i < totalPixels; ++i) {
-            for (int imgIdx = 0; imgIdx < numImages; ++imgIdx) {
+        for (int i = 0; i < totalPixels; i++) {
+            for (int imgIdx = 0; imgIdx < numImages; imgIdx++) {
                 pixelValues[imgIdx] = imageStack[imgIdx].at<float>(i);
             }
 
@@ -488,9 +488,9 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                 cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[0], cv::IMREAD_GRAYSCALE);
                 cv::Mat small;
                 cv::resize(maxQualFrame, small, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
-                cv::Mat img_rgb(small.size(), CV_8UC3);
-                cv::cvtColor(small, img_rgb, cv::COLOR_GRAY2BGR);
-                img_rgb = addCircles(img_rgb, xRef, yRef, 8);
+                cv::Mat labelledImage(small.size(), CV_8UC3);
+                cv::cvtColor(small, labelledImage, cv::COLOR_GRAY2BGR);
+                labelledImage = addCircles(labelledImage, xRef, yRef, 8);
 
                 for (int i = 0; i < offsets.size(); i++) {
                     for (int j = 0; j < xvec[i].size(); j++) {
@@ -499,9 +499,9 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                     }
                     xDeb = clean(xDeb);
                     yDeb = clean(yDeb);
-                    img_rgb = addCircles(img_rgb, xDeb, yDeb, 5);
+                    labelledImage = addCircles(labelledImage, xDeb, yDeb, 5);
                 }
-                cv::imshow("Debug", img_rgb);
+                cv::imshow("Debug", labelledImage);
             }
         }
     }
