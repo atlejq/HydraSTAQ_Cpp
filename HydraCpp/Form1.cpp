@@ -132,7 +132,6 @@ std::vector<float> findRT(const cv::Mat& A, const cv::Mat& B) {
     cv::subtract(B, cv::repeat(centroid_B, 1, B.cols), B_centered);
 
     cv::Mat H = A_centered * B_centered.t();
-
     cv::Mat U, S, Vt;
     cv::SVD::compute(H, S, U, Vt);
     cv::Mat V = Vt.t();
@@ -144,7 +143,6 @@ std::vector<float> findRT(const cv::Mat& A, const cv::Mat& B) {
     }
 
     cv::Mat t = -R * centroid_A + centroid_B;
-
     return { std::atan2(R.at<float>(1, 0), R.at<float>(0, 0)), t.at<float>(0, 0), t.at<float>(1, 0) };
 }
 
@@ -192,16 +190,13 @@ std::vector<float> alignFrames(const std::vector<std::vector<float>>& corrVote, 
     }
 
     sortByColumn(votePairs, 2);
-
-    std::vector<std::vector<int>> rankPairs(votePairs.begin(), votePairs.end());
-
     cv::Mat referenceM(2, topMatches, CV_32F), frameM(2, topMatches, CV_32F);
 
     for (int i = 0; i < topMatches; i++) {
-        referenceM.at<float>(0, i) = refVectorX[rankPairs[i][1]];
-        referenceM.at<float>(1, i) = refVectorY[rankPairs[i][1]];
-        frameM.at<float>(0, i) = xvec[rankPairs[i][0]];
-        frameM.at<float>(1, i) = yvec[rankPairs[i][0]];
+        referenceM.at<float>(0, i) = refVectorX[votePairs[i][1]];
+        referenceM.at<float>(1, i) = refVectorY[votePairs[i][1]];
+        frameM.at<float>(0, i) = xvec[votePairs[i][0]];
+        frameM.at<float>(1, i) = yvec[votePairs[i][0]];
     }
 
     std::vector<float> RTparams = findRT(frameM, referenceM);
