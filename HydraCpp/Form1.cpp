@@ -176,7 +176,7 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::ve
 
 //Function for aligning frames
 std::vector<float> alignFrames(const std::vector<std::vector<float>>& corrVote, const std::vector<float>& refVectorX, const std::vector<float>& refVectorY, const std::vector<float>& xvec, const std::vector<float>& yvec, const int& topMatches) {
-    std::vector<std::vector<int>> pairs;
+    std::vector<std::vector<int>> starPairs;
     for (int i = 0; i < corrVote[0].size(); i++) {
         int maxIndex = 0;
         int maxValue = corrVote[0][i];
@@ -186,17 +186,17 @@ std::vector<float> alignFrames(const std::vector<std::vector<float>>& corrVote, 
                 maxValue = corrVote[j][i];
             }
         }
-        pairs.push_back({ i, maxIndex, maxValue });
+        starPairs.push_back({ i, maxIndex, maxValue });
     }
 
-    sortByColumn(pairs, 2);
+    sortByColumn(starPairs, 2);
     cv::Mat referenceM(2, topMatches, CV_32F), frameM(2, topMatches, CV_32F);
 
     for (int i = 0; i < topMatches; i++) {
-        referenceM.at<float>(0, i) = refVectorX[pairs[i][1]];
-        referenceM.at<float>(1, i) = refVectorY[pairs[i][1]];
-        frameM.at<float>(0, i) = xvec[pairs[i][0]];
-        frameM.at<float>(1, i) = yvec[pairs[i][0]];
+        referenceM.at<float>(0, i) = refVectorX[starPairs[i][1]];
+        referenceM.at<float>(1, i) = refVectorY[starPairs[i][1]];
+        frameM.at<float>(0, i) = xvec[starPairs[i][0]];
+        frameM.at<float>(1, i) = yvec[starPairs[i][0]];
     }
 
     std::vector<float> RTparams = findRT(frameM, referenceM);
