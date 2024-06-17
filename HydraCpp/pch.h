@@ -7,15 +7,14 @@
 #ifndef PCH_H
 #define PCH_H
 
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <opencv2/opencv.hpp>
 #include <omp.h>
-#include <chrono>
-#include <vector>
-#include <algorithm>
+#include <opencv2/opencv.hpp>
 #include <random>
+#include <vector>
 
 // add headers that you want to pre-compile here
 

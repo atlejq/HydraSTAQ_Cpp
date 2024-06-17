@@ -195,8 +195,7 @@ std::vector<float> alignFrames(const std::vector<std::vector<float>>& corrVote, 
 
     std::vector<std::vector<int>> rankPairs(votePairs.begin(), votePairs.end());
 
-    cv::Mat referenceM(2, topMatches, CV_32F);
-    cv::Mat frameM(2, topMatches, CV_32F);
+    cv::Mat referenceM(2, topMatches, CV_32F), frameM(2, topMatches, CV_32F);
 
     for (int i = 0; i < topMatches; i++) {
         referenceM.at<float>(0, i) = refVectorX[rankPairs[i][1]];
@@ -204,7 +203,6 @@ std::vector<float> alignFrames(const std::vector<std::vector<float>>& corrVote, 
         frameM.at<float>(0, i) = xvec[rankPairs[i][0]];
         frameM.at<float>(1, i) = yvec[rankPairs[i][0]];
     }
-
 
     std::vector<float> RTparams = findRT(frameM, referenceM);
     return RTparams;
