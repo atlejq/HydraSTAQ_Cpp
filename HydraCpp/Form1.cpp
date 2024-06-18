@@ -158,9 +158,8 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::ve
         for (int c = 0; c < triangleList.size(); c++) {
             int b = triangleList[c];
             if (std::abs(refTriangles[a][3] - frameTriangles[b][3]) + std::abs(refTriangles[a][4] - frameTriangles[b][4]) < e) {
-                vote[(int)refTriangles[a][0]][(int)frameTriangles[b][0]] += 1;
-                vote[(int)refTriangles[a][1]][(int)frameTriangles[b][1]] += 1;
-                vote[(int)refTriangles[a][2]][(int)frameTriangles[b][2]] += 1;
+                for(int i = 0; i < 3; i++)
+                    vote[(int)refTriangles[a][i]][(int)frameTriangles[b][i]] += 1;
             }
         }
     }
