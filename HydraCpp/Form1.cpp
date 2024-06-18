@@ -336,13 +336,13 @@ cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
     int cols = imageStack[0].cols;
     int totalPixels = rows * cols;
     int numImages = imageStack.size();
+    int midIndex = numImages / 2;
 
     cv::Mat medianImage(rows, cols, CV_32FC1);
 
     #pragma omp parallel num_threads(numLogicalCores*2)
     {
         std::vector<float> pixelValues(numImages);
-        int midIndex = numImages / 2;
 
         #pragma omp for
         for (int i = 0; i < totalPixels; i++) {
@@ -350,11 +350,7 @@ cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
                 pixelValues[imgIdx] = imageStack[imgIdx].at<float>(i);
             }
             std::partial_sort(pixelValues.begin(), pixelValues.begin() + midIndex + 1, pixelValues.end());
-
-            if (numImages % 2 == 0) 
-                medianImage.at<float>(i) = (pixelValues[midIndex] + pixelValues[midIndex - 1]) / 2.0f;
-            else 
-                medianImage.at<float>(i) = pixelValues[midIndex];
+            medianImage.at<float>(i) = (numImages % 2 == 0) ? (pixelValues[midIndex] + pixelValues[midIndex - 1]) / 2.0f : pixelValues[midIndex];
         }
     }
 
