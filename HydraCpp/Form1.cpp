@@ -546,9 +546,8 @@ std::vector<int> Hydra::Form1::Stack() {
         for (int y = 0; y < masterDarkFrame.rows; y++) {
             for (int x = 0; x < masterDarkFrame.cols; x++) {
                 float pixelValue = masterDarkFrame.at<float>(y, x);
-                if (pixelValue > 10 * mean[0]) {
+                if (pixelValue > 10 * mean[0]) 
                     hotPixels.push_back({ x,y });
-                }
             }
         }
 
