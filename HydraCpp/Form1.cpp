@@ -51,9 +51,8 @@ void writeStringMatrix(const std::string& path, const std::vector<std::vector<st
     for (const auto& row : stringArray) {
         for (size_t j = 0; j < row.size(); j++) {
             stringFileStream << row[j];
-            if (j < row.size() - 1) {
+            if (j < row.size() - 1) 
                 stringFileStream << ",";
-            }
         }
         stringFileStream << "\n";
     }
@@ -251,16 +250,20 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, const float
 }
 
 cv::Mat addCircles(cv::Mat img, const std::vector<float>& xcoords, const std::vector<float>& ycoords, const int& size) {
-    for (int i = 0; i < xcoords.size(); i++) {
-        if (align == "R")
-            cv::circle(img, cv::Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, cv::Scalar(0, 0, 255));
-        else if (align == "G")
-            cv::circle(img, cv::Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, cv::Scalar(0, 255, 0));
-        else if (align == "B")
-            cv::circle(img, cv::Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, cv::Scalar(255, 0, 0));
-        else
-            cv::circle(img, cv::Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, cv::Scalar(255, 255, 255));
-    }
+    cv::Scalar color;
+
+    if (align == "R")
+        color = cv::Scalar(0, 0, 255);
+    else if (align == "G")
+        color = cv::Scalar(0, 255, 0);
+    else if (align == "B")
+        color = cv::Scalar(255, 0, 0);
+    else 
+        color = cv::Scalar(255, 255, 255);
+
+    for (int i = 0; i < xcoords.size(); i++) 
+        cv::circle(img, cv::Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, color);
+
     return img;
 }
 
@@ -346,9 +349,9 @@ cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
 
         #pragma omp for
         for (int i = 0; i < totalPixels; i++) {
-            for (int imgIdx = 0; imgIdx < numImages; imgIdx++) {
+            for (int imgIdx = 0; imgIdx < numImages; imgIdx++) 
                 pixelValues[imgIdx] = imageStack[imgIdx].at<float>(i);
-            }
+
             std::partial_sort(pixelValues.begin(), pixelValues.begin() + midIndex + 1, pixelValues.end());
             medianImage.at<float>(i) = (numImages % 2 == 0) ? (pixelValues[midIndex] + pixelValues[midIndex - 1]) / 2.0f : pixelValues[midIndex];
         }
@@ -373,7 +376,7 @@ std::vector<int> Hydra::Form1::RegisterFrames() {
         #pragma omp parallel for num_threads(numLogicalCores*2)
         for (int k = 0; k < n; k++) {
             cv::Mat lightFrame = cv::imread(lightFrames[k], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-            if (lightFrame.data != NULL) {
+            if (!lightFrame.empty()) {
                 std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
 
                 qualVec[k][0] = k;
@@ -397,9 +400,8 @@ std::vector<int> Hydra::Form1::RegisterFrames() {
 
         for (int k = 0; k < qualVec.size(); k++) {
             qualVecS[k][0] = lightFrames[int(qualVec[k][0])];
-            for (int l = 1; l < qualVec[0].size(); l++) {
+            for (int l = 1; l < qualVec[0].size(); l++) 
                 qualVecS[k][l] = std::to_string(qualVec[k][l]);
-            }
         }
 
         elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime).count();
@@ -565,9 +567,7 @@ std::vector<int> Hydra::Form1::Stack() {
             std::vector<int> m(iterations);
 
             for (int j = 0; j < iterations; j++)
-            {
                 m[j] = j;
-            }
 
             xSize = int(xSize * samplingFactor);
             ySize = int(ySize * samplingFactor);
