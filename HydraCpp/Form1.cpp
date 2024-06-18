@@ -492,9 +492,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                         xDeb[j] = cos(offsets[i][4]) * xvec[i][j] - sin(offsets[i][4]) * yvec[i][j] + offsets[i][5];
                         yDeb[j] = sin(offsets[i][4]) * xvec[i][j] + cos(offsets[i][4]) * yvec[i][j] + offsets[i][6];
                     }
-                    xDeb = clean(xDeb);
-                    yDeb = clean(yDeb);
-                    labelledImage = addCircles(labelledImage, xDeb, yDeb, 5);
+                    labelledImage = addCircles(labelledImage, clean(xDeb), clean(yDeb), 5);
                 }
                 cv::imshow("Debug", labelledImage);
             }
