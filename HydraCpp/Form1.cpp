@@ -146,9 +146,9 @@ std::vector<float> findRT(const cv::Mat& A, const cv::Mat& B) {
 }
 
 //Function for computing the "vote matrix"
-std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::vector<float>>& refTriangles, const std::vector<std::vector<float>>& frameTriangles, const std::vector<float>& refVectorX, const std::vector<float>& yvec) {
+std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::vector<float>>& refTriangles, const std::vector<std::vector<float>>& frameTriangles, const int& refVectorSize, const int& vecSize) {
     float e = 0.005;
-    std::vector<std::vector<float>> vote(refVectorX.size(), std::vector<float>(yvec.size(), 0)), corrVote(refVectorX.size(), std::vector<float>(yvec.size(), 0));
+    std::vector<std::vector<float>> vote(refVectorSize, std::vector<float>(vecSize, 0)), corrVote(refVectorSize, std::vector<float>(vecSize, 0));
     for (int a = 0; a < refTriangles.size(); a++) {
         std::vector<int> triangleList;
         for (int b = 0; b < frameTriangles.size(); b++) {
@@ -466,7 +466,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                     if (!clean(xvec[k]).empty() && clean(xvec[k]).size() >= topMatches)
                     {
                         std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[k]), clean(yvec[k]));
-                        std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[0]), clean(yvec[0]));
+                        std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[0]).size(), clean(yvec[0]).size());
                         std::vector<float> RTparams = alignFrames(correctedVoteMatrix, clean(xvecAlign[0]), clean(yvecAlign[0]), clean(xvec[k]), clean(yvec[k]), topMatches);
                         offsets[k] = { float(qualVec[k][0]), float(qualVec[k][1]), float(qualVec[k][2]), float(qualVec[k][3]), RTparams[0], RTparams[1], RTparams[2] };
                         stackArray[k] = { lightFrameArray[k], std::to_string(offsets[k][0]), std::to_string(offsets[k][1]), std::to_string(offsets[k][2]),
