@@ -240,7 +240,7 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, const float
             cv::Point2f center = rect.center;
             float height = rect.size.height;
             float width = rect.size.width;
-            std::vector<float> starVector = { center.x, center.y, width, height, std::sqrt(width * width + height * height) };
+            std::vector<float> starVector = { center.x, center.y, std::sqrt(width * width + height * height) };
             if (std::sqrt(width * width + height * height) < 25)
                 starMatrix.push_back(starVector);
         }
@@ -386,7 +386,7 @@ std::vector<int> Hydra::Form1::RegisterFrames() {
                 qualVec[k][5] = lightFrame.elemSize();
 
                 if (starMatrix.size() > 3) {
-                    sortByColumn(starMatrix, 4);
+                    sortByColumn(starMatrix, 2);
                     for (int i = 0; i < std::min(maxStars, int(starMatrix.size())); i++) {
                         qualVec[k][i + 6] = starMatrix[i][0];
                         qualVec[k][i + 6 + maxStars] = starMatrix[i][1];
