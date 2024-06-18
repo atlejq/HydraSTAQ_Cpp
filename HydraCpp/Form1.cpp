@@ -342,24 +342,19 @@ cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
     #pragma omp parallel num_threads(numLogicalCores*2)
     {
         std::vector<float> pixelValues(numImages);
-        int midIndex = numImages / 2;
 
-        if (numImages % 2 == 0) {
-            #pragma omp for
-            for (int i = 0; i < totalPixels; i++) {
-                for (int imgIdx = 0; imgIdx < numImages; imgIdx++) {
-                    pixelValues[imgIdx] = imageStack[imgIdx].at<float>(i);
-                }
+        #pragma omp for
+        for (int i = 0; i < totalPixels; i++) {
+            for (int imgIdx = 0; imgIdx < numImages; imgIdx++) {
+                pixelValues[imgIdx] = imageStack[imgIdx].at<float>(i);
+            }
+
+            int midIndex = numImages / 2;
+            if (numImages % 2 == 0) {
                 std::partial_sort(pixelValues.begin(), pixelValues.begin() + midIndex + 1, pixelValues.end());
                 medianImage.at<float>(i) = (pixelValues[midIndex] + pixelValues[midIndex - 1]) / 2.0f;
             }
-        }
-        else {
-            #pragma omp for
-            for (int i = 0; i < totalPixels; i++) {
-                for (int imgIdx = 0; imgIdx < numImages; imgIdx++) {
-                    pixelValues[imgIdx] = imageStack[imgIdx].at<float>(i);
-                }
+            else {
                 std::partial_sort(pixelValues.begin(), pixelValues.begin() + midIndex + 1, pixelValues.end());
                 medianImage.at<float>(i) = pixelValues[midIndex];
             }
