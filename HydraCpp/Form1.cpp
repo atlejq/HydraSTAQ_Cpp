@@ -287,10 +287,10 @@ cv::Mat getCalibrationFrame(const int& ySize, const int& xSize, const std::strin
 
 //Function to remove hotpixels
 cv::Mat removeHotPixels(cv::Mat lightFrame, const std::vector <std::vector<int>>& hotPixels) {
-    for (int i = 0; i < hotPixels.size(); i++)
+    for (const auto& hotPix : hotPixels)
     {
-        int x = hotPixels[i][0];
-        int y = hotPixels[i][1];
+        int x = hotPix[0];
+        int y = hotPix[1];
         if (x > 0 || y > 0 || x < lightFrame.cols - 1 || y < lightFrame.rows - 1)
         {
             float sum = 0;
@@ -321,7 +321,6 @@ cv::Mat processFrame(const std::string& framePath, const cv::Mat& masterDarkFram
 cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
     int rows = imageStack[0].rows;
     int cols = imageStack[0].cols;
-    int totalPixels = rows * cols;
     int numImages = imageStack.size();
     int midIndex = numImages / 2;
 
@@ -332,7 +331,7 @@ cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
         std::vector<float> pixelValues(numImages);
 
         #pragma omp for
-        for (int i = 0; i < totalPixels; i++) {
+        for (int i = 0; i < rows * cols; i++) {
             for (int imgIdx = 0; imgIdx < numImages; imgIdx++) 
                 pixelValues[imgIdx] = imageStack[imgIdx].at<float>(i);
 
@@ -476,7 +475,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                         xDeb[j] = cos(offsets[i][4]) * xvec[i][j] - sin(offsets[i][4]) * yvec[i][j] + offsets[i][5];
                         yDeb[j] = sin(offsets[i][4]) * xvec[i][j] + cos(offsets[i][4]) * yvec[i][j] + offsets[i][6];
                     }
-                    labelledImage = addCircles(labelledImage, clean(xDeb), clean(yDeb), 5);
+                    labelledImage = addCircles(labelledImage, xDeb, yDeb, 5);
                 }
                 cv::imshow("Debug", labelledImage);
             }
