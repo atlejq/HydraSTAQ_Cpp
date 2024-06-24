@@ -171,15 +171,12 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::ve
 std::vector<float> alignFrames(const std::vector<std::vector<float>>& corrVote, const std::vector<float>& refVectorX, const std::vector<float>& refVectorY, const std::vector<float>& xvec, const std::vector<float>& yvec, const int& topMatches) {
     std::vector<std::vector<int>> starPairs;
     for (int i = 0; i < corrVote[0].size(); i++) {
-        int maxIndex = 0;
-        int maxValue = corrVote[0][i];
-        for (int j = 1; j < corrVote.size(); j++) {
-            if (corrVote[j][i] > maxValue) {
-                maxIndex = j;
-                maxValue = corrVote[j][i];
-            }
-        }
-        starPairs.push_back({ i, maxIndex, maxValue });
+        auto maxElement = std::max_element(corrVote.begin(), corrVote.end(),
+            [i](const std::vector<float>& a, const std::vector<float>& b) {
+                return a[i] < b[i];
+            });
+        int maxIndex = std::distance(corrVote.begin(), maxElement);
+        starPairs.push_back({ i, maxIndex, static_cast<int>((*maxElement)[i]) });
     }
 
     sortByColumn(starPairs, 2);
@@ -232,12 +229,9 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, const float
 
         for (const auto& c : contours) {
             cv::RotatedRect rect = cv::minAreaRect(c);
-            cv::Point2f center = rect.center;
-            float height = rect.size.height;
-            float width = rect.size.width;
-            std::vector<float> starVector = { center.x, center.y, std::sqrt(width * width + height * height) };
-            if (std::sqrt(width * width + height * height) < 25)
-                starMatrix.push_back(starVector);
+            float d = std::sqrt(rect.size.width * rect.size.width + rect.size.height * rect.size.height);
+            if (d < 25)
+                starMatrix.push_back({ rect.center.x, rect.center.y, d });
         }
     }
     return starMatrix;
