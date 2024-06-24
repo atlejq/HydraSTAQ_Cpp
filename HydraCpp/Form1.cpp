@@ -185,8 +185,7 @@ std::vector<float> alignFrames(const std::vector<std::vector<float>>& corrVote, 
         frameM.at<float>(1, i) = yvec[starPairs[i][0]];
     }
 
-    std::vector<float> RTparams = findRT(frameM, referenceM);
-    return RTparams;
+    return findRT(frameM, referenceM);
 }
 
 //Function to get all the file names in the given directory.
@@ -290,13 +289,13 @@ cv::Mat removeHotPixels(cv::Mat lightFrame, const std::vector <std::vector<int>>
         int y = hotPix[1];
         if (x > 0 || y > 0 || x < lightFrame.cols - 1 || y < lightFrame.rows - 1)
         {
-            float sum = 0;
+            float centerPixelValue = 0;
             for (int dy = -1; dy <= 1; dy++) 
                 for (int dx = -1; dx <= 1; dx++) 
                     if (!(dx == 0 && dy == 0))
-                        sum += lightFrame.at<float>(y + dy, x + dx);
+                        centerPixelValue += lightFrame.at<float>(y + dy, x + dx)/8;
             
-            lightFrame.at<float>(y, x) = sum / 8;
+            lightFrame.at<float>(y, x) = centerPixelValue;
         }
     }
     return lightFrame;
