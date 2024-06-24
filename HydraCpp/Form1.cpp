@@ -136,10 +136,8 @@ std::vector<float> findRT(const cv::Mat& A, const cv::Mat& B) {
     cv::Mat V = Vt.t();
     cv::Mat R = V * U.t();
     
-    if (cv::determinant(R) < 0) {
-        V.col(1) *= -1;
-        R = V * U.t();
-    }
+    if (cv::determinant(R) < 0) 
+        R = V * (cv::Mat_<float>(2, 2) << 1, 0, 0, -1) * U.t();
 
     cv::Mat t = -R * centroid_A + centroid_B;
     return { std::atan2(R.at<float>(1, 0), R.at<float>(0, 0)), t.at<float>(0, 0), t.at<float>(1, 0) };
