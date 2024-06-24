@@ -437,7 +437,6 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
             if (!xRef.empty() && xRef.size() >= topMatches)
             {
                 n = floor(qualVec.size() * (100 - float(discardPercentage)) / 100);
-                std::vector<std::vector<float>> refTriangles = triangles(xRef, yRef);
                 std::vector<std::vector<float>> off(n, std::vector<float>(7));
                 std::vector<std::vector<std::string>> stackArray(n, std::vector<std::string>(8));
 
@@ -445,7 +444,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                     if (!clean(xvec[k]).empty() && clean(xvec[k]).size() >= topMatches)
                     {
                         std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[k]), clean(yvec[k]));
-                        std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[0]).size(), clean(yvec[0]).size());
+                        std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(triangles(xRef, yRef), frameTriangles, clean(xvecAlign[0]).size(), clean(yvec[0]).size());
                         std::vector<float> RTparams = alignFrames(correctedVoteMatrix, clean(xvecAlign[0]), clean(yvecAlign[0]), clean(xvec[k]), clean(yvec[k]), topMatches);
                         off[k] = { float(qualVec[k][0]), float(qualVec[k][1]), float(qualVec[k][2]), float(qualVec[k][3]), RTparams[0], RTparams[1], RTparams[2] };
                         stackArray[k] = { lightFrameArray[k], std::to_string(off[k][0]), std::to_string(off[k][1]), std::to_string(off[k][2]), std::to_string(off[k][3]), std::to_string(off[k][4]), std::to_string(off[k][5]), std::to_string(off[k][6]) };
@@ -456,14 +455,14 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
                 writeStringMatrix(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
 
-                std::vector<float> xDeb(maxStars), yDeb(maxStars);
-
                 cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[0], cv::IMREAD_GRAYSCALE);
                 cv::Mat debugFrame;
                 cv::resize(maxQualFrame, debugFrame, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
                 cv::Mat labelledImage(debugFrame.size(), CV_8UC3);
                 cv::cvtColor(debugFrame, labelledImage, cv::COLOR_GRAY2BGR);
                 labelledImage = addCircles(labelledImage, xRef, yRef, 8);
+
+                std::vector<float> xDeb(maxStars), yDeb(maxStars);
 
                 for (int i = 0; i < off.size(); i++) {
                     for (int j = 0; j < xvec[i].size(); j++) {
