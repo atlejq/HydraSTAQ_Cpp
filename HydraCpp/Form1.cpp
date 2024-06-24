@@ -326,15 +326,6 @@ cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
     {
         std::vector<float> pixelValues(numImages);
 
-        //#pragma omp for
-        //for (int i = 0; i < rows * cols; i++) {
-        //    for (int imgIdx = 0; imgIdx < numImages; imgIdx++) 
-         //       pixelValues[imgIdx] = imageStack[imgIdx].at<float>(i);
-        //
-        //    std::partial_sort(pixelValues.begin(), pixelValues.begin() + midIndex + 1, pixelValues.end());
-         //   medianImage.at<float>(i) = (numImages % 2 == 0) ? (pixelValues[midIndex] + pixelValues[midIndex - 1]) / 2.0f : pixelValues[midIndex];
-       // }
-
         #pragma omp for
         for (int i = 0; i < rows * cols; i++) {
             for (int imgIdx = 0; imgIdx < numImages; imgIdx++)
