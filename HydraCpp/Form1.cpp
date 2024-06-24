@@ -49,12 +49,10 @@ std::vector<std::vector<std::string>> readStringMatrix(const std::string& path) 
 void writeStringMatrix(const std::string& path, const std::vector<std::vector<std::string>>& stringArray) {
     std::ofstream stringFileStream(path);
     for (const auto& row : stringArray) {
-        for (size_t j = 0; j < row.size(); j++) {
-            stringFileStream << row[j];
-            if (j < row.size() - 1) 
-                stringFileStream << ",";
-        }
-        stringFileStream << "\n";
+        for (size_t j = 0; j < row.size() - 1; j++) 
+            stringFileStream << row[j] << ",";
+        
+        stringFileStream << row[row.size() - 1] << "\n";
     }
 }
 
@@ -226,7 +224,7 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, const float
 
         for (const auto& c : contours) {
             cv::RotatedRect rect = cv::minAreaRect(c);
-            float d = std::sqrt(rect.size.width * rect.size.width + rect.size.height * rect.size.height);
+            float d = std::sqrt(pow(rect.size.width, 2) + pow(rect.size.height, 2));
             if (d < 25)
                 starMatrix.push_back({ rect.center.x, rect.center.y, d });
         }
@@ -464,10 +462,10 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                 std::vector<float> xDeb(maxStars), yDeb(maxStars);
 
                 cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[0], cv::IMREAD_GRAYSCALE);
-                cv::Mat small;
-                cv::resize(maxQualFrame, small, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
-                cv::Mat labelledImage(small.size(), CV_8UC3);
-                cv::cvtColor(small, labelledImage, cv::COLOR_GRAY2BGR);
+                cv::Mat debugFrame;
+                cv::resize(maxQualFrame, debugFrame, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
+                cv::Mat labelledImage(debugFrame.size(), CV_8UC3);
+                cv::cvtColor(debugFrame, labelledImage, cv::COLOR_GRAY2BGR);
                 labelledImage = addCircles(labelledImage, xRef, yRef, 8);
 
                 for (int i = 0; i < offsets.size(); i++) {
@@ -555,8 +553,7 @@ std::vector<int> Hydra::Form1::Stack() {
             cv::Mat p(ySize, xSize, CV_32FC1, cv::Scalar(0)), psqr(ySize, xSize, CV_32FC1, cv::Scalar(0)), var(ySize, xSize, CV_32FC1, cv::Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
             std::vector<cv::Mat> tempArray(medianBatchSize, cv::Mat(ySize, xSize, CV_32FC1));
 
-            unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-            shuffle(m.begin(), m.end(), std::default_random_engine(seed));
+            shuffle(m.begin(), m.end(), std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count()));
 
             for (int k = 0; k < batches; k++) {
                 #pragma omp parallel for num_threads(numLogicalCores*2)
