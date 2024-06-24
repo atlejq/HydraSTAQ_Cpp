@@ -10,7 +10,6 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <omp.h>
 #include <opencv2/opencv.hpp>
 #include <random>
