@@ -498,19 +498,19 @@ std::vector<int> Hydra::Form1::Stack() {
         auto startTime = std::chrono::high_resolution_clock::now();
 
         std::vector<std::vector<std::string>> stackInfo = readStringMatrix(stackArrayPath);
-        std::vector<std::string> stackArray(stackInfo.size());
-        std::vector<std::vector<float>> RTparams(stackInfo.size());
-        std::vector<float>background(stackInfo.size());
-        float mean_background = 0;
-
         n = stackInfo.size();
 
-        for (int i = 0; i < stackInfo.size(); i++)
+        std::vector<std::string> stackArray(n);
+        std::vector<std::vector<float>> RTparams(n);
+        std::vector<float>background(n);
+        float mean_background = 0;
+
+        for (int i = 0; i < n; i++)
         {
             stackArray[i] = stackInfo[i][0];
             RTparams[i] = { stof(stackInfo[i][5]), samplingFactor * stof(stackInfo[i][6]), samplingFactor * stof(stackInfo[i][7]) };
             background[i] = stof(stackInfo[i][2]);
-            mean_background = mean_background + background[i] / float(stackInfo.size());
+            mean_background = mean_background + background[i] / float(n);
         }
 
         int xSize = stoi(stackInfo[0][3]);
@@ -538,10 +538,10 @@ std::vector<int> Hydra::Form1::Stack() {
         if (minVal > 0)
         {
             calibratedFlatFrame *= xSize * ySize / cv::sum(calibratedFlatFrame)[0];
-            if (stackInfo.size() < medianBatchSize)
-                medianBatchSize = stackInfo.size();
+            if (n < medianBatchSize)
+                medianBatchSize = n;
 
-            int batches = stackInfo.size() / medianBatchSize;
+            int batches = n / medianBatchSize;
             int iterations = medianBatchSize * batches;
 
             std::vector<int> m(iterations);
@@ -574,21 +574,21 @@ std::vector<int> Hydra::Form1::Stack() {
             if (!std::filesystem::exists(path + outputDir))
                 std::filesystem::create_directory(path + outputDir);
 
-            imwrite(path + outputDir + "Median" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 100)) + ".tif", medianFrame);
-            imwrite(path + outputDir + "Mean" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 100)) + ".tif", p);
+            imwrite(path + outputDir + "Median" + "_" + std::to_string(n) + "_" + filter + "_" + std::to_string(int(samplingFactor * 100)) + ".tif", medianFrame);
+            imwrite(path + outputDir + "Mean" + "_" + std::to_string(n) + "_" + filter + "_" + std::to_string(int(samplingFactor * 100)) + ".tif", p);
 
             #pragma omp parallel for num_threads(numLogicalCores*2) 
-            for (int k = 0; k < stackInfo.size(); k++) {
+            for (int k = 0; k < n; k++) {
                 cv::Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);
 
                 for (int h = 0; h < xSize * ySize; h++)
                     if (abs(lightFrame.at<float>(h) - medianFrame.at<float>(h)) > 2.0 * cv::sqrt(var.at<float>(h)))
                         lightFrame.at<float>(h) = medianFrame.at<float>(h);
 
-                addWeighted(stackFrame, 1, lightFrame, 1 / float(stackInfo.size()), 0.0, stackFrame);
+                addWeighted(stackFrame, 1, lightFrame, 1 / float(n), 0.0, stackFrame);
             }
 
-            imwrite(path + outputDir + "Stack" + "_" + std::to_string(stackInfo.size()) + "_" + filter + "_" + std::to_string(int(samplingFactor * 100)) + ".tif", stackFrame);
+            imwrite(path + outputDir + "Stack" + "_" + std::to_string(n) + "_" + filter + "_" + std::to_string(int(samplingFactor * 100)) + ".tif", stackFrame);
 
             elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime).count();
 
