@@ -438,7 +438,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
             {
                 n = floor(qualVec.size() * (100 - float(discardPercentage)) / 100);
                 std::vector<std::vector<float>> refTriangles = triangles(xRef, yRef);
-                std::vector<std::vector<float>> offsets(n, std::vector<float>(7));
+                std::vector<std::vector<float>> off(n, std::vector<float>(7));
                 std::vector<std::vector<std::string>> stackArray(n, std::vector<std::string>(8));
 
                 for (int k = 0; k < n; k++) {
@@ -447,9 +447,8 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                         std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[k]), clean(yvec[k]));
                         std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[0]).size(), clean(yvec[0]).size());
                         std::vector<float> RTparams = alignFrames(correctedVoteMatrix, clean(xvecAlign[0]), clean(yvecAlign[0]), clean(xvec[k]), clean(yvec[k]), topMatches);
-                        offsets[k] = { float(qualVec[k][0]), float(qualVec[k][1]), float(qualVec[k][2]), float(qualVec[k][3]), RTparams[0], RTparams[1], RTparams[2] };
-                        stackArray[k] = { lightFrameArray[k], std::to_string(offsets[k][0]), std::to_string(offsets[k][1]), std::to_string(offsets[k][2]),
-                                          std::to_string(offsets[k][3]), std::to_string(offsets[k][4]), std::to_string(offsets[k][5]), std::to_string(offsets[k][6]) };
+                        off[k] = { float(qualVec[k][0]), float(qualVec[k][1]), float(qualVec[k][2]), float(qualVec[k][3]), RTparams[0], RTparams[1], RTparams[2] };
+                        stackArray[k] = { lightFrameArray[k], std::to_string(off[k][0]), std::to_string(off[k][1]), std::to_string(off[k][2]), std::to_string(off[k][3]), std::to_string(off[k][4]), std::to_string(off[k][5]), std::to_string(off[k][6]) };
                     }
                 }
 
@@ -466,10 +465,10 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                 cv::cvtColor(debugFrame, labelledImage, cv::COLOR_GRAY2BGR);
                 labelledImage = addCircles(labelledImage, xRef, yRef, 8);
 
-                for (int i = 0; i < offsets.size(); i++) {
+                for (int i = 0; i < off.size(); i++) {
                     for (int j = 0; j < xvec[i].size(); j++) {
-                        xDeb[j] = cos(offsets[i][4]) * xvec[i][j] - sin(offsets[i][4]) * yvec[i][j] + offsets[i][5];
-                        yDeb[j] = sin(offsets[i][4]) * xvec[i][j] + cos(offsets[i][4]) * yvec[i][j] + offsets[i][6];
+                        xDeb[j] = cos(off[i][4]) * xvec[i][j] - sin(off[i][4]) * yvec[i][j] + off[i][5];
+                        yDeb[j] = sin(off[i][4]) * xvec[i][j] + cos(off[i][4]) * yvec[i][j] + off[i][6];
                     }
                     labelledImage = addCircles(labelledImage, xDeb, yDeb, 5);
                 }
