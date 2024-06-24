@@ -31,8 +31,8 @@ std::vector<std::vector<std::string>> readStringMatrix(const std::string& path) 
     {
         while (std::getline(commaSeparatedArrayStream, line)) {
             std::vector<std::string> commaSeparatedLine;
-            std::string::size_type start = 0;
-            std::string::size_type end;
+            std::string::size_type start, end;
+            start = 0;
 
             while ((end = line.find(',', start)) != std::string::npos) {
                 commaSeparatedLine.push_back(line.substr(start, end - start));
@@ -79,10 +79,10 @@ std::tuple<std::vector<std::string>, std::vector<std::vector<float>>, std::vecto
 
 std::vector<float> clean(const std::vector<float>& v) {
     std::vector<float> vFiltered;
-    for (int i = 0; i < v.size(); i++) {
+    for (int i = 0; i < v.size(); i++) 
         if (v[i] != -1)
             vFiltered.push_back(v[i]);
-    }
+
     return vFiltered;
 }
 
@@ -152,10 +152,9 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::ve
                 triangleList.push_back(b);
         }
         for (int b : triangleList) {
-            if (std::abs(refTri[3] - frameTriangles[b][3]) + std::abs(refTri[4] - frameTriangles[b][4]) < e) {
+            if (std::abs(refTri[3] - frameTriangles[b][3]) + std::abs(refTri[4] - frameTriangles[b][4]) < e) 
                 for (int i = 0; i < 3; i++)
                     vote[static_cast<int>(refTri[i])][static_cast<int>(frameTriangles[b][i])] += 1;
-            }
         }
     }
 
@@ -200,10 +199,8 @@ std::vector<std::string> getFrames(const std::string& path, const std::string& e
     if (std::filesystem::exists(path))
     {
         for (auto& p : std::filesystem::recursive_directory_iterator(path))
-        {
             if (p.path().extension() == ext)
                 filenames.push_back(p.path().string());
-        }
     }
     return filenames;
 }
@@ -297,12 +294,11 @@ cv::Mat removeHotPixels(cv::Mat lightFrame, const std::vector <std::vector<int>>
         if (x > 0 || y > 0 || x < lightFrame.cols - 1 || y < lightFrame.rows - 1)
         {
             float sum = 0;
-            for (int dy = -1; dy <= 1; dy++) {
-                for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) 
+                for (int dx = -1; dx <= 1; dx++) 
                     if (!(dx == 0 && dy == 0))
                         sum += lightFrame.at<float>(y + dy, x + dx);
-                }
-            }
+            
             lightFrame.at<float>(y, x) = sum / 8;
         }
     }
@@ -587,10 +583,8 @@ std::vector<int> Hydra::Form1::Stack() {
                 cv::Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);
 
                 for (int h = 0; h < xSize * ySize; h++)
-                {
                     if (abs(lightFrame.at<float>(h) - medianFrame.at<float>(h)) > 2.0 * cv::sqrt(var.at<float>(h)))
                         lightFrame.at<float>(h) = medianFrame.at<float>(h);
-                }
 
                 addWeighted(stackFrame, 1, lightFrame, 1 / float(stackInfo.size()), 0.0, stackFrame);
             }
