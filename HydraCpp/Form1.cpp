@@ -143,19 +143,18 @@ std::vector<float> findRT(const cv::Mat& A, const cv::Mat& B) {
 
 //Function for computing the "vote matrix"
 std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::vector<float>>& refTriangles, const std::vector<std::vector<float>>& frameTriangles, const int& refVectorSize, const int& vecSize) {
-    float e = 0.005;
+    constexpr float e = 0.005;
     std::vector<std::vector<float>> vote(refVectorSize, std::vector<float>(vecSize, 0)), corrVote(refVectorSize, std::vector<float>(vecSize, 0));
-    for (int a = 0; a < refTriangles.size(); a++) {
+    for (const auto& refTri : refTriangles) {
         std::vector<int> triangleList;
         for (int b = 0; b < frameTriangles.size(); b++) {
-            if (std::abs(refTriangles[a][3] - frameTriangles[b][3]) < e)
+            if (std::abs(refTri[3] - frameTriangles[b][3]) < e)
                 triangleList.push_back(b);
         }
-        for (int c = 0; c < triangleList.size(); c++) {
-            int b = triangleList[c];
-            if (std::abs(refTriangles[a][3] - frameTriangles[b][3]) + std::abs(refTriangles[a][4] - frameTriangles[b][4]) < e) {
-                for(int i = 0; i < 3; i++)
-                    vote[(int)refTriangles[a][i]][(int)frameTriangles[b][i]] += 1;
+        for (int b : triangleList) {
+            if (std::abs(refTri[3] - frameTriangles[b][3]) + std::abs(refTri[4] - frameTriangles[b][4]) < e) {
+                for (int i = 0; i < 3; i++)
+                    vote[static_cast<int>(refTri[i])][static_cast<int>(frameTriangles[b][i])] += 1;
             }
         }
     }
