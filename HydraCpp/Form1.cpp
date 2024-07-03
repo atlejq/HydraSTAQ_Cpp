@@ -419,14 +419,10 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
         std::vector<std::vector<float>> yvecAlign = std::get<3>(alignTuple);
 
         bool sizesEqual = true;
-        int l = 0;
-
-        while (sizesEqual == true && l < qualVec.size())
-        {
+ 
+        for (int l = 0; l < qualVec.size() && sizesEqual; l++) {
             if ((qualVec[l][2] != qualVec[0][2]) || (qualVec[l][3] != qualVec[0][3]))
                 sizesEqual = false;
-
-            l++;
         }
 
         if (sizesEqual)
