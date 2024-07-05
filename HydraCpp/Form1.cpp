@@ -292,10 +292,14 @@ cv::Mat removeHotPixels(cv::Mat lightFrame, const std::vector <std::vector<int>>
         if (x > 0 || y > 0 || x < lightFrame.cols - 1 || y < lightFrame.rows - 1)
         {
             float centerPixelValue = 0;
-            for (int dy = -1; dy <= 1; dy++) 
-                for (int dx = -1; dx <= 1; dx++) 
-                    if (!(dx == 0 && dy == 0))
-                        centerPixelValue += lightFrame.at<float>(y + dy, x + dx)/8;
+            std::vector<std::pair<int, int>> directions = { {0, 1}, {0, -1}, {1, 0}, {-1, 0} };
+            for (const auto& dir : directions) {
+                centerPixelValue += lightFrame.at<float>(y + dir.second, x + dir.first) / 4;
+
+            //for (int dy = -1; dy <= 1; dy++) 
+            //    for (int dx = -1; dx <= 1; dx++) 
+            //        if (!(dx == 0 && dy == 0))
+            //           centerPixelValue += lightFrame.at<float>(y + dy, x + dx)/8;
             
             lightFrame.at<float>(y, x) = centerPixelValue;
         }
