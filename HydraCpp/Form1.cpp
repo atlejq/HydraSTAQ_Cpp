@@ -106,13 +106,20 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
     std::vector<std::vector<float>> triangleParameters;
     const float minEdge = 50;
     const int n = x.size();
+    double d0, d1, d2;
+    std::vector<double> d(3);
     for (int i = 0; i < n - 2; i++) {
         for (int j = i + 1; j < n - 1; j++) {
-            for (int k = j + 1; k < n; k++) {
-                std::vector<double> d = { sqrt(pow(x[i] - x[j], 2) + pow(y[i] - y[j], 2)), sqrt(pow(x[j] - x[k], 2) + pow(y[j] - y[k], 2)), sqrt(pow(x[i] - x[k], 2) + pow(y[i] - y[k], 2)) };
-                if (*std::min_element(d.begin(), d.end()) > minEdge) {
-                    std::sort(d.begin(), d.end());
-                    triangleParameters.push_back({ float(i), float(j), float(k), float(d[1] / d[2]), float(d[0] / d[2]) });
+            d0 = sqrt((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]));
+            if (d0 > minEdge) {
+                for (int k = j + 1; k < n; k++) {
+                    d1 = sqrt((x[j] - x[k]) * (x[j] - x[k]) + (y[j] - y[k]) * (y[j] - y[k]));
+                    d2 = sqrt((x[i] - x[k]) * (x[i] - x[k]) + (y[i] - y[k]) * (y[i] - y[k]));
+                    if (d1 > minEdge && d2 > minEdge) {
+                        d = { d0, d1, d2 };
+                        std::sort(d.begin(), d.end());
+                        triangleParameters.push_back({ float(i), float(j), float(k), float(d[1] / d[2]), float(d[0] / d[2]) });
+                    }
                 }
             }
         }
@@ -222,7 +229,7 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, const float
 
         for (const auto& c : contours) {
             cv::RotatedRect rect = cv::minAreaRect(c);
-            float d = std::sqrt(pow(rect.size.width, 2) + pow(rect.size.height, 2));
+            float d = std::sqrt(rect.size.width * rect.size.width + rect.size.height * rect.size.height);
             if (d < 25)
                 starMatrix.push_back({ rect.center.x, rect.center.y, d });
         }
