@@ -106,8 +106,8 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
     std::vector<std::vector<float>> triangleParameters;
     const float minEdge = 50;
     const int n = x.size();
-    double d0, d1, d2;
-    std::vector<double> d(3);
+    float d0, d1, d2;
+    std::vector<float> d(3);
     for (int i = 0; i < n - 2; i++) {
         for (int j = i + 1; j < n - 1; j++) {
             d0 = sqrt((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]));
@@ -117,12 +117,9 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
                     d2 = sqrt((x[i] - x[k]) * (x[i] - x[k]) + (y[i] - y[k]) * (y[i] - y[k]));
                     if (d1 > minEdge && d2 > minEdge) {
                         d = { d0, d1, d2 };
-
                         if (d[1] > d[2]) std::swap(d[1], d[2]);
                         if (d[0] > d[2]) std::swap(d[0], d[2]);
                         if (d[0] > d[1]) std::swap(d[0], d[1]);
-
-                        //std::sort(d.begin(), d.end());
                         triangleParameters.push_back({ float(i), float(j), float(k), float(d[1] / d[2]), float(d[0] / d[2]) });
                     }
                 }
