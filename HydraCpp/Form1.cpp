@@ -413,10 +413,9 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
         bool sizesEqual = true;
  
-        for (int l = 0; l < qualVec.size() && sizesEqual; l++) {
+        for (int l = 0; l < qualVec.size() && sizesEqual; l++) 
             if ((qualVec[l][2] != qualVec[0][2]) || (qualVec[l][3] != qualVec[0][3]))
                 sizesEqual = false;
-        }
 
         if (sizesEqual) {
             std::vector xRef = clean(xvecAlign[0]);
