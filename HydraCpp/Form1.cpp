@@ -63,8 +63,7 @@ std::tuple<std::vector<std::string>, std::vector<std::vector<float>>, std::vecto
         lightFrameArray[i] = inputArray[i][0];
         qualVec[i] = { stof(inputArray[i][1]), stof(inputArray[i][2]), stof(inputArray[i][3]), stof(inputArray[i][4]), stof(inputArray[i][5]) };
 
-        for (int j = 0; j < maxStars; j++)
-        {
+        for (int j = 0; j < maxStars; j++) {
             xvec[i][j] = stof(inputArray[i][j + 6]);
             yvec[i][j] = stof(inputArray[i][j + 6 + maxStars]);
         }
@@ -212,8 +211,7 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, const float
     std::vector<std::vector<float>> starMatrix;
 
     if ((lightFrame.elemSize() == 1 || lightFrame.elemSize() == 2) && lightFrame.channels() == 1) {
-        if (lightFrame.elemSize() == 2)
-        {
+        if (lightFrame.elemSize() == 2) {
             lightFrame = lightFrame / 255;
             lightFrame.convertTo(lightFrame, CV_8U);
         }
@@ -268,8 +266,7 @@ cv::Mat getCalibrationFrame(const int& ySize, const int& xSize, const std::strin
         {
             cv::Mat tmpMasterFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
             #pragma omp parallel for num_threads(numLogicalCores*2)
-            for (int n = 0; n < calibrationFrameArray.size(); n++)
-            {
+            for (int n = 0; n < calibrationFrameArray.size(); n++) {
                 cv::Mat calibrationFrame = cv::imread(calibrationFrameArray[n], cv::IMREAD_ANYDEPTH);
                 if (calibrationFrame.cols == masterFrame.cols && calibrationFrame.rows == masterFrame.rows)
                 {
@@ -289,15 +286,11 @@ cv::Mat removeHotPixels(cv::Mat lightFrame, const std::vector <std::vector<int>>
     for (const auto& hotPix : hotPixels) {
         int x = hotPix[0];
         int y = hotPix[1];
-        if (x > 0 || y > 0 || x < lightFrame.cols - 1 || y < lightFrame.rows - 1)
-        {
-            float centerPixelValue = 0;
-            for (int dy = -1; dy <= 1; dy++) 
-                for (int dx = -1; dx <= 1; dx++) 
-                    if (!(dx == 0 && dy == 0))
-                        centerPixelValue += lightFrame.at<float>(y + dy, x + dx)/8;
-            
-            lightFrame.at<float>(y, x) = centerPixelValue;
+        if (x > 0 || y > 0 || x < lightFrame.cols - 1 || y < lightFrame.rows - 1) {
+            lightFrame.at<float>(y, x) = 0;
+            std::vector<std::pair<int, int>> directions = { {0, 1}, {0, -1}, {1, 0}, {-1, 0} };
+            for (const auto& dir : directions) 
+                lightFrame.at<float>(y, x) += lightFrame.at<float>(y + dir.second, x + dir.first) / 4;
         }
     }
     return lightFrame;
@@ -420,10 +413,9 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
 
         bool sizesEqual = true;
  
-        for (int l = 0; l < qualVec.size() && sizesEqual; l++) {
+        for (int l = 0; l < qualVec.size() && sizesEqual; l++) 
             if ((qualVec[l][2] != qualVec[0][2]) || (qualVec[l][3] != qualVec[0][3]))
                 sizesEqual = false;
-        }
 
         if (sizesEqual) {
             std::vector xRef = clean(xvecAlign[0]);
