@@ -151,7 +151,7 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::ve
     std::vector<std::vector<float>> vote(refVectorSize, std::vector<float>(vecSize, 0)), corrVote(refVectorSize, std::vector<float>(vecSize, 0));
     for (const auto& refTri : refTriangles) 
         for (int b = 0; b < frameTriangles.size(); b++) 
-             if (std::abs(refTri[3] - frameTriangles[b][3]) + std::abs(refTri[4] - frameTriangles[b][4]) < e) 
+             if ((refTri[3] - frameTriangles[b][3])*(refTri[3] - frameTriangles[b][3]) + (refTri[4] - frameTriangles[b][4])*(refTri[4] - frameTriangles[b][4]) < e*e)
                 for (int i = 0; i < 3; i++)
                     vote[static_cast<int>(refTri[i])][static_cast<int>(frameTriangles[b][i])] += 1;    
 
