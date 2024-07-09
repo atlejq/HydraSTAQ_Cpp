@@ -196,11 +196,11 @@ std::vector<float> alignFrames(const std::vector<std::vector<float>>& corrVote, 
 std::vector<std::string> getFrames(const std::string& path, const std::string& ext) {
     std::vector<std::string> filenames;
 
-    if (std::filesystem::exists(path)) {
+    if (std::filesystem::exists(path)) 
         for (auto& p : std::filesystem::recursive_directory_iterator(path))
             if (p.path().extension() == ext)
                 filenames.push_back(p.path().string());
-    }
+    
     return filenames;
 }
 
@@ -424,7 +424,8 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                 std::vector<std::vector<float>> off(n, std::vector<float>(7));
                 std::vector<std::vector<std::string>> stackArray(n, std::vector<std::string>(8));
 
-                for (int k = 0; k < n; k++) {
+                #pragma omp parallel for num_threads(numLogicalCores*2)
+                for (int k = 0; k < n; k++) 
                     if (!clean(xvec[k]).empty() && clean(xvec[k]).size() >= topMatches) {
                         std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[k]), clean(yvec[k]));
                         std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(triangles(xRef, yRef), frameTriangles, clean(xvecAlign[0]).size(), clean(yvec[0]).size());
@@ -432,8 +433,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                         off[k] = { float(qualVec[k][0]), float(qualVec[k][1]), float(qualVec[k][2]), float(qualVec[k][3]), RTparams[0], RTparams[1], RTparams[2] };
                         stackArray[k] = { lightFrameArray[k], std::to_string(off[k][0]), std::to_string(off[k][1]), std::to_string(off[k][2]), std::to_string(off[k][3]), std::to_string(off[k][4]), std::to_string(off[k][5]), std::to_string(off[k][6]) };
                     }
-                }
-
+                
                 elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime).count();
 
                 writeStringMatrix(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
