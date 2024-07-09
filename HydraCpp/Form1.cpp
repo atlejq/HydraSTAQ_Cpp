@@ -153,16 +153,22 @@ std::vector<std::vector<int>> getCorrectedVoteMatrix(const std::vector<std::vect
                     vote[static_cast<int>(refTri[i])][static_cast<int>(frameTriangles[b][i])] += 1;    
 
     for (int row = 0; row < vote.size(); row++) {
-        int maxRowVote = *std::max_element(vote[row].begin(), vote[row].end());
-        int ind = std::distance(vote[row].begin(), std::max_element(vote[row].begin(), vote[row].end()));
+        //int maxRowVote = *std::max_element(vote[row].begin(), vote[row].end());
+        //int ind = std::distance(vote[row].begin(), std::max_element(vote[row].begin(), vote[row].end()));
 
+        int maxRowVote = 0;
+        int ind = 0;
         int nextLargestColElement = 0;
         int nextLargestRowElement = 0;
 
         for (int k = 0; k < vote[0].size(); k++)
-            if (k != ind)
-                if (nextLargestColElement < vote[row][k])
-                    nextLargestColElement = vote[row][k];
+            if (maxRowVote < vote[row][k]) {
+                nextLargestRowElement = maxRowVote;
+                maxRowVote = vote[row][k];
+                ind = k;
+            }
+            else if (nextLargestRowElement < vote[row][k]) 
+                nextLargestRowElement = vote[row][k];
 
         for (int l = 0; l < vote.size(); l++)
             if (l != row)
