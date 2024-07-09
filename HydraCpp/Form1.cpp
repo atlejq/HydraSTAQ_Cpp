@@ -269,16 +269,12 @@ cv::Mat getCalibrationFrame(const int& ySize, const int& xSize, const std::strin
 }
 
 //Function to remove hotpixels
-cv::Mat removeHotPixels(cv::Mat lightFrame, const std::vector <std::vector<int>>& hotPixels) {
+cv::Mat removeHotPixels(cv::Mat lightFrame, const std::vector<std::vector<int>>& hotPixels) {
     for (const auto& hotPix : hotPixels) {
         int x = hotPix[0];
         int y = hotPix[1];
-        if (x > 0 || y > 0 || x < lightFrame.cols - 1 || y < lightFrame.rows - 1) {
-            lightFrame.at<float>(y, x) = 0;
-            std::vector<std::pair<int, int>> directions = { {0, 1}, {0, -1}, {1, 0}, {-1, 0} };
-            for (const auto& dir : directions) 
-                lightFrame.at<float>(y, x) += lightFrame.at<float>(y + dir.second, x + dir.first) / 4;
-        }
+        if (x > 0 || y > 0 || x < lightFrame.cols - 1 || y < lightFrame.rows - 1) 
+            lightFrame.at<float>(y, x) = (lightFrame.at<float>(y, x + 1) + lightFrame.at<float>(y, x - 1) + lightFrame.at<float>(y + 1, x) + lightFrame.at<float>(y - 1, x)) / 4;
     }
     return lightFrame;
 }
