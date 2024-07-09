@@ -149,17 +149,11 @@ std::vector<float> findRT(const cv::Mat& A, const cv::Mat& B) {
 std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::vector<float>>& refTriangles, const std::vector<std::vector<float>>& frameTriangles, const int& refVectorSize, const int& vecSize) {
     constexpr float e = 0.005;
     std::vector<std::vector<float>> vote(refVectorSize, std::vector<float>(vecSize, 0)), corrVote(refVectorSize, std::vector<float>(vecSize, 0));
-    for (const auto& refTri : refTriangles) {
-        std::vector<int> triangleList;
+    for (const auto& refTri : refTriangles) 
         for (int b = 0; b < frameTriangles.size(); b++) 
-            if (std::abs(refTri[3] - frameTriangles[b][3]) < e)
-                triangleList.push_back(b);
-        
-        for (int b : triangleList) 
-            if (std::abs(refTri[3] - frameTriangles[b][3]) + std::abs(refTri[4] - frameTriangles[b][4]) < e) 
+             if (std::abs(refTri[3] - frameTriangles[b][3]) + std::abs(refTri[4] - frameTriangles[b][4]) < e) 
                 for (int i = 0; i < 3; i++)
                     vote[static_cast<int>(refTri[i])][static_cast<int>(frameTriangles[b][i])] += 1;    
-    }
 
     for (int row = 0; row < vote.size(); row++) {
         double maxRowVote = *std::max_element(vote[row].begin(), vote[row].end());
