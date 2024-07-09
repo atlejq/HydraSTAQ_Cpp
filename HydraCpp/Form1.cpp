@@ -143,9 +143,9 @@ std::vector<float> findRT(const cv::Mat& A, const cv::Mat& B) {
 }
 
 //Function for computing the "vote matrix"
-std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::vector<float>>& refTriangles, const std::vector<std::vector<float>>& frameTriangles, const int& refVectorSize, const int& vecSize) {
+std::vector<std::vector<int>> getCorrectedVoteMatrix(const std::vector<std::vector<float>>& refTriangles, const std::vector<std::vector<float>>& frameTriangles, const int& refVectorSize, const int& vecSize) {
     constexpr float eSquare = 0.005 * 0.005;
-    std::vector<std::vector<float>> vote(refVectorSize, std::vector<float>(vecSize, 0)), corrVote(refVectorSize, std::vector<float>(vecSize, 0));
+    std::vector<std::vector<int>> vote(refVectorSize, std::vector<int>(vecSize, 0)), corrVote(refVectorSize, std::vector<int>(vecSize, 0));
     for (const auto& refTri : refTriangles) 
         for (int b = 0; b < frameTriangles.size(); b++) 
              if ((refTri[3] - frameTriangles[b][3])*(refTri[3] - frameTriangles[b][3]) + (refTri[4] - frameTriangles[b][4])*(refTri[4] - frameTriangles[b][4]) < eSquare)
@@ -153,7 +153,7 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::ve
                     vote[static_cast<int>(refTri[i])][static_cast<int>(frameTriangles[b][i])] += 1;    
 
     for (int row = 0; row < vote.size(); row++) {
-        double maxRowVote = *std::max_element(vote[row].begin(), vote[row].end());
+        int maxRowVote = *std::max_element(vote[row].begin(), vote[row].end());
         int ind = std::distance(vote[row].begin(), std::max_element(vote[row].begin(), vote[row].end()));
 
         int nextLargestColElement = 0;
@@ -169,16 +169,16 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::ve
                 if (nextLargestRowElement < vote[l][ind])
                     nextLargestRowElement = vote[l][ind];
 
-        corrVote[row][ind] = std::max(maxRowVote - std::max(nextLargestColElement, nextLargestRowElement), 0.0);
+        corrVote[row][ind] = std::max(maxRowVote - std::max(nextLargestColElement, nextLargestRowElement), 0);
     }
     return corrVote;
 }
 
 //Function for aligning frames
-std::vector<float> alignFrames(const std::vector<std::vector<float>>& corrVote, const std::vector<float>& refVectorX, const std::vector<float>& refVectorY, const std::vector<float>& xvec, const std::vector<float>& yvec, const int& topMatches) {
+std::vector<float> alignFrames(const std::vector<std::vector<int>>& corrVote, const std::vector<float>& refVectorX, const std::vector<float>& refVectorY, const std::vector<float>& xvec, const std::vector<float>& yvec, const int& topMatches) {
     std::vector<std::vector<int>> starPairs;
     for (int i = 0; i < corrVote[0].size(); i++) {
-        auto maxElement = std::max_element(corrVote.begin(), corrVote.end(), [i](const std::vector<float>& a, const std::vector<float>& b) { return a[i] < b[i];   });
+        auto maxElement = std::max_element(corrVote.begin(), corrVote.end(), [i](const std::vector<int>& a, const std::vector<int>& b) { return a[i] < b[i]; });
         starPairs.push_back({ i, static_cast<int>(std::distance(corrVote.begin(), maxElement)), static_cast<int>((*maxElement)[i]) });
     }
 
@@ -427,7 +427,7 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                 for (int k = 0; k < n; k++) 
                     if (!clean(xvec[k]).empty() && clean(xvec[k]).size() >= topMatches) {
                         std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[k]), clean(yvec[k]));
-                        std::vector<std::vector<float>> correctedVoteMatrix = getCorrectedVoteMatrix(triangles(xRef, yRef), frameTriangles, clean(xvecAlign[0]).size(), clean(yvec[0]).size());
+                        std::vector<std::vector<int>> correctedVoteMatrix = getCorrectedVoteMatrix(triangles(xRef, yRef), frameTriangles, clean(xvecAlign[0]).size(), clean(yvec[0]).size());
                         std::vector<float> RTparams = alignFrames(correctedVoteMatrix, clean(xvecAlign[0]), clean(yvecAlign[0]), clean(xvec[k]), clean(yvec[k]), topMatches);
                         off[k] = { float(qualVec[k][0]), float(qualVec[k][1]), float(qualVec[k][2]), float(qualVec[k][3]), RTparams[0], RTparams[1], RTparams[2] };
                         stackArray[k] = { lightFrameArray[k], std::to_string(off[k][0]), std::to_string(off[k][1]), std::to_string(off[k][2]), std::to_string(off[k][3]), std::to_string(off[k][4]), std::to_string(off[k][5]), std::to_string(off[k][6]) };
