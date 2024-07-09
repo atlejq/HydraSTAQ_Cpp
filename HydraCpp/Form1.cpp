@@ -143,40 +143,43 @@ std::vector<float> findRT(const cv::Mat& A, const cv::Mat& B) {
 }
 
 //Function for computing the "vote matrix"
-std::vector<std::vector<int>> getStarPairs(const std::vector<std::vector<float>>& refTriangles, const std::vector<std::vector<float>>& frameTriangles, const int& refVectorSize, const int& vecSize) {
+std::vector<std::vector<int>> getVoteMatrix(const std::vector<std::vector<float>>& refTriangles, const std::vector<std::vector<float>>& frameTriangles, const int& refVectorSize, const int& vecSize) {
     constexpr float eSquare = 0.005 * 0.005;
-    std::vector<std::vector<int>> vote(refVectorSize, std::vector<int>(vecSize, 0));
-    for (const auto& refTri : refTriangles) 
-        for (int b = 0; b < frameTriangles.size(); b++) 
-             if ((refTri[3] - frameTriangles[b][3])*(refTri[3] - frameTriangles[b][3]) + (refTri[4] - frameTriangles[b][4])*(refTri[4] - frameTriangles[b][4]) < eSquare)
+    std::vector<std::vector<int>> voteMatrix(refVectorSize, std::vector<int>(vecSize, 0));
+    for (const auto& refTri : refTriangles)
+        for (int b = 0; b < frameTriangles.size(); b++)
+            if ((refTri[3] - frameTriangles[b][3]) * (refTri[3] - frameTriangles[b][3]) + (refTri[4] - frameTriangles[b][4]) * (refTri[4] - frameTriangles[b][4]) < eSquare)
                 for (int i = 0; i < 3; i++)
-                    vote[static_cast<int>(refTri[i])][static_cast<int>(frameTriangles[b][i])] += 1;    
+                    voteMatrix[static_cast<int>(refTri[i])][static_cast<int>(frameTriangles[b][i])] += 1;
 
+    return voteMatrix;
+}
+    
+std::vector<std::vector<int>> getStarPairs(std::vector<std::vector<int>>& voteMatrix){
     std::vector<std::vector<int>> starPairs;
-
-    for (int row = 0; row < vote.size(); row++) {
+    for (int row = 0; row < voteMatrix.size(); row++) {
 
         int maxRowVote = 0;
         int ind = 0;
         int nextLargestColElement = 0;
         int nextLargestRowElement = 0;
 
-        for (int k = 0; k < vote[0].size(); k++)
-            if (maxRowVote < vote[row][k]) {
+        for (int k = 0; k < voteMatrix[0].size(); k++)
+            if (maxRowVote < voteMatrix[row][k]) {
                 nextLargestRowElement = maxRowVote;
-                maxRowVote = vote[row][k];
+                maxRowVote = voteMatrix[row][k];
                 ind = k;
             }
-            else if (nextLargestRowElement < vote[row][k]) 
-                nextLargestRowElement = vote[row][k];
+            else if (nextLargestRowElement < voteMatrix[row][k])
+                nextLargestRowElement = voteMatrix[row][k];
 
-        for (int l = 0; l < vote.size(); l++)
+        for (int l = 0; l < voteMatrix.size(); l++)
             if (l != row)
-                if (nextLargestRowElement < vote[l][ind])
-                    nextLargestRowElement = vote[l][ind];
+                if (nextLargestRowElement < voteMatrix[l][ind])
+                    nextLargestRowElement = voteMatrix[l][ind];
 
         int correctedVotes = std::max(maxRowVote - std::max(nextLargestColElement, nextLargestRowElement), 0);
-        if(correctedVotes >= 1)
+        if(correctedVotes > 0)
             starPairs.push_back({ row, ind, correctedVotes });
     }
     sortByColumn(starPairs, 2);
@@ -429,7 +432,8 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                 for (int k = 0; k < n; k++) 
                     if (!clean(xvec[k]).empty() && clean(xvec[k]).size() >= topMatches) {
                         std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[k]), clean(yvec[k]));
-                        std::vector<std::vector<int>> starPairs = getStarPairs(triangles(xRef, yRef), frameTriangles, clean(xvecAlign[0]).size(), clean(yvec[0]).size());
+                        std::vector<std::vector<int>> voteMatrix = getVoteMatrix(triangles(xRef, yRef), frameTriangles, clean(xvecAlign[0]).size(), clean(yvec[0]).size());
+                        std::vector<std::vector<int>> starPairs = getStarPairs(voteMatrix);
                         std::vector<float> RTparams = alignFrames(starPairs, clean(xvecAlign[0]), clean(yvecAlign[0]), clean(xvec[k]), clean(yvec[k]), topMatches);
                         off[k] = { float(qualVec[k][0]), float(qualVec[k][1]), float(qualVec[k][2]), float(qualVec[k][3]), RTparams[0], RTparams[1], RTparams[2] };
                         stackArray[k] = { lightFrameArray[k], std::to_string(off[k][0]), std::to_string(off[k][1]), std::to_string(off[k][2]), std::to_string(off[k][3]), std::to_string(off[k][4]), std::to_string(off[k][5]), std::to_string(off[k][6]) };
