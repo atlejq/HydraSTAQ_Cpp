@@ -104,6 +104,7 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
     const float minEdge = 50;
     const int n = x.size();
     float d0, d1, d2;
+    std::vector<float> d(3);
     for (int i = 0; i < n - 2; i++) {
         for (int j = i + 1; j < n - 1; j++) {
             d0 = sqrt((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]));
@@ -112,10 +113,11 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
                     d1 = sqrt((x[j] - x[k]) * (x[j] - x[k]) + (y[j] - y[k]) * (y[j] - y[k]));
                     d2 = sqrt((x[i] - x[k]) * (x[i] - x[k]) + (y[i] - y[k]) * (y[i] - y[k]));
                     if (d1 > minEdge && d2 > minEdge) {
-                        if (d1 > d2) std::swap(d1, d2);
-                        if (d0 > d2) std::swap(d0, d2);
-                        if (d0 > d1) std::swap(d0, d1);
-                        triangleParameters.push_back({ float(i), float(j), float(k), d1 / d2, d0 / d2 });
+                        d = { d0, d1, d2 };
+                        if (d[1] > d[2]) std::swap(d[1], d[2]);
+                        if (d[0] > d[2]) std::swap(d[0], d[2]);
+                        if (d[0] > d[1]) std::swap(d[0], d[1]);
+                        triangleParameters.push_back({ float(i), float(j), float(k), float(d[1] / d[2]), float(d[0] / d[2]) });
                     }
                 }
             }
