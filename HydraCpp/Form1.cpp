@@ -82,9 +82,7 @@ std::vector<float> clean(const std::vector<float>& v) {
 }
 
 template <typename T> void sortByColumn(std::vector<std::vector<T>>& data, size_t column) {
-    std::sort(data.begin(), data.end(), [column](const std::vector<T>& v1, const std::vector<T>& v2) {
-        return v1[column] > v2[column];
-        });
+    std::sort(data.begin(), data.end(), [column](const std::vector<T>& v1, const std::vector<T>& v2) { return v1[column] > v2[column]; });
 }
 
 std::string filterSelector(std::string input) {
@@ -166,12 +164,8 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::ve
 std::vector<float> alignFrames(const std::vector<std::vector<float>>& corrVote, const std::vector<float>& refVectorX, const std::vector<float>& refVectorY, const std::vector<float>& xvec, const std::vector<float>& yvec, const int& topMatches) {
     std::vector<std::vector<int>> starPairs;
     for (int i = 0; i < corrVote[0].size(); i++) {
-        auto maxElement = std::max_element(corrVote.begin(), corrVote.end(),
-            [i](const std::vector<float>& a, const std::vector<float>& b) {
-                return a[i] < b[i];
-            });
-        int maxIndex = std::distance(corrVote.begin(), maxElement);
-        starPairs.push_back({ i, maxIndex, static_cast<int>((*maxElement)[i]) });
+        auto maxElement = std::max_element(corrVote.begin(), corrVote.end(), [i](const std::vector<float>& a, const std::vector<float>& b) { return a[i] < b[i];   });
+        starPairs.push_back({ i, static_cast<int>(std::distance(corrVote.begin(), maxElement)), static_cast<int>((*maxElement)[i]) });
     }
 
     sortByColumn(starPairs, 2);
