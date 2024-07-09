@@ -117,7 +117,7 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
                         if (d[1] > d[2]) std::swap(d[1], d[2]);
                         if (d[0] > d[2]) std::swap(d[0], d[2]);
                         if (d[0] > d[1]) std::swap(d[0], d[1]);
-                        triangleParameters.push_back({ float(i), float(j), float(k), float(d[1] / d[2]), float(d[0] / d[2]) });
+                        triangleParameters.push_back({ float(i), float(j), float(k), d[1] / d[2], d[0] / d[2] });
                     }
                 }
             }
