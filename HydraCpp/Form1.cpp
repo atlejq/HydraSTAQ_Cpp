@@ -155,7 +155,21 @@ std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::ve
     for (int row = 0; row < vote.size(); row++) {
         double maxRowVote = *std::max_element(vote[row].begin(), vote[row].end());
         int ind = std::distance(vote[row].begin(), std::max_element(vote[row].begin(), vote[row].end()));
-        corrVote[row][ind] = std::max(maxRowVote - std::max(*std::max_element(vote[row].begin(), vote[row].begin() + ind), *std::max_element(vote[row].begin() + ind + 1, vote[row].end())), 0.0);
+
+        int nextLargestColElement = 0;
+        int nextLargestRowElement = 0;
+
+        for (int k = 0; k < vote[0].size(); k++)
+            if (k != ind)
+                if (nextLargestColElement < vote[row][k])
+                    nextLargestColElement = vote[row][k];
+
+        for (int l = 0; l < vote.size(); l++)
+            if (l != row)
+                if (nextLargestRowElement < vote[l][ind])
+                    nextLargestRowElement = vote[l][ind];
+
+        corrVote[row][ind] = std::max(maxRowVote - std::max(nextLargestColElement, nextLargestRowElement), 0.0);
     }
     return corrVote;
 }
