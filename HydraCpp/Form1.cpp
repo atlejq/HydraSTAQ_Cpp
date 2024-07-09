@@ -104,7 +104,6 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
     const float minEdge = 50;
     const int n = x.size();
     float d0, d1, d2;
-    std::vector<float> d(3);
     for (int i = 0; i < n - 2; i++) {
         for (int j = i + 1; j < n - 1; j++) {
             d0 = sqrt((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]));
@@ -113,11 +112,10 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
                     d1 = sqrt((x[j] - x[k]) * (x[j] - x[k]) + (y[j] - y[k]) * (y[j] - y[k]));
                     d2 = sqrt((x[i] - x[k]) * (x[i] - x[k]) + (y[i] - y[k]) * (y[i] - y[k]));
                     if (d1 > minEdge && d2 > minEdge) {
-                        d = { d0, d1, d2 };
-                        if (d[1] > d[2]) std::swap(d[1], d[2]);
-                        if (d[0] > d[2]) std::swap(d[0], d[2]);
-                        if (d[0] > d[1]) std::swap(d[0], d[1]);
-                        triangleParameters.push_back({ float(i), float(j), float(k), float(d[1] / d[2]), float(d[0] / d[2]) });
+                        if (d1 > d2) std::swap(d1, d2);
+                        if (d0 > d2) std::swap(d0, d2);
+                        if (d0 > d1) std::swap(d0, d1);
+                        triangleParameters.push_back({ float(i), float(j), float(k), d1 / d2, d0 / d2 });
                     }
                 }
             }
@@ -343,30 +341,30 @@ std::vector<int> Hydra::Form1::RegisterFrames() {
 
     if (!lightFrames.empty()) {
         auto startTime = std::chrono::high_resolution_clock::now();
-        std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(6 + 2 * maxStars, -1));
+        std::vector<float> q(6 + 2 * maxStars);
+        std::vector<std::vector<float>> qualVec(lightFrames.size());
         std::vector<std::vector<std::string>> qualVecS(lightFrames.size(), std::vector<std::string>(6 + 2 * maxStars));
 
         #pragma omp parallel for num_threads(numLogicalCores*2)
         for (int k = 0; k < n; k++) {
             cv::Mat lightFrame = cv::imread(lightFrames[k], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-            if (!lightFrame.empty()) {
-                std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
+            std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
 
-                qualVec[k][0] = k;
-                qualVec[k][1] = starMatrix.size();
-                qualVec[k][2] = cv::sum(lightFrame)[0];
-                qualVec[k][3] = lightFrame.cols;
-                qualVec[k][4] = lightFrame.rows;
-                qualVec[k][5] = lightFrame.elemSize();
+            q[0] = k;
+            q[1] = starMatrix.size();
+            q[2] = cv::sum(lightFrame)[0];
+            q[3] = lightFrame.cols;
+            q[4] = lightFrame.rows;
+            q[5] = lightFrame.elemSize();
 
-                if (starMatrix.size() > 3) {
-                    sortByColumn(starMatrix, 2);
-                    for (int i = 0; i < std::min(maxStars, int(starMatrix.size())); i++) {
-                        qualVec[k][i + 6] = starMatrix[i][0];
-                        qualVec[k][i + 6 + maxStars] = starMatrix[i][1];
-                    }
+            if (starMatrix.size() > 3) {
+                sortByColumn(starMatrix, 2);
+                for (int i = 0; i < std::min(maxStars, int(starMatrix.size())); i++) {
+                    q[i + 6] = starMatrix[i][0];
+                    q[i + 6 + maxStars] = starMatrix[i][1];
                 }
             }
+            qualVec[k] = q;
         }
 
         sortByColumn(qualVec, 1);
