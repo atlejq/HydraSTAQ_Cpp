@@ -101,22 +101,22 @@ std::string filterSelector(std::string input) {
 //Function for enumerating star triangles
 std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std::vector<float>& y) {
     std::vector<std::vector<float>> triangleParameters;
-    const float minEdge = 50;
+    const float minSquare = 50*50;
     const int n = x.size();
-    float d0, d1, d2, d3;
+    float s0, s1, s2, s3;
     for (int i = 0; i < n - 2; i++) {
         for (int j = i + 1; j < n - 1; j++) {
-            d3 = sqrt((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]));
-            if (d3 > minEdge) {
+            s3 = ((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]));
+            if (s3 > minSquare) {
                 for (int k = j + 1; k < n; k++) {
-                    d1 = sqrt((x[j] - x[k]) * (x[j] - x[k]) + (y[j] - y[k]) * (y[j] - y[k]));
-                    d2 = sqrt((x[i] - x[k]) * (x[i] - x[k]) + (y[i] - y[k]) * (y[i] - y[k]));
-                    if (d1 > minEdge && d2 > minEdge) {
-                        d0 = d3;
-                        if (d1 > d2) std::swap(d1, d2);
-                        if (d0 > d2) std::swap(d0, d2);
-                        if (d0 > d1) std::swap(d0, d1);
-                        triangleParameters.push_back({ float(i), float(j), float(k), d1 / d2, d0 / d2 });
+                    s1 = ((x[j] - x[k]) * (x[j] - x[k]) + (y[j] - y[k]) * (y[j] - y[k]));
+                    s2 = ((x[i] - x[k]) * (x[i] - x[k]) + (y[i] - y[k]) * (y[i] - y[k]));
+                    if (s1 > minSquare && s2 > minSquare) {
+                        s0 = s3;
+                        if (s1 > s2) std::swap(s1, s2);
+                        if (s0 > s2) std::swap(s0, s2);
+                        if (s0 > s1) std::swap(s0, s1);
+                        triangleParameters.push_back({ float(i), float(j), float(k), sqrt(s1 / s2), sqrt(s0 / s2) });
                     }
                 }
             }
@@ -146,11 +146,11 @@ std::vector<float> findRT(const cv::Mat& A, const cv::Mat& B) {
 
 //Function for computing the "vote matrix"
 std::vector<std::vector<float>> getCorrectedVoteMatrix(const std::vector<std::vector<float>>& refTriangles, const std::vector<std::vector<float>>& frameTriangles, const int& refVectorSize, const int& vecSize) {
-    constexpr float e = 0.005;
+    constexpr float eSquare = 0.005 * 0.005;
     std::vector<std::vector<float>> vote(refVectorSize, std::vector<float>(vecSize, 0)), corrVote(refVectorSize, std::vector<float>(vecSize, 0));
     for (const auto& refTri : refTriangles) 
         for (int b = 0; b < frameTriangles.size(); b++) 
-             if ((refTri[3] - frameTriangles[b][3])*(refTri[3] - frameTriangles[b][3]) + (refTri[4] - frameTriangles[b][4])*(refTri[4] - frameTriangles[b][4]) < e*e)
+             if ((refTri[3] - frameTriangles[b][3])*(refTri[3] - frameTriangles[b][3]) + (refTri[4] - frameTriangles[b][4])*(refTri[4] - frameTriangles[b][4]) < eSquare)
                 for (int i = 0; i < 3; i++)
                     vote[static_cast<int>(refTri[i])][static_cast<int>(frameTriangles[b][i])] += 1;    
 
