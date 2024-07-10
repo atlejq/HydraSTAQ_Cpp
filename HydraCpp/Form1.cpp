@@ -335,8 +335,7 @@ std::vector<int> Hydra::Form1::RegisterFrames() {
 
     if (!lightFrames.empty()) {
         auto startTime = std::chrono::high_resolution_clock::now();
-        std::vector<float> q(6 + 2 * maxStars);
-        std::vector<std::vector<float>> qualVec(lightFrames.size());
+        std::vector<std::vector<float>> qualVec(lightFrames.size(), std::vector<float>(6 + 2 * maxStars));
         std::vector<std::vector<std::string>> qualVecS(lightFrames.size(), std::vector<std::string>(6 + 2 * maxStars));
 
         #pragma omp parallel for num_threads(numLogicalCores*2)
@@ -344,21 +343,20 @@ std::vector<int> Hydra::Form1::RegisterFrames() {
             cv::Mat lightFrame = cv::imread(lightFrames[k], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
             std::vector<std::vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
 
-            q[0] = k;
-            q[1] = starMatrix.size();
-            q[2] = cv::sum(lightFrame)[0];
-            q[3] = lightFrame.cols;
-            q[4] = lightFrame.rows;
-            q[5] = lightFrame.elemSize();
+            qualVec[k][0] = k;
+            qualVec[k][1] = starMatrix.size();
+            qualVec[k][2] = cv::sum(lightFrame)[0];
+            qualVec[k][3] = lightFrame.cols;
+            qualVec[k][4] = lightFrame.rows;
+            qualVec[k][5] = lightFrame.elemSize();
 
             if (starMatrix.size() > 3) {
                 sortByColumn(starMatrix, 2);
                 for (int i = 0; i < std::min(maxStars, int(starMatrix.size())); i++) {
-                    q[i + 6] = starMatrix[i][0];
-                    q[i + 6 + maxStars] = starMatrix[i][1];
+                    qualVec[k][i + 6] = starMatrix[i][0];
+                    qualVec[k][i + 6 + maxStars] = starMatrix[i][1];
                 }
             }
-            qualVec[k] = q;
         }
 
         sortByColumn(qualVec, 1);
