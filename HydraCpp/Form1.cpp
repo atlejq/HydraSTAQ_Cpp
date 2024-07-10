@@ -153,27 +153,27 @@ std::vector<std::vector<int>> getStarPairs(std::vector<std::vector<int>>& voteMa
     for (int row = 0; row < voteMatrix.size(); row++) {
 
         int maxRowVote = 0;
-        int ind = 0;
+        int maxRowVoteIndex = 0;
         int nextLargestColElement = 0;
         int nextLargestRowElement = 0;
 
-        for (int k = 0; k < voteMatrix[0].size(); k++)
-            if (maxRowVote < voteMatrix[row][k]) {
+        for (int i = 0; i < voteMatrix[0].size(); i++)
+            if (maxRowVote < voteMatrix[row][i]) {
                 nextLargestRowElement = maxRowVote;
-                maxRowVote = voteMatrix[row][k];
-                ind = k;
+                maxRowVote = voteMatrix[row][i];
+                maxRowVoteIndex = i;
             }
-            else if (nextLargestRowElement < voteMatrix[row][k])
-                nextLargestRowElement = voteMatrix[row][k];
+            else if (nextLargestRowElement < voteMatrix[row][i])
+                nextLargestRowElement = voteMatrix[row][i];
 
-        for (int l = 0; l < voteMatrix.size(); l++)
-            if (l != row)
-                if (nextLargestRowElement < voteMatrix[l][ind])
-                    nextLargestRowElement = voteMatrix[l][ind];
+        for (int r = 0; r < voteMatrix.size(); r++)
+            if (r != row)
+                if (nextLargestColElement < voteMatrix[r][maxRowVoteIndex])
+                    nextLargestColElement = voteMatrix[r][maxRowVoteIndex];
 
         int correctedVotes = std::max(maxRowVote - std::max(nextLargestColElement, nextLargestRowElement), 0);
         if(correctedVotes > 0)
-            starPairs.push_back({ row, ind, correctedVotes });
+            starPairs.push_back({ row, maxRowVoteIndex, correctedVotes });
     }
     sortByColumn(starPairs, 2);
     return starPairs;
