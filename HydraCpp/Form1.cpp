@@ -547,12 +547,14 @@ std::vector<int> Hydra::Form1::Stack() {
             #pragma omp parallel for num_threads(numLogicalCores*2) 
             for (int k = 0; k < n; k++) {
                 cv::Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);
-
-                for (int h = 0; h < xSize * ySize; h++)
-                    if (abs(lightFrame.at<float>(h) - medianFrame.at<float>(h)) > 2.0 * std.at<float>(h))
-                        lightFrame.at<float>(h) = medianFrame.at<float>(h);
                 
-           
+                for (int h = 0; h < xSize * ySize; h++)
+                {
+                    float* median = &medianFrame.at<float>(h);
+                    float* data = &lightFrame.at<float>(h);
+                    if (abs(*data - *median) > 2.0 * std.at<float>(h))
+                        *data = *median;
+                }
 
                 addWeighted(stackFrame, 1, lightFrame, 1 / float(n), 0.0, stackFrame);
             }
