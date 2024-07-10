@@ -98,14 +98,10 @@ template <typename T> void sortByColumn(std::vector<std::vector<T>>& data, size_
 }
 
 std::string filterSelector(std::string input) {
-    if (input == "LRGB")
-        return "LRGB";
-    else if (input == "RGB" && filter == "L")
-        return "L";
-    else if (input == "RGB" && filter != "L")
-        return "RGB";
-    else
-        return filter;
+    if (input == "LRGB") return "LRGB";
+    else if (input == "RGB" && filter == "L") return "L";
+    else if (input == "RGB" && filter != "L") return "RGB";
+    else return filter;
 }
 
 //Function for enumerating star triangles
@@ -114,7 +110,7 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
     const float minSquare = 50*50;
     const int n = x.size();
     float s0, s1, s2, s3;
-    for (int i = 0; i < n - 2; i++) {
+    for (int i = 0; i < n - 2; i++) 
         for (int j = i + 1; j < n - 1; j++) {
             s3 = ((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]));
             if (s3 > minSquare) {
@@ -131,7 +127,7 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
                 }
             }
         }
-    }
+
     return triangleParameters;
 }
 
@@ -151,7 +147,6 @@ std::vector<std::vector<int>> getVoteMatrix(const std::vector<std::vector<float>
 std::vector<std::vector<int>> getStarPairs(std::vector<std::vector<int>>& voteMatrix){
     std::vector<std::vector<int>> starPairs;
     for (int row = 0; row < voteMatrix.size(); row++) {
-
         int maxRowVote = 0;
         int maxRowVoteIndex = 0;
         int nextLargestColElement = 0;
@@ -242,14 +237,10 @@ std::vector<std::vector<float>> analyzeStarField(cv::Mat lightFrame, const float
 cv::Mat addCircles(cv::Mat img, const std::vector<float>& xcoords, const std::vector<float>& ycoords, const int& size) {
     cv::Scalar color;
 
-    if (align == "R")
-        color = cv::Scalar(0, 0, 255);
-    else if (align == "G")
-        color = cv::Scalar(0, 255, 0);
-    else if (align == "B")
-        color = cv::Scalar(255, 0, 0);
-    else 
-        color = cv::Scalar(255, 255, 255);
+    if (align == "R") color = cv::Scalar(0, 0, 255);
+    else if (align == "G") color = cv::Scalar(0, 255, 0);
+    else if (align == "B") color = cv::Scalar(255, 0, 0);
+    else color = cv::Scalar(255, 255, 255);
 
     for (int i = 0; i < xcoords.size(); i++) 
         cv::circle(img, cv::Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, color);
@@ -322,7 +313,6 @@ cv::Mat computeMedianImage(const std::vector<cv::Mat>& imageStack) {
     #pragma omp parallel num_threads(numLogicalCores*2)
     {
         std::vector<float> pixelValues(numImages);
-
         #pragma omp for
         for (int i = 0; i < rows * cols; i++) {
             for (int imgIdx = 0; imgIdx < numImages; imgIdx++) 
