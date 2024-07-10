@@ -525,7 +525,7 @@ std::vector<int> Hydra::Form1::Stack() {
             xSize = int(xSize * samplingFactor);
             ySize = int(ySize * samplingFactor);
 
-            cv::Mat p(ySize, xSize, CV_32FC1, cv::Scalar(0)), psqr(ySize, xSize, CV_32FC1, cv::Scalar(0)), var(ySize, xSize, CV_32FC1, cv::Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+            cv::Mat p(ySize, xSize, CV_32FC1, cv::Scalar(0)), psqr(ySize, xSize, CV_32FC1, cv::Scalar(0)), std(ySize, xSize, CV_32FC1, cv::Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
             std::vector<cv::Mat> tempArray(medianBatchSize, cv::Mat(ySize, xSize, CV_32FC1));
 
             shuffle(m.begin(), m.end(), std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count()));
@@ -541,7 +541,7 @@ std::vector<int> Hydra::Form1::Stack() {
                 addWeighted(medianFrame, 1, computeMedianImage(tempArray), 1 / float(batches), 0.0, medianFrame);
             }
 
-            var = (psqr - p.mul(p)) * iterations / (iterations - 1);
+            cv::sqrt((psqr - p.mul(p)) * iterations / (iterations - 1), std);
 
             if (!std::filesystem::exists(path + outputDir))
                 std::filesystem::create_directory(path + outputDir);
@@ -554,8 +554,12 @@ std::vector<int> Hydra::Form1::Stack() {
                 cv::Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);
 
                 for (int h = 0; h < xSize * ySize; h++)
-                    if (abs(lightFrame.at<float>(h) - medianFrame.at<float>(h)) > 2.0 * cv::sqrt(var.at<float>(h)))
-                        lightFrame.at<float>(h) = medianFrame.at<float>(h);
+                {
+                    float* median = &medianFrame.at<float>(h);
+                    float* data = &lightFrame.at<float>(h);
+                    if (abs(*data - *median) > 2.0 * std.at<float>(h))
+                        *data = *median;
+                }
 
                 addWeighted(stackFrame, 1, lightFrame, 1 / float(n), 0.0, stackFrame);
             }
