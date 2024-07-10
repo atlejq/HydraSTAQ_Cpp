@@ -428,11 +428,13 @@ std::vector<int> Hydra::Form1::ComputeOffsets() {
                 std::vector<std::vector<float>> off(n, std::vector<float>(7));
                 std::vector<std::vector<std::string>> stackArray(n, std::vector<std::string>(8));
 
+                std::vector<std::vector<float>> refTriangles = triangles(xRef, yRef);
+
                 #pragma omp parallel for num_threads(numLogicalCores*2)
                 for (int k = 0; k < n; k++) 
                     if (!clean(xvec[k]).empty() && clean(xvec[k]).size() >= topMatches) {
                         std::vector<std::vector<float>> frameTriangles = triangles(clean(xvec[k]), clean(yvec[k]));
-                        std::vector<std::vector<int>> voteMatrix = getVoteMatrix(triangles(xRef, yRef), frameTriangles, clean(xvecAlign[0]).size(), clean(yvec[0]).size());
+                        std::vector<std::vector<int>> voteMatrix = getVoteMatrix(refTriangles, frameTriangles, clean(xvecAlign[0]).size(), clean(yvec[0]).size());
                         std::vector<std::vector<int>> starPairs = getStarPairs(voteMatrix);
                         std::vector<float> RTparams = alignFrames(starPairs, clean(xvecAlign[0]), clean(yvecAlign[0]), clean(xvec[k]), clean(yvec[k]), topMatches);
                         off[k] = { float(qualVec[k][0]), float(qualVec[k][1]), float(qualVec[k][2]), float(qualVec[k][3]), RTparams[0], RTparams[1], RTparams[2] };
