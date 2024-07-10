@@ -72,6 +72,18 @@ std::tuple<std::vector<std::string>, std::vector<std::vector<float>>, std::vecto
     return std::make_tuple(lightFrameArray, qualVec, xvec, yvec);
 }
 
+//Function to get all the file names in the given directory.
+std::vector<std::string> getFrames(const std::string& path, const std::string& ext) {
+    std::vector<std::string> filenames;
+
+    if (std::filesystem::exists(path))
+        for (auto& p : std::filesystem::recursive_directory_iterator(path))
+            if (p.path().extension() == ext)
+                filenames.push_back(p.path().string());
+
+    return filenames;
+}
+
 std::vector<float> clean(const std::vector<float>& v) {
     std::vector<float> vFiltered;
     for (int i = 0; i < v.size(); i++) 
@@ -123,25 +135,6 @@ std::vector<std::vector<float>> triangles(const std::vector<float>& x, const std
     return triangleParameters;
 }
 
-//Function for computing angular and translational offsets between vectors
-std::vector<float> findRT(const cv::Mat& A, const cv::Mat& B) {
-    cv::Mat centroid_A, centroid_B, A_centered, B_centered;
-    cv::reduce(A, centroid_A, 1, cv::REDUCE_AVG);
-    cv::reduce(B, centroid_B, 1, cv::REDUCE_AVG);
-    cv::subtract(A, cv::repeat(centroid_A, 1, A.cols), A_centered);
-    cv::subtract(B, cv::repeat(centroid_B, 1, B.cols), B_centered);
-
-    cv::Mat U, S, Vt;
-    cv::SVD::compute(A_centered * B_centered.t(), S, U, Vt);
-    cv::Mat R = (U * Vt).t();
-    
-    if (cv::determinant(R) < 0)
-        R = (U * (cv::Mat_<float>(2, 2) << 1, 0, 0, -1) * Vt).t();
-
-    cv::Mat t = -R * centroid_A + centroid_B;
-    return { std::atan2(R.at<float>(1, 0), R.at<float>(0, 0)), t.at<float>(0, 0), t.at<float>(1, 0) };
-}
-
 //Function for computing the "vote matrix"
 std::vector<std::vector<int>> getVoteMatrix(const std::vector<std::vector<float>>& refTriangles, const std::vector<std::vector<float>>& frameTriangles, const int& refVectorSize, const int& vecSize) {
     constexpr float eSquare = 0.005 * 0.005;
@@ -186,8 +179,27 @@ std::vector<std::vector<int>> getStarPairs(std::vector<std::vector<int>>& voteMa
     return starPairs;
 }
 
+//Function for computing angular and translational offsets between vectors
+std::vector<float> findRT(const cv::Mat& A, const cv::Mat& B) {
+    cv::Mat centroid_A, centroid_B, A_centered, B_centered;
+    cv::reduce(A, centroid_A, 1, cv::REDUCE_AVG);
+    cv::reduce(B, centroid_B, 1, cv::REDUCE_AVG);
+    cv::subtract(A, cv::repeat(centroid_A, 1, A.cols), A_centered);
+    cv::subtract(B, cv::repeat(centroid_B, 1, B.cols), B_centered);
+
+    cv::Mat U, S, Vt;
+    cv::SVD::compute(A_centered * B_centered.t(), S, U, Vt);
+    cv::Mat R = (U * Vt).t();
+
+    if (cv::determinant(R) < 0)
+        R = (U * (cv::Mat_<float>(2, 2) << 1, 0, 0, -1) * Vt).t();
+
+    cv::Mat t = -R * centroid_A + centroid_B;
+    return { std::atan2(R.at<float>(1, 0), R.at<float>(0, 0)), t.at<float>(0, 0), t.at<float>(1, 0) };
+}
+
 //Function for aligning frames
-std::vector<float> alignFrames(const std::vector<std::vector<int>>& starPairs, const std::vector<float>& refVectorX, const std::vector<float>& refVectorY, const std::vector<float>& xvec, const std::vector<float>& yvec, const int& topMatches) { 
+std::vector<float> alignFrames(const std::vector<std::vector<int>>& starPairs, const std::vector<float>& refVectorX, const std::vector<float>& refVectorY, const std::vector<float>& xvec, const std::vector<float>& yvec, const int& topMatches) {
     cv::Mat referenceMatrix(2, topMatches, CV_32F), frameMatrix(2, topMatches, CV_32F);
 
     for (int i = 0; i < topMatches; i++) {
@@ -198,18 +210,6 @@ std::vector<float> alignFrames(const std::vector<std::vector<int>>& starPairs, c
     }
 
     return findRT(frameMatrix, referenceMatrix);
-}
-
-//Function to get all the file names in the given directory.
-std::vector<std::string> getFrames(const std::string& path, const std::string& ext) {
-    std::vector<std::string> filenames;
-
-    if (std::filesystem::exists(path)) 
-        for (auto& p : std::filesystem::recursive_directory_iterator(path))
-            if (p.path().extension() == ext)
-                filenames.push_back(p.path().string());
-    
-    return filenames;
 }
 
 //Function to analyze the star field in the given light frame.
