@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Form1.h"
 
+using namespace cv;
 using namespace std;
 
 string path = "";
@@ -178,27 +179,27 @@ vector<vector<int>> getStarPairs(vector<vector<int>>& voteMatrix){
 }
 
 //Function for computing angular and translational offsets between vectors
-vector<float> findRT(const cv::Mat& A, const cv::Mat& B) {
-    cv::Mat centroid_A, centroid_B, A_centered, B_centered;
-    cv::reduce(A, centroid_A, 1, cv::REDUCE_AVG);
-    cv::reduce(B, centroid_B, 1, cv::REDUCE_AVG);
-    cv::subtract(A, cv::repeat(centroid_A, 1, A.cols), A_centered);
-    cv::subtract(B, cv::repeat(centroid_B, 1, B.cols), B_centered);
+vector<float> findRT(const Mat& A, const Mat& B) {
+    Mat centroid_A, centroid_B, A_centered, B_centered;
+    reduce(A, centroid_A, 1, REDUCE_AVG);
+    reduce(B, centroid_B, 1, REDUCE_AVG);
+    subtract(A, repeat(centroid_A, 1, A.cols), A_centered);
+    subtract(B, repeat(centroid_B, 1, B.cols), B_centered);
 
-    cv::Mat U, S, Vt;
-    cv::SVD::compute(A_centered * B_centered.t(), S, U, Vt);
-    cv::Mat R = (U * Vt).t();
+    Mat U, S, Vt;
+    SVD::compute(A_centered * B_centered.t(), S, U, Vt);
+    Mat R = (U * Vt).t();
 
-    if (cv::determinant(R) < 0)
-        R = (U * (cv::Mat_<float>(2, 2) << 1, 0, 0, -1) * Vt).t();
+    if (determinant(R) < 0)
+        R = (U * (Mat_<float>(2, 2) << 1, 0, 0, -1) * Vt).t();
 
-    cv::Mat t = -R * centroid_A + centroid_B;
+    Mat t = -R * centroid_A + centroid_B;
     return { atan2(R.at<float>(1, 0), R.at<float>(0, 0)), t.at<float>(0, 0), t.at<float>(1, 0) };
 }
 
 //Function for aligning frames
 vector<float> alignFrames(const vector<vector<int>>& starPairs, const vector<float>& refVectorX, const vector<float>& refVectorY, const vector<float>& xvec, const vector<float>& yvec, const int& topMatches) {
-    cv::Mat referenceMatrix(2, topMatches, CV_32F), frameMatrix(2, topMatches, CV_32F);
+    Mat referenceMatrix(2, topMatches, CV_32F), frameMatrix(2, topMatches, CV_32F);
 
     for (int i = 0; i < topMatches; i++) {
         referenceMatrix.at<float>(0, i) = refVectorX[starPairs[i][0]];
@@ -211,7 +212,7 @@ vector<float> alignFrames(const vector<vector<int>>& starPairs, const vector<flo
 }
 
 //Function to analyze the star field in the given light frame.
-vector<vector<float>> analyzeStarField(cv::Mat lightFrame, const float& t) {
+vector<vector<float>> analyzeStarField(Mat lightFrame, const float& t) {
     vector<vector<float>> starMatrix;
 
     if ((lightFrame.elemSize() == 1 || lightFrame.elemSize() == 2) && lightFrame.channels() == 1) {
@@ -219,16 +220,16 @@ vector<vector<float>> analyzeStarField(cv::Mat lightFrame, const float& t) {
             lightFrame = lightFrame / 255;
             lightFrame.convertTo(lightFrame, CV_8U);
         }
-        cv::Mat filteredImage, thresh;
-        cv::medianBlur(lightFrame, filteredImage, 3);
-        cv::threshold(filteredImage, thresh, t * 255, 255, 0);
+        Mat filteredImage, thresh;
+        medianBlur(lightFrame, filteredImage, 3);
+        threshold(filteredImage, thresh, t * 255, 255, 0);
 
-        vector<vector<cv::Point>> contours;
-        vector<cv::Vec4i> hierarchy;
-        cv::findContours(thresh, contours, hierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
+        vector<vector<Point>> contours;
+        vector<Vec4i> hierarchy;
+        findContours(thresh, contours, hierarchy, RETR_LIST, CHAIN_APPROX_SIMPLE);
 
         for (const auto& c : contours) {
-            cv::RotatedRect rect = cv::minAreaRect(c);
+            RotatedRect rect = minAreaRect(c);
             float d = sqrt(rect.size.width * rect.size.width + rect.size.height * rect.size.height);
             if (d < 25)
                 starMatrix.push_back({ rect.center.x, rect.center.y, d });
@@ -237,26 +238,26 @@ vector<vector<float>> analyzeStarField(cv::Mat lightFrame, const float& t) {
     return starMatrix;
 }
 
-cv::Mat addCircles(cv::Mat img, const vector<float>& xcoords, const vector<float>& ycoords, const int& size) {
-    cv::Scalar color;
+Mat addCircles(Mat img, const vector<float>& xcoords, const vector<float>& ycoords, const int& size) {
+    Scalar color;
 
-    if (alignFilter == "R") color = cv::Scalar(0, 0, 255);
-    else if (alignFilter == "G") color = cv::Scalar(0, 255, 0);
-    else if (alignFilter == "B") color = cv::Scalar(255, 0, 0);
-    else color = cv::Scalar(255, 255, 255);
+    if (alignFilter == "R") color = Scalar(0, 0, 255);
+    else if (alignFilter == "G") color = Scalar(0, 255, 0);
+    else if (alignFilter == "B") color = Scalar(255, 0, 0);
+    else color = Scalar(255, 255, 255);
 
     for (int i = 0; i < xcoords.size(); i++) 
-        cv::circle(img, cv::Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, color);
+        circle(img, Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, color);
 
     return img;
 }
 
 //Function to fetch a calibration frame
-cv::Mat getCalibrationFrame(const int& ySize, const int& xSize, const string& calibrationPath, const float& defaultValue) {
-    cv::Mat masterFrame(ySize, xSize, CV_32FC1, cv::Scalar(defaultValue));
+Mat getCalibrationFrame(const int& ySize, const int& xSize, const string& calibrationPath, const float& defaultValue) {
+    Mat masterFrame(ySize, xSize, CV_32FC1, Scalar(defaultValue));
 
     if (filesystem::exists(calibrationPath + "/" + "masterFrame.tif")) {
-        cv::Mat tmpCalibrationFrame = cv::imread(calibrationPath + "/" + "masterFrame.tif", cv::IMREAD_ANYDEPTH);
+        Mat tmpCalibrationFrame = imread(calibrationPath + "/" + "masterFrame.tif", IMREAD_ANYDEPTH);
         if (tmpCalibrationFrame.cols == masterFrame.cols && tmpCalibrationFrame.rows == masterFrame.rows)
             masterFrame = tmpCalibrationFrame;
     }
@@ -264,10 +265,10 @@ cv::Mat getCalibrationFrame(const int& ySize, const int& xSize, const string& ca
         vector<string> calibrationFrameArray = getFrames(calibrationPath + "/", ext);
         if (!calibrationFrameArray.empty())
         {
-            cv::Mat tmpMasterFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
+            Mat tmpMasterFrame(ySize, xSize, CV_32FC1, Scalar(0));
             #pragma omp parallel for num_threads(numLogicalCores*2)
             for (int n = 0; n < calibrationFrameArray.size(); n++) {
-                cv::Mat calibrationFrame = cv::imread(calibrationFrameArray[n], cv::IMREAD_ANYDEPTH);
+                Mat calibrationFrame = imread(calibrationFrameArray[n], IMREAD_ANYDEPTH);
                 if (calibrationFrame.cols == masterFrame.cols && calibrationFrame.rows == masterFrame.rows)
                 {
                     calibrationFrame.convertTo(calibrationFrame, CV_32FC1, 1.0 / pow(255, calibrationFrame.elemSize()));
@@ -282,7 +283,7 @@ cv::Mat getCalibrationFrame(const int& ySize, const int& xSize, const string& ca
 }
 
 //Function to remove hotpixels
-cv::Mat removeHotPixels(cv::Mat lightFrame, const vector<vector<int>>& hotPixels) {
+Mat removeHotPixels(Mat lightFrame, const vector<vector<int>>& hotPixels) {
     for (const auto& hotPix : hotPixels) {
         int x = hotPix[0];
         int y = hotPix[1];
@@ -293,25 +294,25 @@ cv::Mat removeHotPixels(cv::Mat lightFrame, const vector<vector<int>>& hotPixels
 }
 
 //Function to rotate images
-cv::Mat processFrame(const string& framePath, const cv::Mat& masterDarkFrame, const cv::Mat& calibratedFlatFrame, const float& backGroundCorrection, const vector<float>& RTparams, const vector<vector<int>>& hotPixels) {
-    cv::Mat lightFrame = cv::imread(framePath, cv::IMREAD_GRAYSCALE);
+Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat& calibratedFlatFrame, const float& backGroundCorrection, const vector<float>& RTparams, const vector<vector<int>>& hotPixels) {
+    Mat lightFrame = imread(framePath, IMREAD_GRAYSCALE);
     lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
     lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame) / calibratedFlatFrame;
     lightFrame = removeHotPixels(lightFrame, hotPixels);
-    cv::resize(lightFrame, lightFrame, cv::Size(samplingFactor * lightFrame.cols, samplingFactor * lightFrame.rows), 0, 0, interpolationFlag);
-    cv::Mat M = (cv::Mat_<float>(2, 3) << cos(RTparams[0]), -sin(RTparams[0]), RTparams[1], sin(RTparams[0]), cos(RTparams[0]), RTparams[2]);
+    resize(lightFrame, lightFrame, Size(samplingFactor * lightFrame.cols, samplingFactor * lightFrame.rows), 0, 0, interpolationFlag);
+    Mat M = (Mat_<float>(2, 3) << cos(RTparams[0]), -sin(RTparams[0]), RTparams[1], sin(RTparams[0]), cos(RTparams[0]), RTparams[2]);
     warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
     return lightFrame;
 }
 
 //Function to compute median image
-cv::Mat computeMedianImage(const vector<cv::Mat>& imageStack) {
+Mat computeMedianImage(const vector<Mat>& imageStack) {
     int rows = imageStack[0].rows;
     int cols = imageStack[0].cols;
     int numImages = imageStack.size();
     int midIndex = numImages / 2;
 
-    cv::Mat medianImage(rows, cols, CV_32FC1);
+    Mat medianImage(rows, cols, CV_32FC1);
 
     #pragma omp parallel num_threads(numLogicalCores*2)
     {
@@ -343,12 +344,12 @@ vector<int> Hydra::Form1::RegisterFrames() {
 
         #pragma omp parallel for num_threads(numLogicalCores*2)
         for (int k = 0; k < n; k++) {
-            cv::Mat lightFrame = cv::imread(lightFrames[k], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+            Mat lightFrame = imread(lightFrames[k], IMREAD_ANYCOLOR | IMREAD_ANYDEPTH);
             vector<vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
 
             qualVec[k][0] = k;
             qualVec[k][1] = starMatrix.size();
-            qualVec[k][2] = cv::sum(lightFrame)[0];
+            qualVec[k][2] = sum(lightFrame)[0];
             qualVec[k][3] = lightFrame.cols;
             qualVec[k][4] = lightFrame.rows;
             qualVec[k][5] = lightFrame.elemSize();
@@ -436,11 +437,11 @@ vector<int> Hydra::Form1::ComputeOffsets() {
 
                 writeStringMatrix(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
 
-                cv::Mat maxQualFrame = cv::imread(lightFrameArrayAlign[0], cv::IMREAD_GRAYSCALE);
-                cv::Mat debugFrame;
-                cv::resize(maxQualFrame, debugFrame, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, cv::INTER_CUBIC);
-                cv::Mat labelledImage(debugFrame.size(), CV_8UC3);
-                cv::cvtColor(debugFrame, labelledImage, cv::COLOR_GRAY2BGR);
+                Mat maxQualFrame = imread(lightFrameArrayAlign[0], IMREAD_GRAYSCALE);
+                Mat debugFrame;
+                resize(maxQualFrame, debugFrame, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, INTER_CUBIC);
+                Mat labelledImage(debugFrame.size(), CV_8UC3);
+                cvtColor(debugFrame, labelledImage, COLOR_GRAY2BGR);
                 labelledImage = addCircles(labelledImage, xRef, yRef, 8);
 
                 vector<float> xDeb(maxStars), yDeb(maxStars);
@@ -452,13 +453,13 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                     }
                     labelledImage = addCircles(labelledImage, xDeb, yDeb, 5);
                 }
-                cv::imshow("Debug", labelledImage);
+                imshow("Debug", labelledImage);
             }
         }
     }
     return { n, elapsedTime };
-    cv::waitKey(0);
-    cv::destroyAllWindows();
+    waitKey(0);
+    destroyAllWindows();
 }
 
 //Function for stacking the images
@@ -489,11 +490,11 @@ vector<int> Hydra::Form1::Stack() {
         int xSize = stoi(stackInfo[0][3]);
         int ySize = stoi(stackInfo[0][4]);
 
-        cv::Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
-        cv::Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
+        Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
+        Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
 
-        cv::Scalar mean, stddev;
-        cv::meanStdDev(masterDarkFrame, mean, stddev);
+        Scalar mean, stddev;
+        meanStdDev(masterDarkFrame, mean, stddev);
 
         vector<vector<int>> hotPixels;
 
@@ -503,10 +504,10 @@ vector<int> Hydra::Form1::Stack() {
                     hotPixels.push_back({ x,y });
 
         double minVal, maxVal;
-        cv::minMaxLoc(calibratedFlatFrame, &minVal, &maxVal);
+        minMaxLoc(calibratedFlatFrame, &minVal, &maxVal);
 
         if (minVal > 0) {
-            calibratedFlatFrame *= xSize * ySize / cv::sum(calibratedFlatFrame)[0];
+            calibratedFlatFrame *= xSize * ySize / sum(calibratedFlatFrame)[0];
             if (n < medianBatchSize)
                 medianBatchSize = n;
 
@@ -521,8 +522,8 @@ vector<int> Hydra::Form1::Stack() {
             xSize = int(xSize * samplingFactor);
             ySize = int(ySize * samplingFactor);
 
-            cv::Mat p(ySize, xSize, CV_32FC1, cv::Scalar(0)), psqr(ySize, xSize, CV_32FC1, cv::Scalar(0)), std(ySize, xSize, CV_32FC1, cv::Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, cv::Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, cv::Scalar(0));
-            vector<cv::Mat> tempArray(medianBatchSize, cv::Mat(ySize, xSize, CV_32FC1));
+            Mat p(ySize, xSize, CV_32FC1, Scalar(0)), psqr(ySize, xSize, CV_32FC1, Scalar(0)), std(ySize, xSize, CV_32FC1, Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, Scalar(0));
+            vector<Mat> tempArray(medianBatchSize, Mat(ySize, xSize, CV_32FC1));
 
             shuffle(m.begin(), m.end(), default_random_engine(chrono::system_clock::now().time_since_epoch().count()));
 
@@ -537,7 +538,7 @@ vector<int> Hydra::Form1::Stack() {
                 addWeighted(medianFrame, 1, computeMedianImage(tempArray), 1 / float(batches), 0.0, medianFrame);
             }
 
-            cv::sqrt((psqr - p.mul(p)) * iterations / (iterations - 1), std);
+            sqrt((psqr - p.mul(p)) * iterations / (iterations - 1), std);
 
             if (!filesystem::exists(path + outputDir))
                 filesystem::create_directory(path + outputDir);
@@ -547,7 +548,7 @@ vector<int> Hydra::Form1::Stack() {
 
             #pragma omp parallel for num_threads(numLogicalCores*2) 
             for (int k = 0; k < n; k++) {
-                cv::Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);
+                Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);
                 
                 for (int h = 0; h < xSize * ySize; h++)
                 {
@@ -564,12 +565,12 @@ vector<int> Hydra::Form1::Stack() {
 
             elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
 
-            cv::Mat small;
-            cv::resize(stackFrame, small, cv::Size(stackFrame.cols / (scaling * samplingFactor), stackFrame.rows / (scaling * samplingFactor)), 0, 0, cv::INTER_CUBIC);
-            cv::imshow("Stack", small * 5);
+            Mat small;
+            resize(stackFrame, small, cv::Size(stackFrame.cols / (scaling * samplingFactor), stackFrame.rows / (scaling * samplingFactor)), 0, 0, INTER_CUBIC);
+            imshow("Stack", small * 5);
         }
     }
     return { n, elapsedTime };
-    cv::waitKey(0);
-    cv::destroyAllWindows();
+    waitKey(0);
+    destroyAllWindows();
 }
