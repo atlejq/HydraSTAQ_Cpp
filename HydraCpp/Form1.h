@@ -12,6 +12,8 @@ extern std::string flatDarksDir;
 extern std::string darksGroup;
 extern std::string flatDarksGroup;
 extern std::string ext;
+extern std::string filter;
+extern std::string alignFilter;
 extern int detectionThreshold;
 extern int discardPercentage;
 extern int medianBatchSize;
@@ -20,8 +22,6 @@ extern int maxStars;
 extern int topMatches;
 extern int numLogicalCores;
 extern float samplingFactor;
-extern std::string filter;
-extern std::string align;
 
 namespace Hydra {
 	using namespace System;
@@ -789,19 +789,19 @@ namespace Hydra {
 		}
 
 		private: System::Void radioButton5_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-			align = "R";
+			alignFilter = "R";
 		}
 
 		private: System::Void radioButton6_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-			align = "G";
+			alignFilter = "G";
 		}
 
 		private: System::Void radioButton7_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-			align = "B";
+			alignFilter = "B";
 		}
 
 		private: System::Void radioButton8_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-			align = "L";
+			alignFilter = "L";
 		}
 
 		private: System::Void radioButton9_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
