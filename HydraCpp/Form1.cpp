@@ -393,17 +393,17 @@ vector<int> Hydra::Form1::ComputeOffsets() {
         auto startTime = chrono::high_resolution_clock::now();
 
         tuple filterTuple = unpack(readStringMatrix(qualVecPath));
-        tuple alignTuple = unpack(readStringMatrix(qualVecAlignPath));
+        tuple alignFilterTuple = unpack(readStringMatrix(qualVecAlignPath));
 
         vector<string> lightFrameArray = get<0>(filterTuple);
         vector<vector<float>> qualVec = get<1>(filterTuple);
         vector<vector<float>> xvec = get<2>(filterTuple);
         vector<vector<float>> yvec = get<3>(filterTuple);
 
-        vector<string> lightFrameArrayAlign = get<0>(alignTuple);
-        vector<vector<float>> qualVecAlign = get<1>(alignTuple);
-        vector<vector<float>> xvecAlign = get<2>(alignTuple);
-        vector<vector<float>> yvecAlign = get<3>(alignTuple);
+        vector<string> lightFrameArrayAlign = get<0>(alignFilterTuple);
+        vector<vector<float>> qualVecAlign = get<1>(alignFilterTuple);
+        vector<vector<float>> xvecAlign = get<2>(alignFilterTuple);
+        vector<vector<float>> yvecAlign = get<3>(alignFilterTuple);
 
         bool sizesEqual = true;
  
