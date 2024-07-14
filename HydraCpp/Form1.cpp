@@ -419,7 +419,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                     vector yFrame = clean(yvec[k]);
                     if (!xFrame.empty() && xFrame.size() >= topMatches) {
                         vector<vector<float>> frameTriangles = triangles(xFrame, yFrame);
-                        vector<vector<int>> voteMatrix = getVoteMatrix(refTriangles, frameTriangles, xRef.size(), yFrame.size());
+                        vector<vector<int>> voteMatrix = getVoteMatrix(refTriangles, frameTriangles, xRef.size(), xFrame.size());
                         vector<vector<int>> starPairs = getStarPairs(voteMatrix);
                         RTparams[k] = alignFrames(starPairs, xRef, yRef, xFrame, yFrame, topMatches);
                         stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[k][0]), to_string(RTparams[k][1]), to_string(RTparams[k][2]) };
