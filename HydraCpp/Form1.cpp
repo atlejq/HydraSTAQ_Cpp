@@ -34,8 +34,7 @@ vector<vector<string>> readStringMatrix(const string& path) {
     if (commaSeparatedArrayStream.is_open()) {
         while (getline(commaSeparatedArrayStream, line)) {
             vector<string> commaSeparatedLine;
-            string::size_type start, end;
-            start = 0;
+            string::size_type end, start = 0;
 
             while ((end = line.find(',', start)) != string::npos) {
                 commaSeparatedLine.push_back(line.substr(start, end - start));
@@ -79,7 +78,6 @@ tuple<vector<string>, vector<vector<float>>, vector<vector<float>>, vector<vecto
 //Function to get all the file names in the given directory.
 vector<string> getFrames(const string& path, const string& ext) {
     vector<string> filenames;
-
     if (filesystem::exists(path))
         for (auto& p : filesystem::recursive_directory_iterator(path))
             if (p.path().extension() == ext)
@@ -231,7 +229,7 @@ vector<vector<float>> analyzeStarField(Mat lightFrame, const float& t) {
     return starMatrix;
 }
 
-Mat addCircles(Mat img, const vector<float>& xcoords, const vector<float>& ycoords, const int& size) {
+void addCircles(Mat& img, const vector<float>& xcoords, const vector<float>& ycoords, const int& size) {
     Scalar color;
 
     if (alignFilter == "R") color = Scalar(0, 0, 255);
@@ -241,8 +239,6 @@ Mat addCircles(Mat img, const vector<float>& xcoords, const vector<float>& ycoor
 
     for (int i = 0; i < xcoords.size(); i++) 
         circle(img, Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, color);
-
-    return img;
 }
 
 //Function to fetch a calibration frame
@@ -433,7 +429,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 resize(maxQualFrame, maxQualFrame, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, INTER_CUBIC);
                 Mat labelledImage(maxQualFrame.size(), CV_8UC3);
                 cvtColor(maxQualFrame, labelledImage, COLOR_GRAY2BGR);
-                labelledImage = addCircles(labelledImage, xRef, yRef, 8);
+                addCircles(labelledImage, xRef, yRef, 8);
 
                 vector<float> xDeb(maxStars), yDeb(maxStars);
 
@@ -442,7 +438,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                         xDeb[j] = cos(off[i][4]) * xvec[i][j] - sin(off[i][4]) * yvec[i][j] + off[i][5];
                         yDeb[j] = sin(off[i][4]) * xvec[i][j] + cos(off[i][4]) * yvec[i][j] + off[i][6];
                     }
-                    labelledImage = addCircles(labelledImage, xDeb, yDeb, 5);
+                    addCircles(labelledImage, xDeb, yDeb, 5);
                 }
                 imshow("Debug", labelledImage);
             }
