@@ -406,7 +406,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
 
             if (!xRef.empty() && xRef.size() >= topMatches) {
                 n = floor(qualVec.size() * (100 - float(discardPercentage)) / 100);
-                vector<vector<float>> off(n, vector<float>(7));
+                vector<vector<float>> RTparams(n, vector<float>(3));
                 vector<vector<string>> stackArray(n, vector<string>(8));
                 vector<vector<float>> refTriangles = triangles(xRef, yRef);
 
@@ -416,9 +416,8 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                         vector<vector<float>> frameTriangles = triangles(clean(xvec[k]), clean(yvec[k]));
                         vector<vector<int>> voteMatrix = getVoteMatrix(refTriangles, frameTriangles, xRef.size(), clean(yvec[0]).size());
                         vector<vector<int>> starPairs = getStarPairs(voteMatrix);
-                        vector<float> RTparams = alignFrames(starPairs, xRef, yRef, clean(xvec[k]), clean(yvec[k]), topMatches);
-                        off[k] = { float(qualVec[k][0]), float(qualVec[k][1]), float(qualVec[k][2]), float(qualVec[k][3]), RTparams[0], RTparams[1], RTparams[2] };
-                        stackArray[k] = { lightFrameArray[k], to_string(off[k][0]), to_string(off[k][1]), to_string(off[k][2]), to_string(off[k][3]), to_string(off[k][4]), to_string(off[k][5]), to_string(off[k][6]) };
+                        RTparams[k] = alignFrames(starPairs, xRef, yRef, clean(xvec[k]), clean(yvec[k]), topMatches);
+                        stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[k][0]), to_string(RTparams[k][1]), to_string(RTparams[k][2]) };
                     }
                 
                 elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
@@ -431,12 +430,11 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 cvtColor(maxQualFrame, labelledImage, COLOR_GRAY2BGR);
                 addCircles(labelledImage, xRef, yRef, 8);
 
-                vector<float> xDeb(maxStars), yDeb(maxStars);
-
-                for (int i = 0; i < off.size(); i++) {
+                for (int i = 0; i < RTparams.size(); i++) {
+                    vector<float> xDeb(maxStars), yDeb(maxStars);
                     for (int j = 0; j < xvec[i].size(); j++) {
-                        xDeb[j] = cos(off[i][4]) * xvec[i][j] - sin(off[i][4]) * yvec[i][j] + off[i][5];
-                        yDeb[j] = sin(off[i][4]) * xvec[i][j] + cos(off[i][4]) * yvec[i][j] + off[i][6];
+                        xDeb[j] = cos(RTparams[i][0]) * xvec[i][j] - sin(RTparams[i][0]) * yvec[i][j] + RTparams[i][1];
+                        yDeb[j] = sin(RTparams[i][0]) * xvec[i][j] + cos(RTparams[i][0]) * yvec[i][j] + RTparams[i][2];
                     }
                     addCircles(labelledImage, xDeb, yDeb, 5);
                 }
