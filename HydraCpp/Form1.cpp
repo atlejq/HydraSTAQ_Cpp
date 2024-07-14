@@ -522,19 +522,19 @@ vector<int> Hydra::Form1::Stack() {
             ySize = int(ySize * samplingFactor);
 
             Mat p(ySize, xSize, CV_32FC1, Scalar(0)), psqr(ySize, xSize, CV_32FC1, Scalar(0)), std(ySize, xSize, CV_32FC1, Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, Scalar(0));
-            vector<Mat> tempArray(medianBatchSize, Mat(ySize, xSize, CV_32FC1));
+            vector<Mat> medianArray(medianBatchSize, Mat(ySize, xSize, CV_32FC1));
 
             shuffle(m.begin(), m.end(), default_random_engine(chrono::system_clock::now().time_since_epoch().count()));
 
             for (int k = 0; k < batches; k++) {
                 #pragma omp parallel for num_threads(numLogicalCores*2)
-                for (int tempcount = 0; tempcount < medianBatchSize; tempcount++) {
-                    int i = m[k * medianBatchSize + tempcount];
-                    tempArray[tempcount] = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], RTparams[i], hotPixels);;
-                    addWeighted(p, 1, tempArray[tempcount] / iterations, 1, 0.0, p);
-                    addWeighted(psqr, 1, tempArray[tempcount].mul(tempArray[tempcount]) / iterations, 1, 0.0, psqr);
+                for (int c = 0; c < medianBatchSize; c++) {
+                    int i = m[k * medianBatchSize + c];
+                    medianArray[c] = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], RTparams[i], hotPixels);;
+                    addWeighted(p, 1, medianArray[c] / iterations, 1, 0.0, p);
+                    addWeighted(psqr, 1, medianArray[c].mul(medianArray[c]) / iterations, 1, 0.0, psqr);
                 }
-                addWeighted(medianFrame, 1, computeMedianImage(tempArray), 1 / float(batches), 0.0, medianFrame);
+                addWeighted(medianFrame, 1, computeMedianImage(medianArray), 1 / float(batches), 0.0, medianFrame);
             }
 
             sqrt((psqr - p.mul(p)) * iterations / (iterations - 1), std);
@@ -547,8 +547,7 @@ vector<int> Hydra::Form1::Stack() {
 
             #pragma omp parallel for num_threads(numLogicalCores*2) 
             for (int k = 0; k < n; k++) {
-                Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);            
-                Mat absDiff, mask;
+                Mat absDiff, mask, lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);              
                 absdiff(lightFrame, medianFrame, absDiff);
                 compare(absDiff, 2.0 * std, mask, CMP_GT);
                 medianFrame.copyTo(lightFrame, mask);
