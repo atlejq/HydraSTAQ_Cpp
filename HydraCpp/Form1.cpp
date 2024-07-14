@@ -365,9 +365,8 @@ vector<int> Hydra::Form1::ComputeOffsets() {
     if ((filesystem::exists(qualVecPath) && filesystem::exists(qualVecAlignPath))) {
         auto startTime = chrono::high_resolution_clock::now();
 
-        vector<vector<string>> inputMatrix =  readStringMatrix(qualVecPath);
-        vector<vector<string>> inputMatrixAlign = readStringMatrix(qualVecPath);
-
+        vector<vector<string>> inputMatrix = readStringMatrix(qualVecPath);
+        vector<vector<string>> inputMatrixAlign = readStringMatrix(qualVecAlignPath);
         vector<string> lightFrameArray(inputMatrix.size()), lightFrameArrayAlign(inputMatrixAlign.size());
         vector<vector<float>> qualVec(inputMatrix.size()), xvec(inputMatrix.size(), vector<float>(maxStars)), yvec(inputMatrix.size(), vector<float>(maxStars));
         vector<vector<float>> qualVecAlign(inputMatrixAlign.size()), xvecAlign(inputMatrixAlign.size(), vector<float>(maxStars)), yvecAlign(inputMatrixAlign.size(), vector<float>(maxStars));
