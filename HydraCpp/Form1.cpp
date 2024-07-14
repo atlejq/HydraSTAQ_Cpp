@@ -419,7 +419,6 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 n = floor(qualVec.size() * (100 - float(discardPercentage)) / 100);
                 vector<vector<float>> off(n, vector<float>(7));
                 vector<vector<string>> stackArray(n, vector<string>(8));
-
                 vector<vector<float>> refTriangles = triangles(xRef, yRef);
 
                 #pragma omp parallel for num_threads(numLogicalCores*2)
@@ -549,12 +548,10 @@ vector<int> Hydra::Form1::Stack() {
             #pragma omp parallel for num_threads(numLogicalCores*2) 
             for (int k = 0; k < n; k++) {
                 Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);            
-
                 Mat absDiff, mask;
                 absdiff(lightFrame, medianFrame, absDiff);
                 compare(absDiff, 2.0 * std, mask, CMP_GT);
                 medianFrame.copyTo(lightFrame, mask);
-
                 addWeighted(stackFrame, 1, lightFrame, 1 / float(n), 0.0, stackFrame);
             }
 
