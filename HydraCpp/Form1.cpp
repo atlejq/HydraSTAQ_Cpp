@@ -58,21 +58,22 @@ void writeStringMatrix(const string& path, const vector<vector<string>>& stringA
     }
 }
 
-tuple<vector<string>, vector<vector<float>>, vector<vector<float>>, vector<vector<float>>> unpack(const vector<vector<string>>& inputArray) {
-    vector<string> lightFrameArray(inputArray.size());
-    vector<vector<float>> qualVec(inputArray.size()), xvec(inputArray.size(), vector<float>(maxStars)), yvec(inputArray.size(), vector<float>(maxStars));
+void unpack(const vector<vector<string>>& inputArray, vector<string>* lightFrameArray, vector<vector<float>>* qualVec, vector<vector<float>>* xvec, vector<vector<float>>* yvec) {
+    size_t inputSize = inputArray.size();
+    lightFrameArray->resize(inputSize);
+    qualVec->resize(inputSize);
+    xvec->resize(inputSize, vector<float>(maxStars));
+    yvec->resize(inputSize, vector<float>(maxStars));
 
-    for (int i = 0; i < inputArray.size(); i++) {
-        lightFrameArray[i] = inputArray[i][0];
-        qualVec[i] = { stof(inputArray[i][1]), stof(inputArray[i][2]), stof(inputArray[i][3]), stof(inputArray[i][4]), stof(inputArray[i][5]) };
+    for (size_t i = 0; i < inputSize; i++) {
+        (*lightFrameArray)[i] = inputArray[i][0];
+        (*qualVec)[i] = { stof(inputArray[i][1]), stof(inputArray[i][2]), stof(inputArray[i][3]), stof(inputArray[i][4]), stof(inputArray[i][5]) };
 
-        for (int j = 0; j < maxStars; j++) {
-            xvec[i][j] = stof(inputArray[i][j + 6]);
-            yvec[i][j] = stof(inputArray[i][j + 6 + maxStars]);
+        for (size_t j = 0; j < maxStars; j++) {
+            (*xvec)[i][j] = stof(inputArray[i][j + 6]);
+            (*yvec)[i][j] = stof(inputArray[i][j + 6 + maxStars]);
         }
     }
-
-    return make_tuple(lightFrameArray, qualVec, xvec, yvec);
 }
 
 //Function to get all the file names in the given directory.
@@ -370,18 +371,11 @@ vector<int> Hydra::Form1::ComputeOffsets() {
     if ((filesystem::exists(qualVecPath) && filesystem::exists(qualVecAlignPath))) {
         auto startTime = chrono::high_resolution_clock::now();
 
-        tuple filterTuple = unpack(readStringMatrix(qualVecPath));
-        tuple alignFilterTuple = unpack(readStringMatrix(qualVecAlignPath));
+        vector<string> lightFrameArray, lightFrameArrayAlign;
+        vector<vector<float>> qualVec, xvec, yvec, qualVecAlign, xvecAlign, yvecAlign;
 
-        vector<string> lightFrameArray = get<0>(filterTuple);
-        vector<vector<float>> qualVec = get<1>(filterTuple);
-        vector<vector<float>> xvec = get<2>(filterTuple);
-        vector<vector<float>> yvec = get<3>(filterTuple);
-
-        vector<string> lightFrameArrayAlign = get<0>(alignFilterTuple);
-        vector<vector<float>> qualVecAlign = get<1>(alignFilterTuple);
-        vector<vector<float>> xvecAlign = get<2>(alignFilterTuple);
-        vector<vector<float>> yvecAlign = get<3>(alignFilterTuple);
+        unpack(readStringMatrix(qualVecPath), &lightFrameArray, &qualVec, &xvec, &yvec);
+        unpack(readStringMatrix(qualVecAlignPath), &lightFrameArrayAlign, &qualVecAlign, &xvecAlign, &yvecAlign);
 
         bool sizesEqual = true;
  
