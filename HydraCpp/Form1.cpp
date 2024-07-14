@@ -398,9 +398,8 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 vector<vector<string>> stackArray(n, vector<string>(8));
                 vector<vector<float>> refTriangles = triangles(xRef, yRef);
 
-                Mat maxQualFrame = imread(lightFrameArrayAlign[0], IMREAD_GRAYSCALE);
-                resize(maxQualFrame, maxQualFrame, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, INTER_CUBIC);
-                Mat labelledImage(maxQualFrame.size(), CV_8UC3);
+                Mat labelledImage, maxQualFrame;
+                resize(imread(lightFrameArrayAlign[0], IMREAD_GRAYSCALE), maxQualFrame, cv::Size(), 1.0 / scaling, 1.0 / scaling, INTER_CUBIC);
                 cvtColor(maxQualFrame, labelledImage, COLOR_GRAY2BGR);
 
                 for (int j = 0; j < xRef.size(); j++)
@@ -415,7 +414,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                         vector<vector<float>> frameTriangles = triangles(xFrame, yFrame);
                         vector<vector<int>> voteMatrix = getVoteMatrix(refTriangles, frameTriangles, xRef.size(), xFrame.size());
                         vector<vector<int>> starPairs = getStarPairs(voteMatrix);
-                        vector<float> RTparams = alignFrames(starPairs, xRef, yRef, xFrame, yFrame, topMatches);
+                        vector<float>  RTparams = alignFrames(starPairs, xRef, yRef, xFrame, yFrame, topMatches);
                         stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[0]), to_string(RTparams[1]), to_string(RTparams[2]) };
                         
                         for (int j = 0; j < xFrame.size(); j++) 
@@ -529,7 +528,7 @@ vector<int> Hydra::Form1::Stack() {
             imwrite(path + outputDir + "Stack" + "_" + to_string(n) + "_" + frameFilter + "_" + to_string(int(samplingFactor * 100)) + ".tif", stackFrame);
 
             elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
-            resize(stackFrame, stackFrame, cv::Size(stackFrame.cols / (scaling * samplingFactor), stackFrame.rows / (scaling * samplingFactor)), 0, 0, INTER_CUBIC);
+            resize(stackFrame, stackFrame, cv::Size(), 1.0 / (scaling * samplingFactor), 1.0 / (scaling * samplingFactor), INTER_CUBIC);
             imshow("Stack", stackFrame * 5);
         }
     }
