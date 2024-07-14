@@ -392,7 +392,6 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 for (int j = 0; j < xRef.size(); j++)
                     circle(labelledImage, Point_(xRef[j] / scaling, yRef[j] / scaling), 8, colorMap.at(alignFilter));
 
-
                 #pragma omp parallel for num_threads(numLogicalCores*2)
                 for (int k = 0; k < n; k++)
                 {
