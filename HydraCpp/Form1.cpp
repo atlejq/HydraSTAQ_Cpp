@@ -225,10 +225,9 @@ vector<vector<float>> analyzeStarField(Mat& lightFrame, const float& t) {
     return starMatrix;
 }
 
-void addCircles(Mat& img, const vector<float>& xcoords, const vector<float>& ycoords, const string& filter, const int& size) {
+void addCircle(Mat& img, const float& xcoord, const float& ycoord, const string& filter, const int& size) {
     static const map<string, Scalar> colorMap = {{"R", Scalar(0, 0, 255)}, {"G", Scalar(0, 255, 0)}, {"B", Scalar(255, 0, 0)}, {"L", Scalar(255, 255, 255)} };
-    for (int i = 0; i < xcoords.size(); i++) 
-        circle(img, Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, colorMap.at(filter));
+    circle(img, Point_(xcoord / scaling, ycoord / scaling), size, colorMap.at(filter));
 }
 
 //Function to fetch a calibration frame
@@ -404,7 +403,9 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 resize(maxQualFrame, maxQualFrame, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, INTER_CUBIC);
                 Mat labelledImage(maxQualFrame.size(), CV_8UC3);
                 cvtColor(maxQualFrame, labelledImage, COLOR_GRAY2BGR);
-                addCircles(labelledImage, xRef, yRef, alignFilter, 8);
+
+                for (int j = 0; j < xRef.size(); j++)
+                    addCircle(labelledImage, xRef[j], yRef[j], alignFilter, 8);
 
                 #pragma omp parallel for num_threads(numLogicalCores*2)
                 for (int k = 0; k < n; k++)
@@ -418,12 +419,8 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                         RTparams[k] = alignFrames(starPairs, xRef, yRef, xFrame, yFrame, topMatches);
                         stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[k][0]), to_string(RTparams[k][1]), to_string(RTparams[k][2]) };
                         
-                        vector<float> xDeb(maxStars), yDeb(maxStars);
-                        for (int j = 0; j < xFrame.size(); j++) {
-                            xDeb[j] = cos(RTparams[k][0]) * xFrame[j] - sin(RTparams[k][0]) * yFrame[j] + RTparams[k][1];
-                            yDeb[j] = sin(RTparams[k][0]) * xFrame[j] + cos(RTparams[k][0]) * yFrame[j] + RTparams[k][2];
-                        }
-                        addCircles(labelledImage, xDeb, yDeb, frameFilter, 5);
+                        for (int j = 0; j < xFrame.size(); j++) 
+                            addCircle(labelledImage, cos(RTparams[k][0]) * xFrame[j] - sin(RTparams[k][0]) * yFrame[j] + RTparams[k][1], sin(RTparams[k][0]) * xFrame[j] + cos(RTparams[k][0]) * yFrame[j] + RTparams[k][2], frameFilter, 5);
                     }
                 }
                 elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
