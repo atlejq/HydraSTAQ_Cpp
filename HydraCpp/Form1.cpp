@@ -437,10 +437,9 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 writeStringMatrix(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
 
                 Mat maxQualFrame = imread(lightFrameArrayAlign[0], IMREAD_GRAYSCALE);
-                Mat debugFrame;
-                resize(maxQualFrame, debugFrame, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, INTER_CUBIC);
-                Mat labelledImage(debugFrame.size(), CV_8UC3);
-                cvtColor(debugFrame, labelledImage, COLOR_GRAY2BGR);
+                resize(maxQualFrame, maxQualFrame, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, INTER_CUBIC);
+                Mat labelledImage(maxQualFrame.size(), CV_8UC3);
+                cvtColor(maxQualFrame, labelledImage, COLOR_GRAY2BGR);
                 labelledImage = addCircles(labelledImage, xRef, yRef, 8);
 
                 vector<float> xDeb(maxStars), yDeb(maxStars);
@@ -530,7 +529,7 @@ vector<int> Hydra::Form1::Stack() {
                 #pragma omp parallel for num_threads(numLogicalCores*2)
                 for (int c = 0; c < medianBatchSize; c++) {
                     int i = m[k * medianBatchSize + c];
-                    medianArray[c] = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], RTparams[i], hotPixels);;
+                    medianArray[c] = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], RTparams[i], hotPixels);
                     addWeighted(p, 1, medianArray[c] / iterations, 1, 0.0, p);
                     addWeighted(psqr, 1, medianArray[c].mul(medianArray[c]) / iterations, 1, 0.0, psqr);
                 }
@@ -557,9 +556,8 @@ vector<int> Hydra::Form1::Stack() {
 
             elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
 
-            Mat small;
-            resize(stackFrame, small, cv::Size(stackFrame.cols / (scaling * samplingFactor), stackFrame.rows / (scaling * samplingFactor)), 0, 0, INTER_CUBIC);
-            imshow("Stack", small * 5);
+            resize(stackFrame, stackFrame, cv::Size(stackFrame.cols / (scaling * samplingFactor), stackFrame.rows / (scaling * samplingFactor)), 0, 0, INTER_CUBIC);
+            imshow("Stack", stackFrame * 5);
         }
     }
     return { n, elapsedTime };
