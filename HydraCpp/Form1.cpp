@@ -14,7 +14,7 @@ string flatDarksDir = "/flatDarks/";
 string darksGroup = "RGB";
 string flatDarksGroup = "LRGB";
 string ext = ".png";
-string filter = "R";
+string frameFilter = "R";
 string alignFilter = "R";
 
 int detectionThreshold = 50;
@@ -97,9 +97,9 @@ template <typename T> void sortByColumn(vector<vector<T>>& data, size_t column) 
 
 string filterSelector(string input) {
     if (input == "LRGB") return "LRGB";
-    else if (input == "RGB" && filter == "L") return "L";
-    else if (input == "RGB" && filter != "L") return "RGB";
-    else return filter;
+    else if (input == "RGB" && frameFilter == "L") return "L";
+    else if (input == "RGB" && frameFilter != "L") return "RGB";
+    else return frameFilter;
 }
 
 //Function for enumerating star triangles
@@ -226,12 +226,9 @@ vector<vector<float>> analyzeStarField(Mat& lightFrame, const float& t) {
 }
 
 void addCircles(Mat& img, const vector<float>& xcoords, const vector<float>& ycoords, const string& filter, const int& size) {
-    Scalar color;
+    static const map<string, Scalar> colorMap = {{"R", Scalar(0, 0, 255)}, {"G", Scalar(0, 255, 0)}, {"B", Scalar(255, 0, 0)}, {"L", Scalar(255, 255, 255)} };
 
-    if (filter == "R") color = Scalar(0, 0, 255);
-    else if (filter == "G") color = Scalar(0, 255, 0);
-    else if (filter == "B") color = Scalar(255, 0, 0);
-    else color = Scalar(255, 255, 255);
+    Scalar color = colorMap.at(filter);
 
     for (int i = 0; i < xcoords.size(); i++) 
         circle(img, Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, color);
@@ -319,7 +316,7 @@ Mat computeMedianImage(const vector<Mat>& imageStack) {
 vector<int> Hydra::Form1::RegisterFrames() {
     int elapsedTime = 0;
 
-    vector<string> lightFrames = getFrames(path + lightDir + filter, ext);
+    vector<string> lightFrames = getFrames(path + lightDir + frameFilter, ext);
     int n = lightFrames.size();
 
     if (!lightFrames.empty()) {
@@ -361,7 +358,7 @@ vector<int> Hydra::Form1::RegisterFrames() {
         if (!filesystem::exists(path + parameterDir))
             filesystem::create_directory(path + parameterDir);
 
-        writeStringMatrix(path + parameterDir + "qualVec" + filter + ".csv", qualVecS);
+        writeStringMatrix(path + parameterDir + "qualVec" + frameFilter + ".csv", qualVecS);
     }
     return { n, elapsedTime };
 }
@@ -371,7 +368,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
     int elapsedTime = 0;
     int n = 0;
 
-    string qualVecPath = path + parameterDir + "qualVec" + filter + ".csv";
+    string qualVecPath = path + parameterDir + "qualVec" + frameFilter + ".csv";
     string qualVecAlignPath = path + parameterDir + "qualVec" + alignFilter + ".csv";
 
     if ((filesystem::exists(qualVecPath) && filesystem::exists(qualVecAlignPath))) {
@@ -429,12 +426,12 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                             xDeb[j] = cos(RTparams[k][0]) * xFrame[j] - sin(RTparams[k][0]) * yFrame[j] + RTparams[k][1];
                             yDeb[j] = sin(RTparams[k][0]) * xFrame[j] + cos(RTparams[k][0]) * yFrame[j] + RTparams[k][2];
                         }
-                        addCircles(labelledImage, xDeb, yDeb, filter, 5);
+                        addCircles(labelledImage, xDeb, yDeb, frameFilter, 5);
                     }
                 }
                 elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
 
-                writeStringMatrix(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
+                writeStringMatrix(path + parameterDir + "stackArray" + frameFilter + ".csv", stackArray);
                 imshow("Debug", labelledImage);
             }
         }
@@ -449,7 +446,7 @@ vector<int> Hydra::Form1::Stack() {
     int elapsedTime = 0;
     int n = 0;
 
-    string stackArrayPath = path + parameterDir + "stackArray" + filter + ".csv";
+    string stackArrayPath = path + parameterDir + "stackArray" + frameFilter + ".csv";
 
     if (filesystem::exists(stackArrayPath)) {
         auto startTime = chrono::high_resolution_clock::now();
@@ -472,7 +469,7 @@ vector<int> Hydra::Form1::Stack() {
         int xSize = stoi(stackInfo[0][3]);
         int ySize = stoi(stackInfo[0][4]);
 
-        Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + filter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
+        Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + frameFilter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
         Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
 
         Scalar mean, stddev;
@@ -534,9 +531,9 @@ vector<int> Hydra::Form1::Stack() {
             if (!filesystem::exists(path + outputDir))
                 filesystem::create_directory(path + outputDir);
 
-            imwrite(path + outputDir + "Median" + "_" + to_string(n) + "_" + filter + "_" + to_string(int(samplingFactor * 100)) + ".tif", medianFrame);
-            imwrite(path + outputDir + "Mean" + "_" + to_string(n) + "_" + filter + "_" + to_string(int(samplingFactor * 100)) + ".tif", p);
-            imwrite(path + outputDir + "Stack" + "_" + to_string(n) + "_" + filter + "_" + to_string(int(samplingFactor * 100)) + ".tif", stackFrame);
+            imwrite(path + outputDir + "Median" + "_" + to_string(n) + "_" + frameFilter + "_" + to_string(int(samplingFactor * 100)) + ".tif", medianFrame);
+            imwrite(path + outputDir + "Mean" + "_" + to_string(n) + "_" + frameFilter + "_" + to_string(int(samplingFactor * 100)) + ".tif", p);
+            imwrite(path + outputDir + "Stack" + "_" + to_string(n) + "_" + frameFilter + "_" + to_string(int(samplingFactor * 100)) + ".tif", stackFrame);
 
             elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
             resize(stackFrame, stackFrame, cv::Size(stackFrame.cols / (scaling * samplingFactor), stackFrame.rows / (scaling * samplingFactor)), 0, 0, INTER_CUBIC);

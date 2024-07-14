@@ -12,7 +12,7 @@ extern std::string flatDarksDir;
 extern std::string darksGroup;
 extern std::string flatDarksGroup;
 extern std::string ext;
-extern std::string filter;
+extern std::string frameFilter;
 extern std::string alignFilter;
 extern int detectionThreshold;
 extern int discardPercentage;
@@ -773,19 +773,19 @@ namespace Hydra {
 		}
 
 		private: System::Void radioButton1_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-			filter = "R";
+			frameFilter = "R";
 		}
 
 		private: System::Void radioButton2_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-			filter = "G";
+			frameFilter = "G";
 		}
 
 		private: System::Void radioButton3_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-			filter = "B";
+			frameFilter = "B";
 		}
 
 		private: System::Void radioButton4_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-			filter = "L";
+			frameFilter = "L";
 		}
 
 		private: System::Void radioButton5_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
@@ -876,7 +876,7 @@ namespace Hydra {
 		}
 
 		private: System::Void radioButton14_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-			darksGroup = filter;
+			darksGroup = frameFilter;
 		}
 
 		private: System::Void radioButton15_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
@@ -888,7 +888,7 @@ namespace Hydra {
 		}
 
 		private: System::Void radioButton17_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-			flatDarksGroup = filter;
+			flatDarksGroup = frameFilter;
 		}
 
 		private: System::Void radioButton18_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
