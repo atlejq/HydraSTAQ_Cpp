@@ -179,27 +179,8 @@ vector<vector<int>> getStarPairs(vector<vector<int>>& voteMatrix){
 }
 
 //Function for computing angular and translational offsets between vectors
-vector<float> findRT(const Mat& A, const Mat& B) {
-    Mat centroid_A, centroid_B, A_centered, B_centered;
-    reduce(A, centroid_A, 1, REDUCE_AVG);
-    reduce(B, centroid_B, 1, REDUCE_AVG);
-    subtract(A, repeat(centroid_A, 1, A.cols), A_centered);
-    subtract(B, repeat(centroid_B, 1, B.cols), B_centered);
-
-    Mat U, S, Vt;
-    SVD::compute(A_centered * B_centered.t(), S, U, Vt);
-    Mat R = (U * Vt).t();
-
-    if (determinant(R) < 0)
-        R = (U * (Mat_<float>(2, 2) << 1, 0, 0, -1) * Vt).t();
-
-    Mat t = -R * centroid_A + centroid_B;
-    return { atan2(R.at<float>(1, 0), R.at<float>(0, 0)), t.at<float>(0, 0), t.at<float>(1, 0) };
-}
-
-//Function for aligning frames
 vector<float> alignFrames(const vector<vector<int>>& starPairs, const vector<float>& refVectorX, const vector<float>& refVectorY, const vector<float>& xvec, const vector<float>& yvec, const int& topMatches) {
-    Mat referenceMatrix(2, topMatches, CV_32F), frameMatrix(2, topMatches, CV_32F);
+    Mat frameMatrix(2, topMatches, CV_32F), referenceMatrix(2, topMatches, CV_32F), centroid_F, centroid_R, U, S, Vt, R, t;
 
     for (int i = 0; i < topMatches; i++) {
         referenceMatrix.at<float>(0, i) = refVectorX[starPairs[i][0]];
@@ -208,7 +189,19 @@ vector<float> alignFrames(const vector<vector<int>>& starPairs, const vector<flo
         frameMatrix.at<float>(1, i) = yvec[starPairs[i][1]];
     }
 
-    return findRT(frameMatrix, referenceMatrix);
+    reduce(frameMatrix, centroid_F, 1, REDUCE_AVG);
+    reduce(referenceMatrix, centroid_R, 1, REDUCE_AVG);
+    subtract(frameMatrix, repeat(centroid_F, 1, frameMatrix.cols), frameMatrix);
+    subtract(referenceMatrix, repeat(centroid_R, 1, referenceMatrix.cols), referenceMatrix);
+
+    SVD::compute(frameMatrix * referenceMatrix.t(), S, U, Vt);
+    R = (U * Vt).t();
+
+    if (determinant(R) < 0)
+        R = (U * (Mat_<float>(2, 2) << 1, 0, 0, -1) * Vt).t();
+
+    t = -R * centroid_F + centroid_R;
+    return { atan2(R.at<float>(1, 0), R.at<float>(0, 0)), t.at<float>(0, 0), t.at<float>(1, 0) };
 }
 
 //Function to analyze the star field in the given light frame.
