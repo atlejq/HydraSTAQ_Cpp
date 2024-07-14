@@ -220,11 +220,6 @@ vector<vector<float>> analyzeStarField(Mat& lightFrame, const float& t) {
     return starMatrix;
 }
 
-void addCircle(Mat& img, const float& xcoord, const float& ycoord, const string& filter, const int& size) {
-    static const map<string, Scalar> colorMap = {{"R", Scalar(0, 0, 255)}, {"G", Scalar(0, 255, 0)}, {"B", Scalar(255, 0, 0)}, {"L", Scalar(255, 255, 255)} };
-    circle(img, Point_(xcoord / scaling, ycoord / scaling), size, colorMap.at(filter));
-}
-
 //Function to fetch a calibration frame
 Mat getCalibrationFrame(const int& ySize, const int& xSize, const string& calibrationPath, const float& defaultValue) {
     Mat masterFrame(ySize, xSize, CV_32FC1, Scalar(defaultValue));
@@ -368,10 +363,10 @@ vector<int> Hydra::Form1::ComputeOffsets() {
         vector<vector<string>> inputMatrix = readStringMatrix(qualVecPath);
         vector<vector<string>> inputMatrixAlign = readStringMatrix(qualVecAlignPath);
         vector<string> lightFrameArray(inputMatrix.size()), lightFrameArrayAlign(inputMatrixAlign.size());
-        vector<vector<float>> qualVec(inputMatrix.size()), xvec(inputMatrix.size(), vector<float>(maxStars)), yvec(inputMatrix.size(), vector<float>(maxStars));
+        vector<vector<float>> qualVec(inputMatrix.size()), xvecFrame(inputMatrix.size(), vector<float>(maxStars)), yvecFrame(inputMatrix.size(), vector<float>(maxStars));
         vector<vector<float>> qualVecAlign(inputMatrixAlign.size()), xvecAlign(inputMatrixAlign.size(), vector<float>(maxStars)), yvecAlign(inputMatrixAlign.size(), vector<float>(maxStars));
 
-        unpack(inputMatrix, &lightFrameArray, &qualVec, &xvec, &yvec);
+        unpack(inputMatrix, &lightFrameArray, &qualVec, &xvecFrame, &yvecFrame);
         unpack(inputMatrixAlign, &lightFrameArrayAlign, &qualVecAlign, &xvecAlign, &yvecAlign);
 
         bool sizesEqual = true;
@@ -392,15 +387,17 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 Mat labelledImage, maxQualFrame;
                 resize(imread(lightFrameArrayAlign[0], IMREAD_GRAYSCALE), maxQualFrame, cv::Size(), 1.0 / scaling, 1.0 / scaling, INTER_CUBIC);
                 cvtColor(maxQualFrame, labelledImage, COLOR_GRAY2BGR);
+                static const map<string, Scalar> colorMap = { {"R", Scalar(0, 0, 255)}, {"G", Scalar(0, 255, 0)}, {"B", Scalar(255, 0, 0)}, {"L", Scalar(255, 255, 255)} };
 
                 for (int j = 0; j < xRef.size(); j++)
-                    addCircle(labelledImage, xRef[j], yRef[j], alignFilter, 8);
+                    circle(labelledImage, Point_(xRef[j] / scaling, yRef[j] / scaling), 8, colorMap.at(alignFilter));
+
 
                 #pragma omp parallel for num_threads(numLogicalCores*2)
                 for (int k = 0; k < n; k++)
                 {
-                    vector xFrame = clean(xvec[k]);
-                    vector yFrame = clean(yvec[k]);
+                    vector xFrame = clean(xvecFrame[k]);
+                    vector yFrame = clean(yvecFrame[k]);
                     if (!xFrame.empty() && xFrame.size() >= topMatches) {
                         vector<vector<float>> frameTriangles = triangles(xFrame, yFrame);
                         vector<vector<int>> voteMatrix = getVoteMatrix(refTriangles, frameTriangles, xRef.size(), xFrame.size());
@@ -409,7 +406,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                         stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[0]), to_string(RTparams[1]), to_string(RTparams[2]) };
                         
                         for (int j = 0; j < xFrame.size(); j++) 
-                            addCircle(labelledImage, cos(RTparams[0]) * xFrame[j] - sin(RTparams[0]) * yFrame[j] + RTparams[1], sin(RTparams[0]) * xFrame[j] + cos(RTparams[0]) * yFrame[j] + RTparams[2], frameFilter, 5);
+                            circle(labelledImage, Point_((cos(RTparams[0]) * xFrame[j] - sin(RTparams[0]) * yFrame[j] + RTparams[1])/ scaling, (sin(RTparams[0]) * xFrame[j] + cos(RTparams[0]) * yFrame[j] + RTparams[2]) / scaling), 5, colorMap.at(frameFilter));
                     }
                 }
                 elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
