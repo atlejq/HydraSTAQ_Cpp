@@ -225,12 +225,12 @@ vector<vector<float>> analyzeStarField(Mat& lightFrame, const float& t) {
     return starMatrix;
 }
 
-void addCircles(Mat& img, const vector<float>& xcoords, const vector<float>& ycoords, const int& size) {
+void addCircles(Mat& img, const vector<float>& xcoords, const vector<float>& ycoords, const string& filter, const int& size) {
     Scalar color;
 
-    if (alignFilter == "R") color = Scalar(0, 0, 255);
-    else if (alignFilter == "G") color = Scalar(0, 255, 0);
-    else if (alignFilter == "B") color = Scalar(255, 0, 0);
+    if (filter == "R") color = Scalar(0, 0, 255);
+    else if (filter == "G") color = Scalar(0, 255, 0);
+    else if (filter == "B") color = Scalar(255, 0, 0);
     else color = Scalar(255, 255, 255);
 
     for (int i = 0; i < xcoords.size(); i++) 
@@ -410,7 +410,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 resize(maxQualFrame, maxQualFrame, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, INTER_CUBIC);
                 Mat labelledImage(maxQualFrame.size(), CV_8UC3);
                 cvtColor(maxQualFrame, labelledImage, COLOR_GRAY2BGR);
-                addCircles(labelledImage, xRef, yRef, 8);
+                addCircles(labelledImage, xRef, yRef, alignFilter, 8);
 
                 #pragma omp parallel for num_threads(numLogicalCores*2)
                 for (int k = 0; k < n; k++)
@@ -429,7 +429,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                             xDeb[j] = cos(RTparams[k][0]) * xFrame[j] - sin(RTparams[k][0]) * yFrame[j] + RTparams[k][1];
                             yDeb[j] = sin(RTparams[k][0]) * xFrame[j] + cos(RTparams[k][0]) * yFrame[j] + RTparams[k][2];
                         }
-                        addCircles(labelledImage, xDeb, yDeb, 5);
+                        addCircles(labelledImage, xDeb, yDeb, filter, 5);
                     }
                 }
                 elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
