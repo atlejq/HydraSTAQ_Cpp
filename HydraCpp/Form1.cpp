@@ -397,7 +397,6 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 n = floor(qualVec.size() * (100 - float(discardPercentage)) / 100);
                 vector<vector<string>> stackArray(n, vector<string>(8));
                 vector<vector<float>> refTriangles = triangles(xRef, yRef);
-                vector<vector<float>> RTparams(n, vector<float>(3));
 
                 Mat maxQualFrame = imread(lightFrameArrayAlign[0], IMREAD_GRAYSCALE);
                 resize(maxQualFrame, maxQualFrame, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, INTER_CUBIC);
@@ -416,11 +415,11 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                         vector<vector<float>> frameTriangles = triangles(xFrame, yFrame);
                         vector<vector<int>> voteMatrix = getVoteMatrix(refTriangles, frameTriangles, xRef.size(), xFrame.size());
                         vector<vector<int>> starPairs = getStarPairs(voteMatrix);
-                        RTparams[k] = alignFrames(starPairs, xRef, yRef, xFrame, yFrame, topMatches);
-                        stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[k][0]), to_string(RTparams[k][1]), to_string(RTparams[k][2]) };
+                        vector<float> RTparams = alignFrames(starPairs, xRef, yRef, xFrame, yFrame, topMatches);
+                        stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[0]), to_string(RTparams[1]), to_string(RTparams[2]) };
                         
                         for (int j = 0; j < xFrame.size(); j++) 
-                            addCircle(labelledImage, cos(RTparams[k][0]) * xFrame[j] - sin(RTparams[k][0]) * yFrame[j] + RTparams[k][1], sin(RTparams[k][0]) * xFrame[j] + cos(RTparams[k][0]) * yFrame[j] + RTparams[k][2], frameFilter, 5);
+                            addCircle(labelledImage, cos(RTparams[0]) * xFrame[j] - sin(RTparams[0]) * yFrame[j] + RTparams[1], sin(RTparams[0]) * xFrame[j] + cos(RTparams[0]) * yFrame[j] + RTparams[2], frameFilter, 5);
                     }
                 }
                 elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
