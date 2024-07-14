@@ -203,7 +203,7 @@ vector<float> alignFrames(const vector<vector<int>>& starPairs, const vector<flo
 }
 
 //Function to analyze the star field in the given light frame.
-vector<vector<float>> analyzeStarField(Mat lightFrame, const float& t) {
+vector<vector<float>> analyzeStarField(Mat& lightFrame, const float& t) {
     vector<vector<float>> starMatrix;
 
     if ((lightFrame.elemSize() == 1 || lightFrame.elemSize() == 2) && lightFrame.channels() == 1) {
