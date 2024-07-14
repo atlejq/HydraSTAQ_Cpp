@@ -59,13 +59,7 @@ void writeStringMatrix(const string& path, const vector<vector<string>>& stringA
 }
 
 void unpack(const vector<vector<string>>& inputArray, vector<string>* lightFrameArray, vector<vector<float>>* qualVec, vector<vector<float>>* xvec, vector<vector<float>>* yvec) {
-    size_t inputSize = inputArray.size();
-    lightFrameArray->resize(inputSize);
-    qualVec->resize(inputSize);
-    xvec->resize(inputSize, vector<float>(maxStars));
-    yvec->resize(inputSize, vector<float>(maxStars));
-
-    for (size_t i = 0; i < inputSize; i++) {
+    for (size_t i = 0; i < inputArray.size(); i++) {
         (*lightFrameArray)[i] = inputArray[i][0];
         (*qualVec)[i] = { stof(inputArray[i][1]), stof(inputArray[i][2]), stof(inputArray[i][3]), stof(inputArray[i][4]), stof(inputArray[i][5]) };
 
@@ -371,11 +365,15 @@ vector<int> Hydra::Form1::ComputeOffsets() {
     if ((filesystem::exists(qualVecPath) && filesystem::exists(qualVecAlignPath))) {
         auto startTime = chrono::high_resolution_clock::now();
 
-        vector<string> lightFrameArray, lightFrameArrayAlign;
-        vector<vector<float>> qualVec, xvec, yvec, qualVecAlign, xvecAlign, yvecAlign;
+        vector<vector<string>> inputMatrix =  readStringMatrix(qualVecPath);
+        vector<vector<string>> inputMatrixAlign = readStringMatrix(qualVecPath);
 
-        unpack(readStringMatrix(qualVecPath), &lightFrameArray, &qualVec, &xvec, &yvec);
-        unpack(readStringMatrix(qualVecAlignPath), &lightFrameArrayAlign, &qualVecAlign, &xvecAlign, &yvecAlign);
+        vector<string> lightFrameArray(inputMatrix.size()), lightFrameArrayAlign(inputMatrixAlign.size());
+        vector<vector<float>> qualVec(inputMatrix.size()), xvec(inputMatrix.size(), vector<float>(maxStars)), yvec(inputMatrix.size(), vector<float>(maxStars));
+        vector<vector<float>> qualVecAlign(inputMatrixAlign.size()), xvecAlign(inputMatrixAlign.size(), vector<float>(maxStars)), yvecAlign(inputMatrixAlign.size(), vector<float>(maxStars));
+
+        unpack(inputMatrix, &lightFrameArray, &qualVec, &xvec, &yvec);
+        unpack(inputMatrixAlign, &lightFrameArrayAlign, &qualVecAlign, &xvecAlign, &yvecAlign);
 
         bool sizesEqual = true;
  
