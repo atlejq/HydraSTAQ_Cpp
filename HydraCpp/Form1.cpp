@@ -227,11 +227,8 @@ vector<vector<float>> analyzeStarField(Mat& lightFrame, const float& t) {
 
 void addCircles(Mat& img, const vector<float>& xcoords, const vector<float>& ycoords, const string& filter, const int& size) {
     static const map<string, Scalar> colorMap = {{"R", Scalar(0, 0, 255)}, {"G", Scalar(0, 255, 0)}, {"B", Scalar(255, 0, 0)}, {"L", Scalar(255, 255, 255)} };
-
-    Scalar color = colorMap.at(filter);
-
     for (int i = 0; i < xcoords.size(); i++) 
-        circle(img, Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, color);
+        circle(img, Point_(xcoords[i] / scaling, ycoords[i] / scaling), size, colorMap.at(filter));
 }
 
 //Function to fetch a calibration frame
