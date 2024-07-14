@@ -406,19 +406,23 @@ vector<int> Hydra::Form1::ComputeOffsets() {
 
             if (!xRef.empty() && xRef.size() >= topMatches) {
                 n = floor(qualVec.size() * (100 - float(discardPercentage)) / 100);
-                vector<vector<float>> RTparams(n, vector<float>(3));
                 vector<vector<string>> stackArray(n, vector<string>(8));
                 vector<vector<float>> refTriangles = triangles(xRef, yRef);
+                vector<vector<float>> RTparams(n, vector<float>(3));
 
                 #pragma omp parallel for num_threads(numLogicalCores*2)
-                for (int k = 0; k < n; k++) 
-                    if (!clean(xvec[k]).empty() && clean(xvec[k]).size() >= topMatches) {
-                        vector<vector<float>> frameTriangles = triangles(clean(xvec[k]), clean(yvec[k]));
-                        vector<vector<int>> voteMatrix = getVoteMatrix(refTriangles, frameTriangles, xRef.size(), clean(yvec[0]).size());
+                for (int k = 0; k < n; k++)
+                {
+                    vector xFrame = clean(xvec[k]);
+                    vector yFrame = clean(yvec[k]);
+                    if (!xFrame.empty() && xFrame.size() >= topMatches) {
+                        vector<vector<float>> frameTriangles = triangles(xFrame, yFrame);
+                        vector<vector<int>> voteMatrix = getVoteMatrix(refTriangles, frameTriangles, xRef.size(), yFrame.size());
                         vector<vector<int>> starPairs = getStarPairs(voteMatrix);
-                        RTparams[k] = alignFrames(starPairs, xRef, yRef, clean(xvec[k]), clean(yvec[k]), topMatches);
+                        RTparams[k] = alignFrames(starPairs, xRef, yRef, xFrame, yFrame, topMatches);
                         stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[k][0]), to_string(RTparams[k][1]), to_string(RTparams[k][2]) };
                     }
+                }
                 
                 elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
 
@@ -430,11 +434,11 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 cvtColor(maxQualFrame, labelledImage, COLOR_GRAY2BGR);
                 addCircles(labelledImage, xRef, yRef, 8);
 
-                for (int i = 0; i < RTparams.size(); i++) {
+                for (int k = 0; k < n; k++) {
                     vector<float> xDeb(maxStars), yDeb(maxStars);
-                    for (int j = 0; j < xvec[i].size(); j++) {
-                        xDeb[j] = cos(RTparams[i][0]) * xvec[i][j] - sin(RTparams[i][0]) * yvec[i][j] + RTparams[i][1];
-                        yDeb[j] = sin(RTparams[i][0]) * xvec[i][j] + cos(RTparams[i][0]) * yvec[i][j] + RTparams[i][2];
+                    for (int j = 0; j < xvec[k].size(); j++) {
+                        xDeb[j] = cos(RTparams[k][0]) * xvec[k][j] - sin(RTparams[k][0]) * yvec[k][j] + RTparams[k][1];
+                        yDeb[j] = sin(RTparams[k][0]) * xvec[k][j] + cos(RTparams[k][0]) * yvec[k][j] + RTparams[k][2];
                     }
                     addCircles(labelledImage, xDeb, yDeb, 5);
                 }
