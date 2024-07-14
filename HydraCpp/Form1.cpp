@@ -86,13 +86,9 @@ vector<string> getFrames(const string& path, const string& ext) {
     return filenames;
 }
 
-vector<float> clean(const vector<float>& v) {
-    vector<float> vFiltered;
-    for (int i = 0; i < v.size(); i++) 
-        if (v[i] != -1)
-            vFiltered.push_back(v[i]);
-
-    return vFiltered;
+vector<float> clean(vector<float>& v) {
+    v.erase(std::remove(v.begin(), v.end(), -1), v.end());
+    return v;
 }
 
 template <typename T> void sortByColumn(vector<vector<T>>& data, size_t column) {
@@ -401,7 +397,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 sizesEqual = false;
 
         if (sizesEqual) {
-            vector xRef = clean(xvecAlign[0]);
+            vector xRef = clean(xvecAlign[0]); 
             vector yRef = clean(yvecAlign[0]);
 
             if (!xRef.empty() && xRef.size() >= topMatches) {
@@ -409,6 +405,12 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 vector<vector<string>> stackArray(n, vector<string>(8));
                 vector<vector<float>> refTriangles = triangles(xRef, yRef);
                 vector<vector<float>> RTparams(n, vector<float>(3));
+
+                Mat maxQualFrame = imread(lightFrameArrayAlign[0], IMREAD_GRAYSCALE);
+                resize(maxQualFrame, maxQualFrame, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, INTER_CUBIC);
+                Mat labelledImage(maxQualFrame.size(), CV_8UC3);
+                cvtColor(maxQualFrame, labelledImage, COLOR_GRAY2BGR);
+                addCircles(labelledImage, xRef, yRef, 8);
 
                 #pragma omp parallel for num_threads(numLogicalCores*2)
                 for (int k = 0; k < n; k++)
@@ -421,27 +423,18 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                         vector<vector<int>> starPairs = getStarPairs(voteMatrix);
                         RTparams[k] = alignFrames(starPairs, xRef, yRef, xFrame, yFrame, topMatches);
                         stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[k][0]), to_string(RTparams[k][1]), to_string(RTparams[k][2]) };
+                        
+                        vector<float> xDeb(maxStars), yDeb(maxStars);
+                        for (int j = 0; j < xFrame.size(); j++) {
+                            xDeb[j] = cos(RTparams[k][0]) * xFrame[j] - sin(RTparams[k][0]) * yFrame[j] + RTparams[k][1];
+                            yDeb[j] = sin(RTparams[k][0]) * xFrame[j] + cos(RTparams[k][0]) * yFrame[j] + RTparams[k][2];
+                        }
+                        addCircles(labelledImage, xDeb, yDeb, 5);
                     }
                 }
-                
                 elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
 
                 writeStringMatrix(path + parameterDir + "stackArray" + filter + ".csv", stackArray);
-
-                Mat maxQualFrame = imread(lightFrameArrayAlign[0], IMREAD_GRAYSCALE);
-                resize(maxQualFrame, maxQualFrame, cv::Size(maxQualFrame.cols / scaling, maxQualFrame.rows / scaling), 0, 0, INTER_CUBIC);
-                Mat labelledImage(maxQualFrame.size(), CV_8UC3);
-                cvtColor(maxQualFrame, labelledImage, COLOR_GRAY2BGR);
-                addCircles(labelledImage, xRef, yRef, 8);
-
-                for (int k = 0; k < n; k++) {
-                    vector<float> xDeb(maxStars), yDeb(maxStars);
-                    for (int j = 0; j < xvec[k].size(); j++) {
-                        xDeb[j] = cos(RTparams[k][0]) * xvec[k][j] - sin(RTparams[k][0]) * yvec[k][j] + RTparams[k][1];
-                        yDeb[j] = sin(RTparams[k][0]) * xvec[k][j] + cos(RTparams[k][0]) * yvec[k][j] + RTparams[k][2];
-                    }
-                    addCircles(labelledImage, xDeb, yDeb, 5);
-                }
                 imshow("Debug", labelledImage);
             }
         }
@@ -546,7 +539,6 @@ vector<int> Hydra::Form1::Stack() {
             imwrite(path + outputDir + "Stack" + "_" + to_string(n) + "_" + filter + "_" + to_string(int(samplingFactor * 100)) + ".tif", stackFrame);
 
             elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
-
             resize(stackFrame, stackFrame, cv::Size(stackFrame.cols / (scaling * samplingFactor), stackFrame.rows / (scaling * samplingFactor)), 0, 0, INTER_CUBIC);
             imshow("Stack", stackFrame * 5);
         }
