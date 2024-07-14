@@ -538,13 +538,7 @@ vector<int> Hydra::Form1::Stack() {
             }
 
             sqrt((psqr - p.mul(p)) * iterations / (iterations - 1), std);
-
-            if (!filesystem::exists(path + outputDir))
-                filesystem::create_directory(path + outputDir);
-
-            imwrite(path + outputDir + "Median" + "_" + to_string(n) + "_" + filter + "_" + to_string(int(samplingFactor * 100)) + ".tif", medianFrame);
-            imwrite(path + outputDir + "Mean" + "_" + to_string(n) + "_" + filter + "_" + to_string(int(samplingFactor * 100)) + ".tif", p);
-
+        
             #pragma omp parallel for num_threads(numLogicalCores*2) 
             for (int k = 0; k < n; k++) {
                 Mat absDiff, mask, lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);              
@@ -554,6 +548,11 @@ vector<int> Hydra::Form1::Stack() {
                 addWeighted(stackFrame, 1, lightFrame, 1 / float(n), 0.0, stackFrame);
             }
 
+            if (!filesystem::exists(path + outputDir))
+                filesystem::create_directory(path + outputDir);
+
+            imwrite(path + outputDir + "Median" + "_" + to_string(n) + "_" + filter + "_" + to_string(int(samplingFactor * 100)) + ".tif", medianFrame);
+            imwrite(path + outputDir + "Mean" + "_" + to_string(n) + "_" + filter + "_" + to_string(int(samplingFactor * 100)) + ".tif", p);
             imwrite(path + outputDir + "Stack" + "_" + to_string(n) + "_" + filter + "_" + to_string(int(samplingFactor * 100)) + ".tif", stackFrame);
 
             elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
