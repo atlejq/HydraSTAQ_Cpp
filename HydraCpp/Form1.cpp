@@ -125,20 +125,16 @@ vector<vector<float>> triangles(const vector<float>& x, const vector<float>& y) 
 }
 
 //Function for computing the "vote matrix"
-vector<vector<int>> getVoteMatrix(const vector<vector<float>>& refTriangles, const vector<vector<float>>& frameTriangles, const int& refVectorSize, const int& vecSize) {
+vector<vector<int>> getStarPairs(const vector<vector<float>>& refTriangles, const vector<vector<float>>& frameTriangles, const int& refVectorSize, const int& vecSize) {
     constexpr float eSquare = 0.005 * 0.005;
+    vector<vector<int>> starPairs;
     vector<vector<int>> voteMatrix(refVectorSize, vector<int>(vecSize, 0));
     for (const auto& refTri : refTriangles)
         for (int b = 0; b < frameTriangles.size(); b++)
             if ((refTri[3] - frameTriangles[b][3]) * (refTri[3] - frameTriangles[b][3]) + (refTri[4] - frameTriangles[b][4]) * (refTri[4] - frameTriangles[b][4]) < eSquare)
                 for (int i = 0; i < 3; i++)
                     voteMatrix[static_cast<int>(refTri[i])][static_cast<int>(frameTriangles[b][i])] += 1;
-
-    return voteMatrix;
-}
-    
-vector<vector<int>> getStarPairs(vector<vector<int>>& voteMatrix){
-    vector<vector<int>> starPairs;
+  
     for (int row = 0; row < voteMatrix.size(); row++) {
         int maxRowVote = 0;
         int maxRowVoteIndex = 0;
@@ -399,8 +395,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                     vector yFrame = clean(yvecFrame[k]);
                     if (!xFrame.empty() && xFrame.size() >= topMatches) {
                         vector<vector<float>> frameTriangles = triangles(xFrame, yFrame);
-                        vector<vector<int>> voteMatrix = getVoteMatrix(refTriangles, frameTriangles, xRef.size(), xFrame.size());
-                        vector<vector<int>> starPairs = getStarPairs(voteMatrix);
+                        vector<vector<int>> starPairs = getStarPairs(refTriangles, frameTriangles, xRef.size(), xFrame.size());
                         vector<float>  RTparams = alignFrames(starPairs, xRef, yRef, xFrame, yFrame, topMatches);
                         stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[0]), to_string(RTparams[1]), to_string(RTparams[2]) };
                         
