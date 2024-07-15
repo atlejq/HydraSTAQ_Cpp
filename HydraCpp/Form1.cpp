@@ -155,8 +155,7 @@ vector<vector<int>> getStarPairs(const vector<vector<float>>& refTriangles, cons
                 if (nextLargestColElement < voteMatrix[r][maxRowVoteIndex])
                     nextLargestColElement = voteMatrix[r][maxRowVoteIndex];
 
-        int correctedVotes = max(maxRowVote - max(nextLargestColElement, nextLargestRowElement), 0);
-        if(correctedVotes > 0)
+        if(int correctedVotes = max(maxRowVote - max(nextLargestColElement, nextLargestRowElement), 0) > 0)
             starPairs.push_back({ row, maxRowVoteIndex, correctedVotes });
     }
     sortByColumn(starPairs, 2);
