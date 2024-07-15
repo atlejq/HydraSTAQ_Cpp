@@ -378,14 +378,13 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 vector<vector<string>> stackArray(n, vector<string>(8));
                 vector<vector<float>> refTriangles = triangles(xRef, yRef);
 
-                Mat labelledImage;
                 Mat maxQualFrame = imread(lightFrameArrayAlign[0], IMREAD_GRAYSCALE);
                 resize(maxQualFrame, maxQualFrame, cv::Size(), 1.0 / scaling, 1.0 / scaling, INTER_CUBIC);
-                cvtColor(maxQualFrame, labelledImage, COLOR_GRAY2BGR);
+                cvtColor(maxQualFrame, maxQualFrame, COLOR_GRAY2BGR);
                 static const map<string, Scalar> colorMap = { {"R", Scalar(0, 0, 255)}, {"G", Scalar(0, 255, 0)}, {"B", Scalar(255, 0, 0)}, {"L", Scalar(255, 255, 255)} };
 
                 for (int j = 0; j < xRef.size(); j++)
-                    circle(labelledImage, Point_(xRef[j] / scaling, yRef[j] / scaling), 8, colorMap.at(alignFilter));
+                    circle(maxQualFrame, Point_(xRef[j] / scaling, yRef[j] / scaling), 8, colorMap.at(alignFilter));
 
                 #pragma omp parallel for num_threads(numLogicalCores*2)
                 for (int k = 0; k < n; k++)
@@ -399,13 +398,13 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                         stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[0]), to_string(RTparams[1]), to_string(RTparams[2]) };
                         
                         for (int j = 0; j < xFrame.size(); j++) 
-                            circle(labelledImage, Point_((cos(RTparams[0]) * xFrame[j] - sin(RTparams[0]) * yFrame[j] + RTparams[1])/ scaling, (sin(RTparams[0]) * xFrame[j] + cos(RTparams[0]) * yFrame[j] + RTparams[2]) / scaling), 5, colorMap.at(frameFilter));
+                            circle(maxQualFrame, Point_((cos(RTparams[0]) * xFrame[j] - sin(RTparams[0]) * yFrame[j] + RTparams[1])/ scaling, (sin(RTparams[0]) * xFrame[j] + cos(RTparams[0]) * yFrame[j] + RTparams[2]) / scaling), 5, colorMap.at(frameFilter));
                     }
                 }
                 elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
 
                 writeStringMatrix(path + parameterDir + "stackArray" + frameFilter + ".csv", stackArray);
-                imshow("Debug", labelledImage);
+                imshow("Debug", maxQualFrame);
             }
         }
     }
