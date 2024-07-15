@@ -82,7 +82,7 @@ vector<string> getFrames(const string& path, const string& ext) {
 }
 
 vector<float> clean(vector<float>& v) {
-    v.erase(std::remove(v.begin(), v.end(), -1), v.end());
+    v.erase(std::remove(v.begin(), v.end(), 0), v.end());
     return v;
 }
 
@@ -301,7 +301,7 @@ vector<int> Hydra::Form1::RegisterFrames() {
 
     if (!lightFrames.empty()) {
         auto startTime = chrono::high_resolution_clock::now();
-        vector<vector<float>> qualVec(lightFrames.size(), vector<float>(6 + 2 * maxStars));
+        vector<vector<float>> qualVec(lightFrames.size(), vector<float>(6 + 2 * maxStars, 0));
         vector<vector<string>> qualVecS(lightFrames.size(), vector<string>(6 + 2 * maxStars));
 
         #pragma omp parallel for num_threads(numLogicalCores*2)
