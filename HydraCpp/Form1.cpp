@@ -198,12 +198,12 @@ vector<vector<float>> analyzeStarField(Mat& lightFrame, const float& t) {
             lightFrame = lightFrame / 255;
             lightFrame.convertTo(lightFrame, CV_8U);
         }
-        Mat filteredImage, thresh;
-        medianBlur(lightFrame, filteredImage, 3);
-        threshold(filteredImage, thresh, t * 255, 255, 0);
 
+        Mat filteredImage, thresh;
         vector<vector<Point>> contours;
         vector<Vec4i> hierarchy;
+        medianBlur(lightFrame, filteredImage, 3);
+        threshold(filteredImage, thresh, t * 255, 255, 0);
         findContours(thresh, contours, hierarchy, RETR_LIST, CHAIN_APPROX_SIMPLE);
 
         for (const auto& c : contours) {
