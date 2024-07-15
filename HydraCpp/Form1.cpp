@@ -31,10 +31,11 @@ vector<vector<string>> readStringMatrix(const string& path) {
     vector<vector<string>> commaSeparatedArray;
     string line;
     ifstream commaSeparatedArrayStream(path);
-    if (commaSeparatedArrayStream.is_open()) {
+    if (commaSeparatedArrayStream.is_open()) 
         while (getline(commaSeparatedArrayStream, line)) {
             vector<string> commaSeparatedLine;
-            string::size_type end, start = 0;
+            string::size_type end;
+            string::size_type start = 0;
 
             while ((end = line.find(',', start)) != string::npos) {
                 commaSeparatedLine.push_back(line.substr(start, end - start));
@@ -44,7 +45,7 @@ vector<vector<string>> readStringMatrix(const string& path) {
             commaSeparatedLine.push_back(line.substr(start));
             commaSeparatedArray.push_back(commaSeparatedLine);
         }
-    }
+    
     return commaSeparatedArray;
 }
 
@@ -70,7 +71,6 @@ void unpack(const vector<vector<string>>& inputArray, vector<string>* lightFrame
     }
 }
 
-//Function to get all the file names in the given directory.
 vector<string> getFrames(const string& path, const string& ext) {
     vector<string> filenames;
     if (filesystem::exists(path))
@@ -380,8 +380,9 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 vector<vector<string>> stackArray(n, vector<string>(8));
                 vector<vector<float>> refTriangles = triangles(xRef, yRef);
 
-                Mat labelledImage, maxQualFrame;
-                resize(imread(lightFrameArrayAlign[0], IMREAD_GRAYSCALE), maxQualFrame, cv::Size(), 1.0 / scaling, 1.0 / scaling, INTER_CUBIC);
+                Mat labelledImage;
+                Mat maxQualFrame = imread(lightFrameArrayAlign[0], IMREAD_GRAYSCALE);
+                resize(maxQualFrame, maxQualFrame, cv::Size(), 1.0 / scaling, 1.0 / scaling, INTER_CUBIC);
                 cvtColor(maxQualFrame, labelledImage, COLOR_GRAY2BGR);
                 static const map<string, Scalar> colorMap = { {"R", Scalar(0, 0, 255)}, {"G", Scalar(0, 255, 0)}, {"B", Scalar(255, 0, 0)}, {"L", Scalar(255, 255, 255)} };
 
@@ -472,13 +473,13 @@ vector<int> Hydra::Form1::Stack() {
             for (int j = 0; j < iterations; j++)
                 m[j] = j;
 
+            shuffle(m.begin(), m.end(), default_random_engine(chrono::system_clock::now().time_since_epoch().count()));
+
             xSize = int(xSize * samplingFactor);
             ySize = int(ySize * samplingFactor);
 
             Mat p(ySize, xSize, CV_32FC1, Scalar(0)), psqr(ySize, xSize, CV_32FC1, Scalar(0)), std(ySize, xSize, CV_32FC1, Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, Scalar(0));
             vector<Mat> medianArray(medianBatchSize, Mat(ySize, xSize, CV_32FC1));
-
-            shuffle(m.begin(), m.end(), default_random_engine(chrono::system_clock::now().time_since_epoch().count()));
 
             for (int k = 0; k < batches; k++) {
                 #pragma omp parallel for num_threads(numLogicalCores*2)
@@ -495,7 +496,8 @@ vector<int> Hydra::Form1::Stack() {
         
             #pragma omp parallel for num_threads(numLogicalCores*2) 
             for (int k = 0; k < n; k++) {
-                Mat absDiff, mask, lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);              
+                Mat absDiff, mask;
+                Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);
                 absdiff(lightFrame, medianFrame, absDiff);
                 compare(absDiff, 2.0 * std, mask, CMP_GT);
                 medianFrame.copyTo(lightFrame, mask);
