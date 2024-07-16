@@ -249,8 +249,7 @@ Mat removeHotPixels(Mat lightFrame, const vector<vector<int>>& hotPixels) {
     for (const auto& hotPix : hotPixels) {
         int x = hotPix[0];
         int y = hotPix[1];
-        if (x > 0 || y > 0 || x < lightFrame.cols - 1 || y < lightFrame.rows - 1) 
-            lightFrame.at<float>(y, x) = (lightFrame.at<float>(y, x + 1) + lightFrame.at<float>(y, x - 1) + lightFrame.at<float>(y + 1, x) + lightFrame.at<float>(y - 1, x)) / 4;
+        lightFrame.at<float>(y, x) = (lightFrame.at<float>(y, x + 1) + lightFrame.at<float>(y, x - 1) + lightFrame.at<float>(y + 1, x) + lightFrame.at<float>(y - 1, x)) / 4;
     }
     return lightFrame;
 }
@@ -451,9 +450,10 @@ vector<int> Hydra::Form1::Stack() {
 
         for (int y = 0; y < ySize; y++) 
             for (int x = 0; x < xSize; x++) 
-                if (masterDarkFrame.at<float>(y, x) > 10 * mean[0])
-                    hotPixels.push_back({ x,y });
-
+                if (x > 0 || y > 0 || x < masterDarkFrame.cols - 1 || y < masterDarkFrame.rows - 1)
+                    if (masterDarkFrame.at<float>(y, x) > 10 * mean[0])
+                        hotPixels.push_back({ x,y });
+            
         double minVal, maxVal;
         minMaxLoc(calibratedFlatFrame, &minVal, &maxVal);
 
