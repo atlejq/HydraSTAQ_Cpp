@@ -198,12 +198,10 @@ vector<vector<float>> analyzeStarField(Mat lightFrame, const float& t) {
             lightFrame.convertTo(lightFrame, CV_8U);
         }
         Mat filteredImage, thresh;
+        vector<vector<Point>> contours;
         medianBlur(lightFrame, filteredImage, 3);
         threshold(filteredImage, thresh, t * 255, 255, 0);
-
-        vector<vector<Point>> contours;
-        vector<Vec4i> hierarchy;
-        findContours(thresh, contours, hierarchy, RETR_LIST, CHAIN_APPROX_SIMPLE);
+        findContours(thresh, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
 
         for (const auto& c : contours) {
             RotatedRect rect = minAreaRect(c);
