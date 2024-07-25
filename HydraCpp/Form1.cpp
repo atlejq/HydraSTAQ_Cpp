@@ -244,22 +244,22 @@ Mat getCalibrationFrame(const int& ySize, const int& xSize, const string& calibr
 }
 
 //Function to remove hotpixels
-Mat removeHotPixels(Mat lightFrame, const vector<vector<int>>& hotPixels) {
+void correctHotPixels(Mat& lightFrame, const vector<Point>& hotPixels) {
     for (const auto& hotPix : hotPixels) {
-        int x = hotPix[0];
-        int y = hotPix[1];
-        lightFrame.at<float>(y, x) = (lightFrame.at<float>(y, x + 1) + lightFrame.at<float>(y, x - 1) + lightFrame.at<float>(y + 1, x) + lightFrame.at<float>(y - 1, x)) / 4;
+        int x = hotPix.x;
+        int y = hotPix.y;
+
+        lightFrame.at<float>(y, x) = (lightFrame.at<float>(y, x + 1) + lightFrame.at<float>(y, x - 1) + lightFrame.at<float>(y + 1, x) + lightFrame.at<float>(y - 1, x)) / 4.0;
     }
-    return lightFrame;
 }
 
 //Function to rotate images
-Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat& inverted, const float& backGroundCorrection, const vector<float>& RTparams, const vector<vector<int>>& hotPixels) {
+Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat& inverted, const float& backGroundCorrection, const vector<float>& RTparams, const vector<Point>& hotPixels) {
     Mat lightFrame = imread(framePath, IMREAD_GRAYSCALE);
     lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
     lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame);
     multiply(lightFrame, inverted, lightFrame);
-    lightFrame = removeHotPixels(lightFrame, hotPixels);
+    correctHotPixels(lightFrame, hotPixels);
     resize(lightFrame, lightFrame, Size(samplingFactor * lightFrame.cols, samplingFactor * lightFrame.rows), 0, 0, interpolationFlag);
     Mat M = (Mat_<float>(2, 3) << RTparams[0], -RTparams[1], RTparams[2], RTparams[1], RTparams[0], RTparams[3]);
     warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
@@ -441,16 +441,17 @@ vector<int> Hydra::Form1::Stack() {
         Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + frameFilter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
         Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
 
-        Scalar mean, stddev;
-        meanStdDev(masterDarkFrame, mean, stddev);
+        Scalar mean = cv::mean(masterDarkFrame);
+        vector<cv::Point> hotPixels;
 
-        vector<vector<int>> hotPixels;
+        Mat mask = (masterDarkFrame > 10 * mean[0]);
 
-        for (int y = 0; y < ySize; y++) 
-            for (int x = 0; x < xSize; x++) 
-                if (x > 0 || y > 0 || x < xSize - 1 || y < ySize - 1)
-                    if (masterDarkFrame.at<float>(y, x) > 10 * mean[0])
-                        hotPixels.push_back({ x,y });
+        mask.row(0).setTo(Scalar(0));
+        mask.row(mask.rows - 1).setTo(Scalar(0));
+        mask.col(0).setTo(Scalar(0));
+        mask.col(mask.cols - 1).setTo(Scalar(0));
+
+        findNonZero(mask, hotPixels);
             
         double minVal, maxVal;
         minMaxLoc(calibratedFlatFrame, &minVal, &maxVal);
