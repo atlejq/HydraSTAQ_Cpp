@@ -246,14 +246,14 @@ Mat getCalibrationFrame(const int& width, const int& height, const string& calib
 
 //Find hot pixels
 void findHotPixels(const Mat& masterDarkFrame, const int& ySize, const int& xSize, vector<vector<int>>& hotPixels) {
-    Scalar mean = cv::mean(masterDarkFrame);
-    float meanValue = mean[0];
+    float meanValue = mean(masterDarkFrame)[0];
 
     for (int y = 1; y < ySize - 1; y++)
         for (int x = 1; x < xSize - 1; x++)
             if (masterDarkFrame.at<float>(y, x) > 10 * meanValue)
                 hotPixels.push_back({ x,y });
 }
+
 
 //Function to remove hotpixels
 void removeHotPixels(Mat lightFrame, const vector<vector<int>>& hotPixels) {
@@ -456,8 +456,7 @@ vector<int> Hydra::Form1::Stack() {
             vector<vector<int>> hotPixels;
             findHotPixels(masterDarkFrame, height, width, hotPixels);
 
-            calibratedFlatFrame *= width * height / sum(calibratedFlatFrame)[0];
-
+            calibratedFlatFrame *= 1 / mean(calibratedFlatFrame)[0];
             Mat ones(height, width, CV_32FC1, Scalar(1));
             Mat invertedCalibratedFlatFrame;
             divide(ones, calibratedFlatFrame, invertedCalibratedFlatFrame);
