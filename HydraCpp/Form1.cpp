@@ -156,8 +156,9 @@ vector<vector<int>> getStarPairs(const vector<vector<float>>& refTriangles, cons
                 if (nextLargestColElement < voteMatrix[r][maxRowVoteIndex])
                     nextLargestColElement = voteMatrix[r][maxRowVoteIndex];
 
-        if (int correctedVotes = max(maxRowVote - max(nextLargestColElement, nextLargestRowElement), 0) > 0)
-            starPairs.push_back({ row, maxRowVoteIndex, correctedVotes });
+        int correctedVotes = max(maxRowVote - max(nextLargestColElement, nextLargestRowElement), 0) > 0;
+
+        if (correctedVotes > 0) starPairs.push_back({ row, maxRowVoteIndex, correctedVotes });
     }
     sortByColumn(starPairs, 2);
     return starPairs;
@@ -182,8 +183,7 @@ vector<float> alignFrames(const vector<vector<int>>& starPairs, const vector<flo
     SVD::compute(frameMatrix * referenceMatrix.t(), S, U, Vt);
     R = (U * Vt).t();
 
-    if (determinant(R) < 0)
-        R = (U * (Mat_<float>(2, 2) << 1, 0, 0, -1) * Vt).t();
+    if (determinant(R) < 0) R = (U * (Mat_<float>(2, 2) << 1, 0, 0, -1) * Vt).t();
 
     t = -R * centroid_F + centroid_R;
     return { R.at<float>(0, 0), R.at<float>(1, 0), t.at<float>(0, 0), t.at<float>(1, 0) };
@@ -257,8 +257,7 @@ void findHotPixels(const Mat& masterDarkFrame, const int& ySize, const int& xSiz
 
 //Function to remove hotpixels
 void removeHotPixels(Mat lightFrame, const vector<vector<int>>& hotPixels) {
-    for (const auto& hotPix : hotPixels) 
-        lightFrame.at<float>(hotPix[1], hotPix[0]) = (lightFrame.at<float>(hotPix[1], hotPix[0] + 1) + lightFrame.at<float>(hotPix[1], hotPix[0] - 1) + lightFrame.at<float>(hotPix[1] + 1, hotPix[0]) + lightFrame.at<float>(hotPix[1] - 1, hotPix[0])) / 4;
+    for (const auto& hotPix : hotPixels) lightFrame.at<float>(hotPix[1], hotPix[0]) = (lightFrame.at<float>(hotPix[1], hotPix[0] + 1) + lightFrame.at<float>(hotPix[1], hotPix[0] - 1) + lightFrame.at<float>(hotPix[1] + 1, hotPix[0]) + lightFrame.at<float>(hotPix[1] - 1, hotPix[0])) / 4;
 }
 
 //Function to rotate images
@@ -340,8 +339,7 @@ vector<int> Hydra::Form1::RegisterFrames() {
 
         elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
 
-        if (!filesystem::exists(path + parameterDir))
-            filesystem::create_directory(path + parameterDir);
+        if (!filesystem::exists(path + parameterDir)) filesystem::create_directory(path + parameterDir);
 
         writeStringMatrix(path + parameterDir + "qualVec" + frameFilter + ".csv", qualVecS);
     }
@@ -388,8 +386,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 cvtColor(maxQualFrame, maxQualFrame, COLOR_GRAY2BGR);
                 static const map<string, Scalar> colorMap = { {"R", Scalar(0, 0, 255)}, {"G", Scalar(0, 255, 0)}, {"B", Scalar(255, 0, 0)}, {"L", Scalar(255, 255, 255)} };
 
-                for (int j = 0; j < xRef.size(); j++)
-                    circle(maxQualFrame, Point_(xRef[j] / scaling, yRef[j] / scaling), 8, colorMap.at(alignFilter));
+                for (int j = 0; j < xRef.size(); j++) circle(maxQualFrame, Point_(xRef[j] / scaling, yRef[j] / scaling), 8, colorMap.at(alignFilter));
 
                 #pragma omp parallel for num_threads(numLogicalCores*2)
                 for (int k = 0; k < n; k++)
@@ -402,8 +399,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                         vector<float> RTparams = alignFrames(starPairs, xRef, yRef, xFrame, yFrame, topMatches);
                         stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[0]), to_string(RTparams[1]), to_string(RTparams[2]), to_string(RTparams[3]) };
 
-                        for (int j = 0; j < xFrame.size(); j++)
-                            circle(maxQualFrame, Point_((RTparams[0] * xFrame[j] - RTparams[1] * yFrame[j] + RTparams[2]) / scaling, (RTparams[1] * xFrame[j] + RTparams[0] * yFrame[j] + RTparams[3]) / scaling), 5, colorMap.at(frameFilter));
+                        for (int j = 0; j < xFrame.size(); j++) circle(maxQualFrame, Point_((RTparams[0] * xFrame[j] - RTparams[1] * yFrame[j] + RTparams[2]) / scaling, (RTparams[1] * xFrame[j] + RTparams[0] * yFrame[j] + RTparams[3]) / scaling), 5, colorMap.at(frameFilter));
                     }
                 }
                 elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
@@ -466,16 +462,14 @@ vector<int> Hydra::Form1::Stack() {
             Mat p(s.height, s.width, CV_32FC1, Scalar(0)), psqr(s.height, s.width, CV_32FC1, Scalar(0)), std(s.height, s.width, CV_32FC1, Scalar(0)), medianFrame(s.height, s.width, CV_32FC1, Scalar(0)), stackFrame(s.height, s.width, CV_32FC1, Scalar(0));
             vector<Mat> medianArray(medianBatchSize, Mat(s.height, s.width, CV_32FC1));
 
-            if (n < medianBatchSize)
-                medianBatchSize = n;
+            if (n < medianBatchSize) medianBatchSize = n;
 
             int batches = n / medianBatchSize;
             int iterations = medianBatchSize * batches;
 
             vector<int> m(iterations);
 
-            for (int j = 0; j < iterations; j++)
-                m[j] = j;
+            for (int j = 0; j < iterations; j++) m[j] = j;
 
             shuffle(m.begin(), m.end(), default_random_engine(chrono::system_clock::now().time_since_epoch().count()));
 
@@ -502,8 +496,7 @@ vector<int> Hydra::Form1::Stack() {
                 addWeighted(stackFrame, 1, lightFrame, 1 / float(n), 0.0, stackFrame);
             }
 
-            if (!filesystem::exists(path + outputDir))
-                filesystem::create_directory(path + outputDir);
+            if (!filesystem::exists(path + outputDir)) filesystem::create_directory(path + outputDir);
 
             imwrite(path + outputDir + "Median" + "_" + to_string(n) + "_" + frameFilter + "_" + to_string(int(samplingFactor * 100)) + ".tif", medianFrame);
             imwrite(path + outputDir + "Mean" + "_" + to_string(n) + "_" + frameFilter + "_" + to_string(int(samplingFactor * 100)) + ".tif", p);
