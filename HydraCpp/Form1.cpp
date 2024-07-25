@@ -57,6 +57,7 @@ void writeStringMatrix(const string& path, const vector<vector<string>>& stringA
 
         stringFileStream << row[row.size() - 1] << "\n";
     }
+    stringFileStream.close();
 }
 
 void unpack(const vector<vector<string>>& inputArray, vector<string>* lightFrameArray, vector<vector<float>>* qualVec, vector<vector<float>>* xvec, vector<vector<float>>* yvec) {
@@ -252,7 +253,6 @@ void findHotPixels(const Mat& masterDarkFrame, const int& xSize, const int& ySiz
             if (x > 0 || y > 0 || x < xSize - 1 || y < ySize - 1)
                 if (masterDarkFrame.at<float>(y, x) > 10 * mean[0])
                     hotPixels.push_back({ x,y });
-
 }
 
 //Function to remove hotpixels
@@ -449,14 +449,25 @@ vector<int> Hydra::Form1::Stack() {
         Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + frameFilter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
         Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
 
-        vector<vector<int>> hotPixels;
-        findHotPixels(masterDarkFrame, xSize, ySize, hotPixels);
-
-        double minVal, maxVal;
-        minMaxLoc(calibratedFlatFrame, &minVal, &maxVal);
+        double minVal;
+        minMaxLoc(calibratedFlatFrame, &minVal);
 
         if (minVal > 0) {
+            vector<vector<int>> hotPixels;
+            findHotPixels(masterDarkFrame, xSize, ySize, hotPixels);
+
             calibratedFlatFrame *= xSize * ySize / sum(calibratedFlatFrame)[0];
+
+            xSize = int(xSize * samplingFactor);
+            ySize = int(ySize * samplingFactor);
+
+            Mat ones(ySize, xSize, CV_32FC1, Scalar(1));
+            Mat invertedCalibratedFlatFrame;
+            divide(ones, calibratedFlatFrame, invertedCalibratedFlatFrame);
+
+            Mat p(ySize, xSize, CV_32FC1, Scalar(0)), psqr(ySize, xSize, CV_32FC1, Scalar(0)), std(ySize, xSize, CV_32FC1, Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, Scalar(0));
+            vector<Mat> medianArray(medianBatchSize, Mat(ySize, xSize, CV_32FC1));
+
             if (n < medianBatchSize)
                 medianBatchSize = n;
 
@@ -469,16 +480,6 @@ vector<int> Hydra::Form1::Stack() {
                 m[j] = j;
 
             shuffle(m.begin(), m.end(), default_random_engine(chrono::system_clock::now().time_since_epoch().count()));
-
-            xSize = int(xSize * samplingFactor);
-            ySize = int(ySize * samplingFactor);
-
-            Mat ones(ySize, xSize, CV_32FC1, Scalar(1));
-            Mat invertedCalibratedFlatFrame;
-            divide(ones, calibratedFlatFrame, invertedCalibratedFlatFrame);
-
-            Mat p(ySize, xSize, CV_32FC1, Scalar(0)), psqr(ySize, xSize, CV_32FC1, Scalar(0)), std(ySize, xSize, CV_32FC1, Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, Scalar(0));
-            vector<Mat> medianArray(medianBatchSize, Mat(ySize, xSize, CV_32FC1));
 
             for (int k = 0; k < batches; k++) {
                 #pragma omp parallel for num_threads(numLogicalCores*2)
