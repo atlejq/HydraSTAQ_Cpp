@@ -162,7 +162,7 @@ vector<vector<int>> getStarPairs(const vector<vector<float>>& refTriangles, cons
     return starPairs;
 }
 
-//Function for computing angular and translational offsets between vectors
+//Function for computing rotation matrix
 vector<float> alignFrames(const vector<vector<int>>& starPairs, const vector<float>& refVectorX, const vector<float>& refVectorY, const vector<float>& xvec, const vector<float>& yvec, const int& topMatches) {
     Mat frameMatrix(2, topMatches, CV_32F), referenceMatrix(2, topMatches, CV_32F), centroid_F, centroid_R, U, S, Vt, R, t;
 
