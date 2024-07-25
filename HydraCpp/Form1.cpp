@@ -441,8 +441,7 @@ vector<int> Hydra::Form1::Stack() {
         Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + frameFilter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
         Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
 
-        Scalar mean, stddev;
-        meanStdDev(masterDarkFrame, mean, stddev);
+        Scalar mean = cv::mean(masterDarkFrame);
 
         vector<vector<int>> hotPixels;
 
