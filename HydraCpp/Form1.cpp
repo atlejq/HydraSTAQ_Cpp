@@ -457,7 +457,6 @@ vector<int> Hydra::Form1::Stack() {
 
             calibratedFlatFrame *= width * height / sum(calibratedFlatFrame)[0];
 
-
             Mat ones(height, width, CV_32FC1, Scalar(1));
             Mat invertedCalibratedFlatFrame;
             divide(ones, calibratedFlatFrame, invertedCalibratedFlatFrame);
