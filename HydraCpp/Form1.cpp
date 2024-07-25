@@ -244,13 +244,12 @@ Mat getCalibrationFrame(const int& ySize, const int& xSize, const string& calibr
 }
 
 //Function to remove hotpixels
-Mat removeHotPixels(Mat lightFrame, const vector<vector<int>>& hotPixels) {
+void removeHotPixels(Mat lightFrame, const vector<vector<int>>& hotPixels) {
     for (const auto& hotPix : hotPixels) {
         int x = hotPix[0];
         int y = hotPix[1];
         lightFrame.at<float>(y, x) = (lightFrame.at<float>(y, x + 1) + lightFrame.at<float>(y, x - 1) + lightFrame.at<float>(y + 1, x) + lightFrame.at<float>(y - 1, x)) / 4;
     }
-    return lightFrame;
 }
 
 //Function to rotate images
@@ -259,7 +258,7 @@ Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat&
     lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
     lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame);
     multiply(lightFrame, inverted, lightFrame);
-    lightFrame = removeHotPixels(lightFrame, hotPixels);
+    removeHotPixels(lightFrame, hotPixels);
     resize(lightFrame, lightFrame, Size(samplingFactor * lightFrame.cols, samplingFactor * lightFrame.rows), 0, 0, interpolationFlag);
     Mat M = (Mat_<float>(2, 3) << RTparams[0], -RTparams[1], RTparams[2], RTparams[1], RTparams[0], RTparams[3]);
     warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
@@ -442,7 +441,6 @@ vector<int> Hydra::Form1::Stack() {
         Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
 
         Scalar mean = cv::mean(masterDarkFrame);
-
         vector<vector<int>> hotPixels;
 
         for (int y = 0; y < ySize; y++)
