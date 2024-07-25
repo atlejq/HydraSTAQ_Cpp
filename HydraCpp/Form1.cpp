@@ -245,7 +245,7 @@ Mat getCalibrationFrame(const int& width, const int& height, const string& calib
 }
 
 //Find hot pixels
-void findHotPixels(const Mat& masterDarkFrame, const int& xSize, const int& ySize,  vector<vector<int>>& hotPixels)
+void findHotPixels(const Mat& masterDarkFrame, const int& ySize, const int& xSize, vector<vector<int>>& hotPixels)
 {
     Scalar mean = cv::mean(masterDarkFrame);
     for (int y = 0; y < ySize; y++)
@@ -443,22 +443,22 @@ vector<int> Hydra::Form1::Stack() {
             mean_background = mean_background + background[i] / float(n);
         }
 
-        int xSize = stoi(stackInfo[0][3]);
-        int ySize = stoi(stackInfo[0][4]);
+        int width = stoi(stackInfo[0][3]);
+        int height = stoi(stackInfo[0][4]);
 
-        Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + frameFilter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
-        Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
+        Mat calibratedFlatFrame = getCalibrationFrame(height, width, path + flatDir + frameFilter, 1) - getCalibrationFrame(height, width, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
+        Mat masterDarkFrame = getCalibrationFrame(height, width, path + darkDir + filterSelector(darksGroup), 0);
 
         double minVal;
         minMaxLoc(calibratedFlatFrame, &minVal);
 
         if (minVal > 0) {
             vector<vector<int>> hotPixels;
-            findHotPixels(masterDarkFrame, xSize, ySize, hotPixels);
+            findHotPixels(masterDarkFrame, height, width, hotPixels);
 
-            calibratedFlatFrame *= xSize * ySize / sum(calibratedFlatFrame)[0];
+            calibratedFlatFrame *= width * height / sum(calibratedFlatFrame)[0];
 
-            cv::Size s = cv::Size(int(xSize * samplingFactor), int(ySize * samplingFactor));
+            cv::Size s = cv::Size(int(width * samplingFactor), int(height * samplingFactor));
 
             Mat ones(s.height, s.width, CV_32FC1, Scalar(1));
             Mat invertedCalibratedFlatFrame;
