@@ -185,7 +185,7 @@ vector<float> alignFrames(const vector<vector<int>>& starPairs, const vector<flo
         R = (U * (Mat_<float>(2, 2) << 1, 0, 0, -1) * Vt).t();
 
     t = -R * centroid_F + centroid_R;
-    return { atan2(R.at<float>(1, 0), R.at<float>(0, 0)), t.at<float>(0, 0), t.at<float>(1, 0) };
+    return { cos(atan2(R.at<float>(1, 0), R.at<float>(0, 0))), sin(atan2(R.at<float>(1, 0), R.at<float>(0, 0))), t.at<float>(0, 0), t.at<float>(1, 0) };
 }
 
 //Function to analyze the star field in the given light frame.
@@ -392,10 +392,10 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                         vector<vector<float>> frameTriangles = triangles(xFrame, yFrame);
                         vector<vector<int>> starPairs = getStarPairs(refTriangles, frameTriangles, xRef.size(), xFrame.size());
                         vector<float> RTparams = alignFrames(starPairs, xRef, yRef, xFrame, yFrame, topMatches);
-                        stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(cos(RTparams[0])), to_string(sin(RTparams[0])), to_string(RTparams[1]), to_string(RTparams[2]) };
+                        stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[0]), to_string(RTparams[1]), to_string(RTparams[2]), to_string(RTparams[3]) };
                         
                         for (int j = 0; j < xFrame.size(); j++) 
-                            circle(maxQualFrame, Point_((cos(RTparams[0]) * xFrame[j] - sin(RTparams[0]) * yFrame[j] + RTparams[1])/ scaling, (sin(RTparams[0]) * xFrame[j] + cos(RTparams[0]) * yFrame[j] + RTparams[2]) / scaling), 5, colorMap.at(frameFilter));
+                            circle(maxQualFrame, Point_((RTparams[0] * xFrame[j] - RTparams[1] * yFrame[j] + RTparams[2])/ scaling, (RTparams[1] * xFrame[j] + RTparams[0] * yFrame[j] + RTparams[3]) / scaling), 5, colorMap.at(frameFilter));
                     }
                 }
                 elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
