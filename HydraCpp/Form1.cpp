@@ -261,7 +261,7 @@ Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat&
     multiply(lightFrame, inverted, lightFrame);
     lightFrame = removeHotPixels(lightFrame, hotPixels);
     resize(lightFrame, lightFrame, Size(samplingFactor * lightFrame.cols, samplingFactor * lightFrame.rows), 0, 0, interpolationFlag);
-    Mat M = (Mat_<float>(2, 3) << cos(RTparams[0]), -sin(RTparams[0]), RTparams[1], sin(RTparams[0]), cos(RTparams[0]), RTparams[2]);
+    Mat M = (Mat_<float>(2, 3) << RTparams[0], -RTparams[1], RTparams[2], RTparams[1], RTparams[0], RTparams[3]);
     warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
     return lightFrame;
 }
@@ -392,7 +392,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                         vector<vector<float>> frameTriangles = triangles(xFrame, yFrame);
                         vector<vector<int>> starPairs = getStarPairs(refTriangles, frameTriangles, xRef.size(), xFrame.size());
                         vector<float> RTparams = alignFrames(starPairs, xRef, yRef, xFrame, yFrame, topMatches);
-                        stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[0]), to_string(RTparams[1]), to_string(RTparams[2]) };
+                        stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(cos(RTparams[0])), to_string(sin(RTparams[0])), to_string(RTparams[0]*57.2958), to_string(RTparams[1]), to_string(RTparams[2]) };
                         
                         for (int j = 0; j < xFrame.size(); j++) 
                             circle(maxQualFrame, Point_((cos(RTparams[0]) * xFrame[j] - sin(RTparams[0]) * yFrame[j] + RTparams[1])/ scaling, (sin(RTparams[0]) * xFrame[j] + cos(RTparams[0]) * yFrame[j] + RTparams[2]) / scaling), 5, colorMap.at(frameFilter));
@@ -430,7 +430,7 @@ vector<int> Hydra::Form1::Stack() {
 
         for (int i = 0; i < n; i++) {
             stackArray[i] = stackInfo[i][0];
-            RTparams[i] = { stof(stackInfo[i][5]), samplingFactor * stof(stackInfo[i][6]), samplingFactor * stof(stackInfo[i][7]) };
+            RTparams[i] = { stof(stackInfo[i][5]), stof(stackInfo[i][6]), samplingFactor * stof(stackInfo[i][8]), samplingFactor * stof(stackInfo[i][9]) };
             background[i] = stof(stackInfo[i][2]);
             mean_background = mean_background + background[i] / float(n);
         }
