@@ -247,9 +247,11 @@ Mat getCalibrationFrame(const int& width, const int& height, const string& calib
 //Find hot pixels
 void findHotPixels(const Mat& masterDarkFrame, const int& ySize, const int& xSize, vector<vector<int>>& hotPixels) {
     Scalar mean = cv::mean(masterDarkFrame);
+    float meanValue = mean[0];
+
     for (int y = 1; y < ySize - 1; y++)
         for (int x = 1; x < xSize - 1; x++)
-            if (masterDarkFrame.at<float>(y, x) > 10 * mean[0])
+            if (masterDarkFrame.at<float>(y, x) > 10 * meanValue)
                 hotPixels.push_back({ x,y });
 }
 
