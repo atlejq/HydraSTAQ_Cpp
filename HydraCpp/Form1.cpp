@@ -247,11 +247,12 @@ Mat getCalibrationFrame(const int& width, const int& height, const string& calib
 //Find hot pixels
 void findHotPixels(const Mat& masterDarkFrame, const int& ySize, const int& xSize, vector<vector<int>>& hotPixels) {
     Scalar mean = cv::mean(masterDarkFrame);
-    for (int y = 0; y < ySize; y++)
-        for (int x = 0; x < xSize; x++)
-            if (x > 0 || y > 0 || x < xSize - 1 || y < ySize - 1)
-                if (masterDarkFrame.at<float>(y, x) > 10 * mean[0])
-                    hotPixels.push_back({ x,y });
+    float meanValue = mean[0];
+
+    for (int y = 1; y < ySize - 1; y++)
+        for (int x = 1; x < xSize - 1; x++)
+            if (masterDarkFrame.at<float>(y, x) > 10 * meanValue)
+                hotPixels.push_back({ x,y });
 }
 
 //Function to remove hotpixels
@@ -267,9 +268,9 @@ Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat&
     lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame);
     multiply(lightFrame, inverted, lightFrame);
     removeHotPixels(lightFrame, hotPixels);
-    resize(lightFrame, lightFrame, Size(samplingFactor * lightFrame.cols, samplingFactor * lightFrame.rows), 0, 0, interpolationFlag);
+    resize(lightFrame, lightFrame, Size(), samplingFactor, samplingFactor, interpolationFlag);
     Mat M = (Mat_<float>(2, 3) << RTparams[0], -RTparams[1], RTparams[2], RTparams[1], RTparams[0], RTparams[3]);
-    warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
+    warpAffine(lightFrame, lightFrame, M, Size(), interpolationFlag);
     return lightFrame;
 }
 
