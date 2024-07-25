@@ -243,6 +243,18 @@ Mat getCalibrationFrame(const int& ySize, const int& xSize, const string& calibr
     return masterFrame;
 }
 
+//Find hot pixels
+void findHotPixels(const Mat& masterDarkFrame, const int& xSize, const int& ySize,  vector<vector<int>>& hotPixels)
+{
+    Scalar mean = cv::mean(masterDarkFrame);
+    for (int y = 0; y < ySize; y++)
+        for (int x = 0; x < xSize; x++)
+            if (x > 0 || y > 0 || x < xSize - 1 || y < ySize - 1)
+                if (masterDarkFrame.at<float>(y, x) > 10 * mean[0])
+                    hotPixels.push_back({ x,y });
+
+}
+
 //Function to remove hotpixels
 void removeHotPixels(Mat lightFrame, const vector<vector<int>>& hotPixels) {
     for (const auto& hotPix : hotPixels) 
@@ -437,14 +449,8 @@ vector<int> Hydra::Form1::Stack() {
         Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + frameFilter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
         Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
 
-        Scalar mean = cv::mean(masterDarkFrame);
         vector<vector<int>> hotPixels;
-
-        for (int y = 0; y < ySize; y++)
-            for (int x = 0; x < xSize; x++)
-                if (x > 0 || y > 0 || x < xSize - 1 || y < ySize - 1)
-                    if (masterDarkFrame.at<float>(y, x) > 10 * mean[0])
-                        hotPixels.push_back({ x,y });
+        findHotPixels(masterDarkFrame, xSize, ySize, hotPixels);
 
         double minVal, maxVal;
         minMaxLoc(calibratedFlatFrame, &minVal, &maxVal);
