@@ -245,11 +245,8 @@ Mat getCalibrationFrame(const int& ySize, const int& xSize, const string& calibr
 
 //Function to remove hotpixels
 void removeHotPixels(Mat lightFrame, const vector<vector<int>>& hotPixels) {
-    for (const auto& hotPix : hotPixels) {
-        int x = hotPix[0];
-        int y = hotPix[1];
-        lightFrame.at<float>(y, x) = (lightFrame.at<float>(y, x + 1) + lightFrame.at<float>(y, x - 1) + lightFrame.at<float>(y + 1, x) + lightFrame.at<float>(y - 1, x)) / 4;
-    }
+    for (const auto& hotPix : hotPixels) 
+        lightFrame.at<float>(hotPix[1], hotPix[0]) = (lightFrame.at<float>(hotPix[1], hotPix[0] + 1) + lightFrame.at<float>(hotPix[1], hotPix[0] - 1) + lightFrame.at<float>(hotPix[1] + 1, hotPix[0]) + lightFrame.at<float>(hotPix[1] - 1, hotPix[0])) / 4;
 }
 
 //Function to rotate images
