@@ -458,15 +458,14 @@ vector<int> Hydra::Form1::Stack() {
 
             calibratedFlatFrame *= xSize * ySize / sum(calibratedFlatFrame)[0];
 
-            xSize = int(xSize * samplingFactor);
-            ySize = int(ySize * samplingFactor);
+            cv::Size s = cv::Size(int(ySize * samplingFactor), int(xSize * samplingFactor));
 
-            Mat ones(ySize, xSize, CV_32FC1, Scalar(1));
+            Mat ones(s.width, s.height, CV_32FC1, Scalar(1));
             Mat invertedCalibratedFlatFrame;
             divide(ones, calibratedFlatFrame, invertedCalibratedFlatFrame);
 
-            Mat p(ySize, xSize, CV_32FC1, Scalar(0)), psqr(ySize, xSize, CV_32FC1, Scalar(0)), std(ySize, xSize, CV_32FC1, Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, Scalar(0));
-            vector<Mat> medianArray(medianBatchSize, Mat(ySize, xSize, CV_32FC1));
+            Mat p(s.width, s.height, CV_32FC1, Scalar(0)), psqr(s.width, s.height, CV_32FC1, Scalar(0)), std(s.width, s.height, CV_32FC1, Scalar(0)), medianFrame(s.width, s.height, CV_32FC1, Scalar(0)), stackFrame(s.width, s.height, CV_32FC1, Scalar(0));
+            vector<Mat> medianArray(medianBatchSize, Mat(s.width, s.height, CV_32FC1));
 
             if (n < medianBatchSize)
                 medianBatchSize = n;
@@ -489,7 +488,7 @@ vector<int> Hydra::Form1::Stack() {
                     addWeighted(p, 1, medianArray[c] / iterations, 1, 0.0, p);
                     addWeighted(psqr, 1, medianArray[c].mul(medianArray[c]) / iterations, 1, 0.0, psqr);
                 }
-                addWeighted(medianFrame, 1, computeMedianImage(medianArray, ySize, xSize), 1 / float(batches), 0.0, medianFrame);
+                addWeighted(medianFrame, 1, computeMedianImage(medianArray, s.width, s.height), 1 / float(batches), 0.0, medianFrame);
             }
 
             sqrt((psqr - p.mul(p)) * iterations / (iterations - 1), std);
