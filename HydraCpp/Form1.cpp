@@ -215,8 +215,8 @@ vector<vector<float>> analyzeStarField(Mat lightFrame, const float& t) {
 }
 
 //Function to fetch a calibration frame
-Mat getCalibrationFrame(const int& ySize, const int& xSize, const string& calibrationPath, const float& defaultValue) {
-    Mat masterFrame(ySize, xSize, CV_32FC1, Scalar(defaultValue));
+Mat getCalibrationFrame(const int& width, const int& height, const string& calibrationPath, const float& defaultValue) {
+    Mat masterFrame(width, height, CV_32FC1, Scalar(defaultValue));
 
     if (filesystem::exists(calibrationPath + "/" + "masterFrame.tif")) {
         Mat tmpCalibrationFrame = imread(calibrationPath + "/" + "masterFrame.tif", IMREAD_ANYDEPTH);
@@ -227,7 +227,7 @@ Mat getCalibrationFrame(const int& ySize, const int& xSize, const string& calibr
         vector<string> calibrationFrameArray = getFrames(calibrationPath + "/", ext);
         if (!calibrationFrameArray.empty())
         {
-            Mat tmpMasterFrame(ySize, xSize, CV_32FC1, Scalar(0));
+            Mat tmpMasterFrame(width, height, CV_32FC1, Scalar(0));
             #pragma omp parallel for num_threads(numLogicalCores*2)
             for (int n = 0; n < calibrationFrameArray.size(); n++) {
                 Mat calibrationFrame = imread(calibrationFrameArray[n], IMREAD_ANYDEPTH);
@@ -458,14 +458,14 @@ vector<int> Hydra::Form1::Stack() {
 
             calibratedFlatFrame *= xSize * ySize / sum(calibratedFlatFrame)[0];
 
-            cv::Size s = cv::Size(int(ySize * samplingFactor), int(xSize * samplingFactor));
+            cv::Size s = cv::Size(int(xSize * samplingFactor), int(ySize * samplingFactor));
 
-            Mat ones(s.width, s.height, CV_32FC1, Scalar(1));
+            Mat ones(s.height, s.width, CV_32FC1, Scalar(1));
             Mat invertedCalibratedFlatFrame;
             divide(ones, calibratedFlatFrame, invertedCalibratedFlatFrame);
 
-            Mat p(s.width, s.height, CV_32FC1, Scalar(0)), psqr(s.width, s.height, CV_32FC1, Scalar(0)), std(s.width, s.height, CV_32FC1, Scalar(0)), medianFrame(s.width, s.height, CV_32FC1, Scalar(0)), stackFrame(s.width, s.height, CV_32FC1, Scalar(0));
-            vector<Mat> medianArray(medianBatchSize, Mat(s.width, s.height, CV_32FC1));
+            Mat p(s.height, s.width, CV_32FC1, Scalar(0)), psqr(s.height, s.width, CV_32FC1, Scalar(0)), std(s.height, s.width, CV_32FC1, Scalar(0)), medianFrame(s.height, s.width, CV_32FC1, Scalar(0)), stackFrame(s.height, s.width, CV_32FC1, Scalar(0));
+            vector<Mat> medianArray(medianBatchSize, Mat(s.height, s.width, CV_32FC1));
 
             if (n < medianBatchSize)
                 medianBatchSize = n;
@@ -488,7 +488,7 @@ vector<int> Hydra::Form1::Stack() {
                     addWeighted(p, 1, medianArray[c] / iterations, 1, 0.0, p);
                     addWeighted(psqr, 1, medianArray[c].mul(medianArray[c]) / iterations, 1, 0.0, psqr);
                 }
-                addWeighted(medianFrame, 1, computeMedianImage(medianArray, s.width, s.height), 1 / float(batches), 0.0, medianFrame);
+                addWeighted(medianFrame, 1, computeMedianImage(medianArray, s.height, s.width), 1 / float(batches), 0.0, medianFrame);
             }
 
             sqrt((psqr - p.mul(p)) * iterations / (iterations - 1), std);
