@@ -31,7 +31,7 @@ vector<vector<string>> readStringMatrix(const string& path) {
     vector<vector<string>> commaSeparatedArray;
     string line;
     ifstream commaSeparatedArrayStream(path);
-    if (commaSeparatedArrayStream.is_open()) 
+    if (commaSeparatedArrayStream.is_open())
         while (getline(commaSeparatedArrayStream, line)) {
             vector<string> commaSeparatedLine;
             string::size_type end;
@@ -45,16 +45,16 @@ vector<vector<string>> readStringMatrix(const string& path) {
             commaSeparatedLine.push_back(line.substr(start));
             commaSeparatedArray.push_back(commaSeparatedLine);
         }
-    
+
     return commaSeparatedArray;
 }
 
 void writeStringMatrix(const string& path, const vector<vector<string>>& stringArray) {
     ofstream stringFileStream(path);
     for (const auto& row : stringArray) {
-        for (size_t j = 0; j < row.size() - 1; j++) 
+        for (size_t j = 0; j < row.size() - 1; j++)
             stringFileStream << row[j] << ",";
-        
+
         stringFileStream << row[row.size() - 1] << "\n";
     }
 }
@@ -100,10 +100,10 @@ string filterSelector(string input) {
 //Function for enumerating star triangles
 vector<vector<float>> triangles(const vector<float>& x, const vector<float>& y) {
     vector<vector<float>> triangleParameters;
-    const float minSquare = 50*50;
+    const float minSquare = 50 * 50;
     const int n = x.size();
     float s0, s1, s2, s3;
-    for (int i = 0; i < n - 2; i++) 
+    for (int i = 0; i < n - 2; i++)
         for (int j = i + 1; j < n - 1; j++) {
             s3 = ((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]));
             if (s3 > minSquare) {
@@ -134,7 +134,7 @@ vector<vector<int>> getStarPairs(const vector<vector<float>>& refTriangles, cons
             if ((refTri[3] - frameTriangles[b][3]) * (refTri[3] - frameTriangles[b][3]) + (refTri[4] - frameTriangles[b][4]) * (refTri[4] - frameTriangles[b][4]) < eSquare)
                 for (int i = 0; i < 3; i++)
                     voteMatrix[static_cast<int>(refTri[i])][static_cast<int>(frameTriangles[b][i])] += 1;
-  
+
     for (int row = 0; row < voteMatrix.size(); row++) {
         int maxRowVote = 0;
         int maxRowVoteIndex = 0;
@@ -155,14 +155,14 @@ vector<vector<int>> getStarPairs(const vector<vector<float>>& refTriangles, cons
                 if (nextLargestColElement < voteMatrix[r][maxRowVoteIndex])
                     nextLargestColElement = voteMatrix[r][maxRowVoteIndex];
 
-        if(int correctedVotes = max(maxRowVote - max(nextLargestColElement, nextLargestRowElement), 0) > 0)
+        if (int correctedVotes = max(maxRowVote - max(nextLargestColElement, nextLargestRowElement), 0) > 0)
             starPairs.push_back({ row, maxRowVoteIndex, correctedVotes });
     }
     sortByColumn(starPairs, 2);
     return starPairs;
 }
 
-//Function for computing rotation matrix
+//Function for computing angular and translational offsets between vectors
 vector<float> alignFrames(const vector<vector<int>>& starPairs, const vector<float>& refVectorX, const vector<float>& refVectorY, const vector<float>& xvec, const vector<float>& yvec, const int& topMatches) {
     Mat frameMatrix(2, topMatches, CV_32F), referenceMatrix(2, topMatches, CV_32F), centroid_F, centroid_R, U, S, Vt, R, t;
 
@@ -244,9 +244,13 @@ Mat getCalibrationFrame(const int& ySize, const int& xSize, const string& calibr
 }
 
 //Function to remove hotpixels
-void correctHotPixels(Mat& lightFrame, const vector<vector<int>>& hotPixels) {
-    for (const auto& h : hotPixels)
-        lightFrame.at<float>(h[1], h[0]) = (lightFrame.at<float>(h[1], h[0] + 1) + lightFrame.at<float>(h[1], h[0] - 1) + lightFrame.at<float>(h[1] + 1, h[0]) + lightFrame.at<float>(h[1] - 1, h[0])) / 4.0;
+Mat removeHotPixels(Mat lightFrame, const vector<vector<int>>& hotPixels) {
+    for (const auto& hotPix : hotPixels) {
+        int x = hotPix[0];
+        int y = hotPix[1];
+        lightFrame.at<float>(y, x) = (lightFrame.at<float>(y, x + 1) + lightFrame.at<float>(y, x - 1) + lightFrame.at<float>(y + 1, x) + lightFrame.at<float>(y - 1, x)) / 4;
+    }
+    return lightFrame;
 }
 
 //Function to rotate images
@@ -255,7 +259,7 @@ Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat&
     lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
     lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame);
     multiply(lightFrame, inverted, lightFrame);
-    correctHotPixels(lightFrame, hotPixels);
+    lightFrame = removeHotPixels(lightFrame, hotPixels);
     resize(lightFrame, lightFrame, Size(samplingFactor * lightFrame.cols, samplingFactor * lightFrame.rows), 0, 0, interpolationFlag);
     Mat M = (Mat_<float>(2, 3) << RTparams[0], -RTparams[1], RTparams[2], RTparams[1], RTparams[0], RTparams[3]);
     warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
@@ -322,7 +326,7 @@ vector<int> Hydra::Form1::RegisterFrames() {
 
         for (int k = 0; k < qualVec.size(); k++) {
             qualVecS[k][0] = lightFrames[int(qualVec[k][0])];
-            for (int l = 1; l < qualVec[0].size(); l++) 
+            for (int l = 1; l < qualVec[0].size(); l++)
                 qualVecS[k][l] = to_string(qualVec[k][l]);
         }
 
@@ -357,13 +361,13 @@ vector<int> Hydra::Form1::ComputeOffsets() {
         unpack(inputMatrixAlign, &lightFrameArrayAlign, &qualVecAlign, &xvecAlign, &yvecAlign);
 
         bool sizesEqual = true;
- 
-        for (int l = 0; l < qualVec.size() && sizesEqual; l++) 
+
+        for (int l = 0; l < qualVec.size() && sizesEqual; l++)
             if ((qualVec[l][2] != qualVec[0][2]) || (qualVec[l][3] != qualVec[0][3]))
                 sizesEqual = false;
 
         if (sizesEqual) {
-            vector xRef = clean(xvecAlign[0]); 
+            vector xRef = clean(xvecAlign[0]);
             vector yRef = clean(yvecAlign[0]);
 
             if (!xRef.empty() && xRef.size() >= topMatches) {
@@ -389,9 +393,9 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                         vector<vector<int>> starPairs = getStarPairs(refTriangles, frameTriangles, xRef.size(), xFrame.size());
                         vector<float> RTparams = alignFrames(starPairs, xRef, yRef, xFrame, yFrame, topMatches);
                         stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[0]), to_string(RTparams[1]), to_string(RTparams[2]), to_string(RTparams[3]) };
-                        
-                        for (int j = 0; j < xFrame.size(); j++) 
-                            circle(maxQualFrame, Point_((RTparams[0] * xFrame[j] - RTparams[1] * yFrame[j] + RTparams[2])/ scaling, (RTparams[1] * xFrame[j] + RTparams[0] * yFrame[j] + RTparams[3]) / scaling), 5, colorMap.at(frameFilter));
+
+                        for (int j = 0; j < xFrame.size(); j++)
+                            circle(maxQualFrame, Point_((RTparams[0] * xFrame[j] - RTparams[1] * yFrame[j] + RTparams[2]) / scaling, (RTparams[1] * xFrame[j] + RTparams[0] * yFrame[j] + RTparams[3]) / scaling), 5, colorMap.at(frameFilter));
                     }
                 }
                 elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
@@ -437,19 +441,17 @@ vector<int> Hydra::Form1::Stack() {
         Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + frameFilter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
         Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
 
-        vector<cv::Point> hotPixelPoints;
-        Scalar mean = cv::mean(masterDarkFrame);
-        Mat mask = (masterDarkFrame > 10 * mean[0]);
-        findNonZero(mask, hotPixelPoints);
-        vector<vector<int>> hotPixels(2, vector<int>(hotPixelPoints.size()));
+        Scalar mean, stddev;
+        meanStdDev(masterDarkFrame, mean, stddev);
 
-        for (int i = 0; i < hotPixels.size(); i++)
-            if (hotPixelPoints[i].x > 0 && hotPixelPoints[i].x < xSize && hotPixelPoints[i].y > 0 && hotPixelPoints[i].y < ySize)
-            {
-                hotPixels[0][i] = hotPixelPoints[i].x;
-                hotPixels[1][i] = hotPixelPoints[i].y;
-            }
-            
+        vector<vector<int>> hotPixels;
+
+        for (int y = 0; y < ySize; y++)
+            for (int x = 0; x < xSize; x++)
+                if (x > 0 || y > 0 || x < xSize - 1 || y < ySize - 1)
+                    if (masterDarkFrame.at<float>(y, x) > 10 * mean[0])
+                        hotPixels.push_back({ x,y });
+
         double minVal, maxVal;
         minMaxLoc(calibratedFlatFrame, &minVal, &maxVal);
 
@@ -490,7 +492,7 @@ vector<int> Hydra::Form1::Stack() {
             }
 
             sqrt((psqr - p.mul(p)) * iterations / (iterations - 1), std);
-        
+
             #pragma omp parallel for num_threads(numLogicalCores*2) 
             for (int k = 0; k < n; k++) {
                 Mat absDiff, mask;
