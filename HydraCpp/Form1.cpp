@@ -453,8 +453,7 @@ vector<int> Hydra::Form1::Stack() {
             findHotPixels(masterDarkFrame, height, width, hotPixels);
 
             calibratedFlatFrame *= 1 / mean(calibratedFlatFrame)[0];
-            Mat ones(height, width, CV_32FC1, Scalar(1));
-            Mat invertedCalibratedFlatFrame;
+            Mat invertedCalibratedFlatFrame, ones(height, width, CV_32FC1, Scalar(1));
             divide(ones, calibratedFlatFrame, invertedCalibratedFlatFrame);
 
             cv::Size s = cv::Size(int(width * samplingFactor), int(height * samplingFactor));
@@ -468,9 +467,7 @@ vector<int> Hydra::Form1::Stack() {
             int iterations = medianBatchSize * batches;
 
             vector<int> m(iterations);
-
             for (int j = 0; j < iterations; j++) m[j] = j;
-
             shuffle(m.begin(), m.end(), default_random_engine(chrono::system_clock::now().time_since_epoch().count()));
 
             for (int k = 0; k < batches; k++) {
