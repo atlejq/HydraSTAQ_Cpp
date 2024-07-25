@@ -245,8 +245,7 @@ Mat getCalibrationFrame(const int& width, const int& height, const string& calib
 }
 
 //Find hot pixels
-void findHotPixels(const Mat& masterDarkFrame, const int& ySize, const int& xSize, vector<vector<int>>& hotPixels)
-{
+void findHotPixels(const Mat& masterDarkFrame, const int& ySize, const int& xSize, vector<vector<int>>& hotPixels) {
     Scalar mean = cv::mean(masterDarkFrame);
     for (int y = 0; y < ySize; y++)
         for (int x = 0; x < xSize; x++)
@@ -496,7 +495,7 @@ vector<int> Hydra::Form1::Stack() {
             #pragma omp parallel for num_threads(numLogicalCores*2) 
             for (int k = 0; k < n; k++) {
                 Mat absDiff, mask;
-                Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, calibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);
+                Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, invertedCalibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);
                 absdiff(lightFrame, medianFrame, absDiff);
                 compare(absDiff, 2.0 * std, mask, CMP_GT);
                 medianFrame.copyTo(lightFrame, mask);
