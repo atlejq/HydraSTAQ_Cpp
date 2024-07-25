@@ -185,7 +185,7 @@ vector<float> alignFrames(const vector<vector<int>>& starPairs, const vector<flo
         R = (U * (Mat_<float>(2, 2) << 1, 0, 0, -1) * Vt).t();
 
     t = -R * centroid_F + centroid_R;
-    return { cos(atan2(R.at<float>(1, 0), R.at<float>(0, 0))), sin(atan2(R.at<float>(1, 0), R.at<float>(0, 0))), t.at<float>(0, 0), t.at<float>(1, 0) };
+    return { R.at<float>(0, 0), R.at<float>(1, 0), t.at<float>(0, 0), t.at<float>(1, 0) };
 }
 
 //Function to analyze the star field in the given light frame.
