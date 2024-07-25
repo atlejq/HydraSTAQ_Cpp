@@ -254,10 +254,11 @@ Mat removeHotPixels(Mat lightFrame, const vector<vector<int>>& hotPixels) {
 }
 
 //Function to rotate images
-Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat& calibratedFlatFrame, const float& backGroundCorrection, const vector<float>& RTparams, const vector<vector<int>>& hotPixels) {
+Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat& inverted, const float& backGroundCorrection, const vector<float>& RTparams, const vector<vector<int>>& hotPixels) {
     Mat lightFrame = imread(framePath, IMREAD_GRAYSCALE);
     lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
-    lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame) / calibratedFlatFrame;
+    lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame);
+    multiply(lightFrame, inverted, lightFrame);
     lightFrame = removeHotPixels(lightFrame, hotPixels);
     resize(lightFrame, lightFrame, Size(samplingFactor * lightFrame.cols, samplingFactor * lightFrame.rows), 0, 0, interpolationFlag);
     Mat M = (Mat_<float>(2, 3) << cos(RTparams[0]), -sin(RTparams[0]), RTparams[1], sin(RTparams[0]), cos(RTparams[0]), RTparams[2]);
@@ -266,9 +267,7 @@ Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat&
 }
 
 //Function to compute median image
-Mat computeMedianImage(const vector<Mat>& imageStack) {
-    int rows = imageStack[0].rows;
-    int cols = imageStack[0].cols;
+Mat computeMedianImage(const vector<Mat>& imageStack, const int& rows, const int& cols) {
     int numImages = imageStack.size();
     int midIndex = numImages / 2;
 
@@ -392,7 +391,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                     if (!xFrame.empty() && xFrame.size() >= topMatches) {
                         vector<vector<float>> frameTriangles = triangles(xFrame, yFrame);
                         vector<vector<int>> starPairs = getStarPairs(refTriangles, frameTriangles, xRef.size(), xFrame.size());
-                        vector<float>  RTparams = alignFrames(starPairs, xRef, yRef, xFrame, yFrame, topMatches);
+                        vector<float> RTparams = alignFrames(starPairs, xRef, yRef, xFrame, yFrame, topMatches);
                         stackArray[k] = { lightFrameArray[k], to_string(qualVec[k][0]), to_string(qualVec[k][1]), to_string(qualVec[k][2]), to_string(qualVec[k][3]), to_string(RTparams[0]), to_string(RTparams[1]), to_string(RTparams[2]) };
                         
                         for (int j = 0; j < xFrame.size(); j++) 
@@ -449,7 +448,7 @@ vector<int> Hydra::Form1::Stack() {
 
         for (int y = 0; y < ySize; y++) 
             for (int x = 0; x < xSize; x++) 
-                if (x > 0 || y > 0 || x < masterDarkFrame.cols - 1 || y < masterDarkFrame.rows - 1)
+                if (x > 0 || y > 0 || x < xSize - 1 || y < ySize - 1)
                     if (masterDarkFrame.at<float>(y, x) > 10 * mean[0])
                         hotPixels.push_back({ x,y });
             
@@ -474,6 +473,10 @@ vector<int> Hydra::Form1::Stack() {
             xSize = int(xSize * samplingFactor);
             ySize = int(ySize * samplingFactor);
 
+            Mat ones(ySize, xSize, CV_32FC1, Scalar(1));
+            Mat invertedCalibratedFlatFrame;
+            divide(ones, calibratedFlatFrame, invertedCalibratedFlatFrame);
+
             Mat p(ySize, xSize, CV_32FC1, Scalar(0)), psqr(ySize, xSize, CV_32FC1, Scalar(0)), std(ySize, xSize, CV_32FC1, Scalar(0)), medianFrame(ySize, xSize, CV_32FC1, Scalar(0)), stackFrame(ySize, xSize, CV_32FC1, Scalar(0));
             vector<Mat> medianArray(medianBatchSize, Mat(ySize, xSize, CV_32FC1));
 
@@ -481,11 +484,11 @@ vector<int> Hydra::Form1::Stack() {
                 #pragma omp parallel for num_threads(numLogicalCores*2)
                 for (int c = 0; c < medianBatchSize; c++) {
                     int i = m[k * medianBatchSize + c];
-                    medianArray[c] = processFrame(stackArray[i], masterDarkFrame, calibratedFlatFrame, mean_background / background[i], RTparams[i], hotPixels);
+                    medianArray[c] = processFrame(stackArray[i], masterDarkFrame, invertedCalibratedFlatFrame, mean_background / background[i], RTparams[i], hotPixels);
                     addWeighted(p, 1, medianArray[c] / iterations, 1, 0.0, p);
                     addWeighted(psqr, 1, medianArray[c].mul(medianArray[c]) / iterations, 1, 0.0, psqr);
                 }
-                addWeighted(medianFrame, 1, computeMedianImage(medianArray), 1 / float(batches), 0.0, medianFrame);
+                addWeighted(medianFrame, 1, computeMedianImage(medianArray, ySize, xSize), 1 / float(batches), 0.0, medianFrame);
             }
 
             sqrt((psqr - p.mul(p)) * iterations / (iterations - 1), std);
