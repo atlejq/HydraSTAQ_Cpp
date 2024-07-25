@@ -244,17 +244,13 @@ Mat getCalibrationFrame(const int& ySize, const int& xSize, const string& calibr
 }
 
 //Function to remove hotpixels
-void correctHotPixels(Mat& lightFrame, const vector<Point>& hotPixels) {
-    for (const auto& hotPix : hotPixels) {
-        int x = hotPix.x;
-        int y = hotPix.y;
-
-        lightFrame.at<float>(y, x) = (lightFrame.at<float>(y, x + 1) + lightFrame.at<float>(y, x - 1) + lightFrame.at<float>(y + 1, x) + lightFrame.at<float>(y - 1, x)) / 4.0;
-    }
+void correctHotPixels(Mat& lightFrame, const vector<vector<int>>& hotPixels) {
+    for (const auto& h : hotPixels)
+        lightFrame.at<float>(h[1], h[0]) = (lightFrame.at<float>(h[1], h[0] + 1) + lightFrame.at<float>(h[1], h[0] - 1) + lightFrame.at<float>(h[1] + 1, h[0]) + lightFrame.at<float>(h[1] - 1, h[0])) / 4.0;
 }
 
 //Function to rotate images
-Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat& inverted, const float& backGroundCorrection, const vector<float>& RTparams, const vector<Point>& hotPixels) {
+Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat& inverted, const float& backGroundCorrection, const vector<float>& RTparams, const vector<vector<int>>& hotPixels) {
     Mat lightFrame = imread(framePath, IMREAD_GRAYSCALE);
     lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
     lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame);
@@ -441,17 +437,18 @@ vector<int> Hydra::Form1::Stack() {
         Mat calibratedFlatFrame = getCalibrationFrame(ySize, xSize, path + flatDir + frameFilter, 1) - getCalibrationFrame(ySize, xSize, path + flatDarksDir + filterSelector(flatDarksGroup), 0);
         Mat masterDarkFrame = getCalibrationFrame(ySize, xSize, path + darkDir + filterSelector(darksGroup), 0);
 
+        vector<cv::Point> hotPixelPoints;
         Scalar mean = cv::mean(masterDarkFrame);
-        vector<cv::Point> hotPixels;
-
         Mat mask = (masterDarkFrame > 10 * mean[0]);
+        findNonZero(mask, hotPixelPoints);
+        vector<vector<int>> hotPixels(2, vector<int>(hotPixelPoints.size()));
 
-        mask.row(0).setTo(Scalar(0));
-        mask.row(mask.rows - 1).setTo(Scalar(0));
-        mask.col(0).setTo(Scalar(0));
-        mask.col(mask.cols - 1).setTo(Scalar(0));
-
-        findNonZero(mask, hotPixels);
+        for (int i = 0; i < hotPixels.size(); i++)
+            if (hotPixelPoints[i].x > 0 && hotPixelPoints[i].x < xSize && hotPixelPoints[i].y > 0 && hotPixelPoints[i].y < ySize)
+            {
+                hotPixels[0][i] = hotPixelPoints[i].x;
+                hotPixels[1][i] = hotPixelPoints[i].y;
+            }
             
         double minVal, maxVal;
         minMaxLoc(calibratedFlatFrame, &minVal, &maxVal);
