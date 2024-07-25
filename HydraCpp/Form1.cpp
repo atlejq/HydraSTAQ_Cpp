@@ -267,9 +267,9 @@ Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat&
     lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame);
     multiply(lightFrame, inverted, lightFrame);
     removeHotPixels(lightFrame, hotPixels);
-    resize(lightFrame, lightFrame, Size(samplingFactor * lightFrame.cols, samplingFactor * lightFrame.rows), 0, 0, interpolationFlag);
+    resize(lightFrame, lightFrame, Size(), samplingFactor, samplingFactor, interpolationFlag);
     Mat M = (Mat_<float>(2, 3) << RTparams[0], -RTparams[1], RTparams[2], RTparams[1], RTparams[0], RTparams[3]);
-    warpAffine(lightFrame, lightFrame, M, lightFrame.size(), interpolationFlag);
+    warpAffine(lightFrame, lightFrame, M, Size(), interpolationFlag);
     return lightFrame;
 }
 
