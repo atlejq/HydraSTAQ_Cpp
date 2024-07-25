@@ -457,11 +457,12 @@ vector<int> Hydra::Form1::Stack() {
 
             calibratedFlatFrame *= width * height / sum(calibratedFlatFrame)[0];
 
-            cv::Size s = cv::Size(int(width * samplingFactor), int(height * samplingFactor));
 
-            Mat ones(s.height, s.width, CV_32FC1, Scalar(1));
+            Mat ones(height, width, CV_32FC1, Scalar(1));
             Mat invertedCalibratedFlatFrame;
             divide(ones, calibratedFlatFrame, invertedCalibratedFlatFrame);
+
+            cv::Size s = cv::Size(int(width * samplingFactor), int(height * samplingFactor));
 
             Mat p(s.height, s.width, CV_32FC1, Scalar(0)), psqr(s.height, s.width, CV_32FC1, Scalar(0)), std(s.height, s.width, CV_32FC1, Scalar(0)), medianFrame(s.height, s.width, CV_32FC1, Scalar(0)), stackFrame(s.height, s.width, CV_32FC1, Scalar(0));
             vector<Mat> medianArray(medianBatchSize, Mat(s.height, s.width, CV_32FC1));
