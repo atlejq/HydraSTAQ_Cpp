@@ -151,10 +151,13 @@ vector<vector<int>> getStarPairs(const vector<vector<float>>& refTriangles, cons
             else if (nextLargestRowElement < voteMatrix[row][i])
                 nextLargestRowElement = voteMatrix[row][i];
 
-        for (int r = 0; r < voteMatrix.size(); r++)
-            if (r != row)
-                if (nextLargestColElement < voteMatrix[r][maxRowVoteIndex])
-                    nextLargestColElement = voteMatrix[r][maxRowVoteIndex];
+        for (int r = 0; r < row; r++) 
+            if (nextLargestColElement < voteMatrix[r][maxRowVoteIndex]) 
+                nextLargestColElement = voteMatrix[r][maxRowVoteIndex];
+
+        for (int r = row + 1; r < voteMatrix.size(); r++) 
+            if (nextLargestColElement < voteMatrix[r][maxRowVoteIndex]) 
+                nextLargestColElement = voteMatrix[r][maxRowVoteIndex];
 
         int correctedVotes = max(maxRowVote - max(nextLargestColElement, nextLargestRowElement), 0) > 0;
 
@@ -457,12 +460,10 @@ vector<int> Hydra::Form1::Stack() {
             divide(ones, calibratedFlatFrame, invertedCalibratedFlatFrame);
 
             cv::Size s = cv::Size(int(width * samplingFactor), int(height * samplingFactor));
-
             Mat p(s.height, s.width, CV_32FC1, Scalar(0)), psqr(s.height, s.width, CV_32FC1, Scalar(0)), std(s.height, s.width, CV_32FC1, Scalar(0)), medianFrame(s.height, s.width, CV_32FC1, Scalar(0)), stackFrame(s.height, s.width, CV_32FC1, Scalar(0));
             vector<Mat> medianArray(medianBatchSize, Mat(s.height, s.width, CV_32FC1));
 
             if (n < medianBatchSize) medianBatchSize = n;
-
             int batches = n / medianBatchSize;
             int iterations = medianBatchSize * batches;
 
