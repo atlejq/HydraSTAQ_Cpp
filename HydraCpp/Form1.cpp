@@ -205,6 +205,7 @@ vector<vector<float>> analyzeStarField(Mat lightFrame, const float& t) {
         for (const auto& c : contours) {
             RotatedRect rect = minAreaRect(c);
             float d = sqrt(rect.size.width * rect.size.width + rect.size.height * rect.size.height);
+            
             if (d < 25)
                 starMatrix.push_back({ rect.center.x, rect.center.y, d });
         }
@@ -253,7 +254,7 @@ void findHotPixels(const Mat& masterDarkFrame, const int& ySize, const int& xSiz
 }
 
 //Function to remove hotpixels
-void removeHotPixels(Mat lightFrame, const vector<vector<int>>& hotPixels) {
+void removeHotPixels(Mat& lightFrame, const vector<vector<int>>& hotPixels) {
     for (const auto& hotPix : hotPixels) lightFrame.at<float>(hotPix[1], hotPix[0]) = (lightFrame.at<float>(hotPix[1], hotPix[0] + 1) + lightFrame.at<float>(hotPix[1], hotPix[0] - 1) + lightFrame.at<float>(hotPix[1] + 1, hotPix[0]) + lightFrame.at<float>(hotPix[1] - 1, hotPix[0])) / 4;
 }
 
