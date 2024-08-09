@@ -225,14 +225,12 @@ Mat getCalibrationFrame(const int& height, const int& width, const string& calib
     }
     else {
         vector<string> calibrationFrameArray = getFrames(calibrationPath + "/", ext);
-        if (!calibrationFrameArray.empty())
-        {
+        if (!calibrationFrameArray.empty()) {
             Mat tmpMasterFrame(width, height, CV_32FC1, Scalar(0));
             #pragma omp parallel for num_threads(numLogicalCores*2)
             for (int n = 0; n < calibrationFrameArray.size(); n++) {
                 Mat calibrationFrame = imread(calibrationFrameArray[n], IMREAD_ANYDEPTH);
-                if (calibrationFrame.cols == width && calibrationFrame.rows == height)
-                {
+                if (calibrationFrame.cols == width && calibrationFrame.rows == height) {
                     normalize(calibrationFrame, calibrationFrame, 0, 1, cv::NORM_MINMAX, CV_32F);
                     addWeighted(tmpMasterFrame, 1, calibrationFrame, 1 / float(calibrationFrameArray.size()), 0.0, tmpMasterFrame);
                 }
@@ -278,7 +276,7 @@ Mat computeMedianImage(const vector<Mat>& imageStack, const int& rows, const int
 
     Mat medianImage(rows, cols, CV_32FC1);
 
-    #pragma omp parallel num_threads(numLogicalCores*2)
+    #pragma omp parallel num_threads(numLogicalCores*2) 
     {
         vector<float> pixelValues(numImages);
         #pragma omp for
@@ -387,8 +385,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
                 for (int j = 0; j < xRef.size(); j++) circle(maxQualFrame, Point_(xRef[j] / scaling, yRef[j] / scaling), 8, colorMap.at(alignFilter));
 
                 #pragma omp parallel for num_threads(numLogicalCores*2)
-                for (int k = 0; k < n; k++)
-                {
+                for (int k = 0; k < n; k++) {
                     vector xFrame = clean(xvecFrame[k]);
                     vector yFrame = clean(yvecFrame[k]);
                     if (!xFrame.empty() && xFrame.size() >= topMatches) {
