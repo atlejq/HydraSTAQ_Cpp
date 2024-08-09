@@ -271,10 +271,9 @@ Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat&
 
 //Function to compute median image
 Mat computeMedianImage(const vector<Mat>& imageStack, const int& rows, const int& cols) {
+    Mat medianImage(rows, cols, CV_32FC1);
     int numImages = imageStack.size();
     int midIndex = numImages / 2;
-
-    Mat medianImage(rows, cols, CV_32FC1);
 
     #pragma omp parallel num_threads(numLogicalCores*2) 
     {
