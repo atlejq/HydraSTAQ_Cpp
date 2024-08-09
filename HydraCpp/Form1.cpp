@@ -149,14 +149,10 @@ vector<vector<int>> getStarPairs(const vector<vector<float>>& refTriangles, cons
                 maxRowVoteIndex = i;
             }
             else if (nextLargestRowElement < voteMatrix[row][i])
-                nextLargestRowElement = voteMatrix[row][i];
+                nextLargestRowElement = voteMatrix[row][i];                
 
-        for (int r = 0; r < row; r++) 
-            if (nextLargestColElement < voteMatrix[r][maxRowVoteIndex]) 
-                nextLargestColElement = voteMatrix[r][maxRowVoteIndex];
-
-        for (int r = row + 1; r < voteMatrix.size(); r++) 
-            if (nextLargestColElement < voteMatrix[r][maxRowVoteIndex]) 
+        for (int r = 0; r < voteMatrix.size(); r++) 
+            if (r != row && nextLargestColElement < voteMatrix[r][maxRowVoteIndex])
                 nextLargestColElement = voteMatrix[r][maxRowVoteIndex];
 
         int correctedVotes = max(maxRowVote - max(nextLargestColElement, nextLargestRowElement), 0) > 0;
@@ -197,10 +193,9 @@ vector<vector<float>> analyzeStarField(Mat lightFrame, const float& t) {
     vector<vector<float>> starMatrix;
 
     if ((lightFrame.elemSize() == 1 || lightFrame.elemSize() == 2) && lightFrame.channels() == 1) {
-        if (lightFrame.elemSize() == 2) {
-            lightFrame = lightFrame / 255;
-            lightFrame.convertTo(lightFrame, CV_8U);
-        }
+        if (lightFrame.elemSize() == 2) 
+            lightFrame.convertTo(lightFrame, CV_8U, 1.0 / 255);
+
         Mat filteredImage, thresh;
         vector<vector<Point>> contours;
         medianBlur(lightFrame, filteredImage, 3);
@@ -219,10 +214,12 @@ vector<vector<float>> analyzeStarField(Mat lightFrame, const float& t) {
 
 //Function to fetch a calibration frame
 Mat getCalibrationFrame(const int& width, const int& height, const string& calibrationPath, const float& defaultValue) {
+    string masterFramePath = calibrationPath + "/masterFrame.tif";
+
     Mat masterFrame(width, height, CV_32FC1, Scalar(defaultValue));
 
-    if (filesystem::exists(calibrationPath + "/" + "masterFrame.tif")) {
-        Mat tmpCalibrationFrame = imread(calibrationPath + "/" + "masterFrame.tif", IMREAD_ANYDEPTH);
+    if (filesystem::exists(masterFramePath)) {
+        Mat tmpCalibrationFrame = imread(masterFramePath, IMREAD_ANYDEPTH);
         if (tmpCalibrationFrame.cols == masterFrame.cols && tmpCalibrationFrame.rows == masterFrame.rows)
             masterFrame = tmpCalibrationFrame;
     }
@@ -240,7 +237,7 @@ Mat getCalibrationFrame(const int& width, const int& height, const string& calib
                     addWeighted(tmpMasterFrame, 1, calibrationFrame, 1 / float(calibrationFrameArray.size()), 0.0, tmpMasterFrame);
                 }
             }
-            imwrite(calibrationPath + "/" + "masterFrame" + ".tif", tmpMasterFrame);
+            imwrite(masterFramePath, tmpMasterFrame);
             masterFrame = tmpMasterFrame;
         }
     }
