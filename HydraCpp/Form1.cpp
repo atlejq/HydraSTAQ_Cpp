@@ -215,10 +215,9 @@ vector<vector<float>> analyzeStarField(Mat lightFrame, const float& t) {
 
 //Function to fetch a calibration frame
 Mat getCalibrationFrame(const int& height, const int& width, const string& calibrationPath, const float& defaultValue) {
-    string masterFramePath = calibrationPath + "/masterFrame.tif";
-
     Mat masterFrame(height, width, CV_32FC1, Scalar(defaultValue));
-
+    string masterFramePath = calibrationPath + "/" + "masterFrame.tif";
+    
     if (filesystem::exists(masterFramePath)) {
         Mat tmpCalibrationFrame = imread(masterFramePath, IMREAD_ANYDEPTH);
         if (tmpCalibrationFrame.cols == width && tmpCalibrationFrame.rows == height)
