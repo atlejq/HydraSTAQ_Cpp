@@ -213,14 +213,14 @@ vector<vector<float>> analyzeStarField(Mat lightFrame, const float& t) {
 }
 
 //Function to fetch a calibration frame
-Mat getCalibrationFrame(const int& width, const int& height, const string& calibrationPath, const float& defaultValue) {
+Mat getCalibrationFrame(const int& height, const int& width, const string& calibrationPath, const float& defaultValue) {
     string masterFramePath = calibrationPath + "/masterFrame.tif";
 
-    Mat masterFrame(width, height, CV_32FC1, Scalar(defaultValue));
+    Mat masterFrame(height, width, CV_32FC1, Scalar(defaultValue));
 
     if (filesystem::exists(masterFramePath)) {
         Mat tmpCalibrationFrame = imread(masterFramePath, IMREAD_ANYDEPTH);
-        if (tmpCalibrationFrame.cols == masterFrame.cols && tmpCalibrationFrame.rows == masterFrame.rows)
+        if (tmpCalibrationFrame.cols == width && tmpCalibrationFrame.rows == height)
             masterFrame = tmpCalibrationFrame;
     }
     else {
@@ -231,7 +231,7 @@ Mat getCalibrationFrame(const int& width, const int& height, const string& calib
             #pragma omp parallel for num_threads(numLogicalCores*2)
             for (int n = 0; n < calibrationFrameArray.size(); n++) {
                 Mat calibrationFrame = imread(calibrationFrameArray[n], IMREAD_ANYDEPTH);
-                if (calibrationFrame.cols == masterFrame.cols && calibrationFrame.rows == masterFrame.rows)
+                if (calibrationFrame.cols == width && calibrationFrame.rows == height)
                 {
                     normalize(calibrationFrame, calibrationFrame, 0, 1, cv::NORM_MINMAX, CV_32F);
                     addWeighted(tmpMasterFrame, 1, calibrationFrame, 1 / float(calibrationFrameArray.size()), 0.0, tmpMasterFrame);
