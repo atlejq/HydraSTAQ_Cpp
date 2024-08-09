@@ -127,12 +127,12 @@ vector<vector<float>> triangles(const vector<float>& x, const vector<float>& y) 
 
 //Function for computing the "vote matrix"
 vector<vector<int>> getStarPairs(const vector<vector<float>>& refTriangles, const vector<vector<float>>& frameTriangles, const int& refVectorSize, const int& vecSize) {
-    constexpr float eSquare = 0.005 * 0.005;
+    constexpr float eSquare = 0.005;
     vector<vector<int>> starPairs;
     vector<vector<int>> voteMatrix(refVectorSize, vector<int>(vecSize, 0));
     for (const auto& refTri : refTriangles)
         for (int b = 0; b < frameTriangles.size(); b++)
-            if ((refTri[3] - frameTriangles[b][3]) * (refTri[3] - frameTriangles[b][3]) + (refTri[4] - frameTriangles[b][4]) * (refTri[4] - frameTriangles[b][4]) < eSquare)
+            if ((refTri[3] - frameTriangles[b][3]) * (refTri[3] - frameTriangles[b][3]) + (refTri[4] - frameTriangles[b][4]) * (refTri[4] - frameTriangles[b][4]) < eSquare * eSquare)
                 for (int i = 0; i < 3; i++)
                     voteMatrix[static_cast<int>(refTri[i])][static_cast<int>(frameTriangles[b][i])] += 1;
 
@@ -236,7 +236,7 @@ Mat getCalibrationFrame(const int& width, const int& height, const string& calib
                 Mat calibrationFrame = imread(calibrationFrameArray[n], IMREAD_ANYDEPTH);
                 if (calibrationFrame.cols == masterFrame.cols && calibrationFrame.rows == masterFrame.rows)
                 {
-                    calibrationFrame.convertTo(calibrationFrame, CV_32FC1, 1.0 / pow(255, calibrationFrame.elemSize()));
+                    normalize(calibrationFrame, calibrationFrame, 0, 1, cv::NORM_MINMAX, CV_32F);
                     addWeighted(tmpMasterFrame, 1, calibrationFrame, 1 / float(calibrationFrameArray.size()), 0.0, tmpMasterFrame);
                 }
             }
@@ -257,18 +257,16 @@ void findHotPixels(const Mat& masterDarkFrame, const int& ySize, const int& xSiz
                 hotPixels.push_back({ x,y });
 }
 
-
 //Function to remove hotpixels
 void removeHotPixels(Mat lightFrame, const vector<vector<int>>& hotPixels) {
     for (const auto& hotPix : hotPixels) lightFrame.at<float>(hotPix[1], hotPix[0]) = (lightFrame.at<float>(hotPix[1], hotPix[0] + 1) + lightFrame.at<float>(hotPix[1], hotPix[0] - 1) + lightFrame.at<float>(hotPix[1] + 1, hotPix[0]) + lightFrame.at<float>(hotPix[1] - 1, hotPix[0])) / 4;
 }
 
 //Function to rotate images
-Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat& inverted, const float& backGroundCorrection, const vector<float>& RTparams, const vector<vector<int>>& hotPixels) {
+Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat& invertedFlatFrame, const float& backGroundCorrection, const vector<float>& RTparams, const vector<vector<int>>& hotPixels) {
     Mat lightFrame = imread(framePath, IMREAD_GRAYSCALE);
-    lightFrame.convertTo(lightFrame, CV_32FC1, 1.0 / pow(255, lightFrame.elemSize()));
-    lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame);
-    multiply(lightFrame, inverted, lightFrame);
+    normalize(lightFrame, lightFrame, 0, 1, cv::NORM_MINMAX, CV_32F);
+    lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame).mul(invertedFlatFrame);
     removeHotPixels(lightFrame, hotPixels);
     resize(lightFrame, lightFrame, Size(), samplingFactor, samplingFactor, interpolationFlag);
     Mat M = (Mat_<float>(2, 3) << RTparams[0], -RTparams[1], RTparams[2], RTparams[1], RTparams[0], RTparams[3]);
