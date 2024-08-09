@@ -142,14 +142,14 @@ vector<vector<int>> getStarPairs(const vector<vector<float>>& refTriangles, cons
         int nextLargestColElement = 0;
         int nextLargestRowElement = 0;
 
-        for (int i = 0; i < voteMatrix[0].size(); i++)
-            if (maxRowVote < voteMatrix[row][i]) {
+        for (int c = 0; c < voteMatrix[0].size(); c++)
+            if (maxRowVote < voteMatrix[row][c]) {
                 nextLargestRowElement = maxRowVote;
-                maxRowVote = voteMatrix[row][i];
-                maxRowVoteIndex = i;
+                maxRowVote = voteMatrix[row][c];
+                maxRowVoteIndex = c;
             }
-            else if (nextLargestRowElement < voteMatrix[row][i])
-                nextLargestRowElement = voteMatrix[row][i];                
+            else if (nextLargestRowElement < voteMatrix[row][c])
+                nextLargestRowElement = voteMatrix[row][c];                
 
         for (int r = 0; r < voteMatrix.size(); r++) 
             if (r != row && nextLargestColElement < voteMatrix[r][maxRowVoteIndex])
