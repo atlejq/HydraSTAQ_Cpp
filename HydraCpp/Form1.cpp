@@ -101,13 +101,12 @@ string filterSelector(string input) {
 //Function for enumerating star triangles
 vector<vector<float>> triangles(const vector<float>& x, const vector<float>& y) {
     vector<vector<float>> triangleParameters;
-    const float minSquare = 50 * 50;
+    const float minSquare = 2500; //50 * 50;
     const int n = x.size();
-    float s0, s1, s2, s3;
+    float s0, s1, s2;
     for (int i = 0; i < n - 2; i++)
         for (int j = i + 1; j < n - 1; j++) {
-            s3 = ((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]));
-            if (s3 > minSquare) {
+            if (float s3 = ((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j])) > minSquare) {
                 for (int k = j + 1; k < n; k++) {
                     s1 = ((x[j] - x[k]) * (x[j] - x[k]) + (y[j] - y[k]) * (y[j] - y[k]));
                     s2 = ((x[i] - x[k]) * (x[i] - x[k]) + (y[i] - y[k]) * (y[i] - y[k]));
@@ -127,12 +126,12 @@ vector<vector<float>> triangles(const vector<float>& x, const vector<float>& y) 
 
 //Function for computing the "vote matrix"
 vector<vector<int>> getStarPairs(const vector<vector<float>>& refTriangles, const vector<vector<float>>& frameTriangles, const int& refVectorSize, const int& vecSize) {
-    constexpr float eSquare = 0.005;
+    constexpr float eSquare = 0.005 * 0.005; 
     vector<vector<int>> starPairs;
     vector<vector<int>> voteMatrix(refVectorSize, vector<int>(vecSize, 0));
     for (const auto& refTri : refTriangles)
         for (int b = 0; b < frameTriangles.size(); b++)
-            if ((refTri[3] - frameTriangles[b][3]) * (refTri[3] - frameTriangles[b][3]) + (refTri[4] - frameTriangles[b][4]) * (refTri[4] - frameTriangles[b][4]) < eSquare * eSquare)
+            if ((refTri[3] - frameTriangles[b][3]) * (refTri[3] - frameTriangles[b][3]) + (refTri[4] - frameTriangles[b][4]) * (refTri[4] - frameTriangles[b][4]) < eSquare)
                 for (int i = 0; i < 3; i++)
                     voteMatrix[static_cast<int>(refTri[i])][static_cast<int>(frameTriangles[b][i])] += 1;
 
