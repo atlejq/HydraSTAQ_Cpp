@@ -28,25 +28,22 @@ int numLogicalCores = omp_get_max_threads();
 float samplingFactor = 1;
 
 vector<vector<string>> readStringMatrix(const string& path) {
-    vector<vector<string>> commaSeparatedArray;
+    ifstream file(path);
+    vector<vector<string>> result;
     string line;
-    ifstream commaSeparatedArrayStream(path);
-    if (commaSeparatedArrayStream.is_open())
-        while (getline(commaSeparatedArrayStream, line)) {
-            vector<string> commaSeparatedLine;
-            string::size_type end;
-            string::size_type start = 0;
 
-            while ((end = line.find(',', start)) != string::npos) {
-                commaSeparatedLine.push_back(line.substr(start, end - start));
-                start = end + 1;
-            }
+    while (getline(file, line)) {
+        vector<string> row;
+        stringstream ss(line);
+        string cell;
 
-            commaSeparatedLine.push_back(line.substr(start));
-            commaSeparatedArray.push_back(commaSeparatedLine);
-        }
+        while (getline(ss, cell, ',')) 
+            row.push_back(cell);
 
-    return commaSeparatedArray;
+        result.push_back(row);
+    }
+
+    return result;
 }
 
 void writeStringMatrix(const string& path, const vector<vector<string>>& stringArray) {
