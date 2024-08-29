@@ -446,17 +446,18 @@ vector<int> Hydra::Form1::Stack() {
             Mat invertedCalibratedFlatFrame, ones(height, width, CV_32FC1, Scalar(1));
             divide(ones, calibratedFlatFrame, invertedCalibratedFlatFrame);
 
-            cv::Size s = cv::Size(int(width * samplingFactor), int(height * samplingFactor));
-            Mat p(s.height, s.width, CV_32FC1, Scalar(0)), psqr(s.height, s.width, CV_32FC1, Scalar(0)), std(s.height, s.width, CV_32FC1, Scalar(0)), medianFrame(s.height, s.width, CV_32FC1, Scalar(0)), stackFrame(s.height, s.width, CV_32FC1, Scalar(0));
-            vector<Mat> medianArray(medianBatchSize, Mat(s.height, s.width, CV_32FC1));
-
             if (n < medianBatchSize) medianBatchSize = n;
+
             int batches = n / medianBatchSize;
             int iterations = medianBatchSize * batches;
 
             vector<int> m(iterations);
             for (int j = 0; j < iterations; j++) m[j] = j;
             shuffle(m.begin(), m.end(), default_random_engine(chrono::system_clock::now().time_since_epoch().count()));
+
+            cv::Size s = cv::Size(int(width * samplingFactor), int(height * samplingFactor));
+            Mat p(s.height, s.width, CV_32FC1, Scalar(0)), psqr(s.height, s.width, CV_32FC1, Scalar(0)), std(s.height, s.width, CV_32FC1, Scalar(0)), medianFrame(s.height, s.width, CV_32FC1, Scalar(0)), stackFrame(s.height, s.width, CV_32FC1, Scalar(0));
+            vector<Mat> medianArray(medianBatchSize, Mat(s.height, s.width, CV_32FC1));
 
             for (int k = 0; k < batches; k++) {
                 #pragma omp parallel for num_threads(numLogicalCores*2)
