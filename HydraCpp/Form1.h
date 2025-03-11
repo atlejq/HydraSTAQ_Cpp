@@ -913,7 +913,7 @@ namespace Hydra {
 			}
 		}
 
-		void MarshalString(String^ s, std::string& os) {
+		void MarshalString(System::String^ s, std::string& os) {
 				   using namespace Runtime::InteropServices;
 				   const char* chars = (const char*)(Marshal::StringToHGlobalAnsi(s)).ToPointer();
 				   os = chars;
