@@ -254,12 +254,12 @@ void removeHotPixels(Mat& lightFrame, const vector<vector<int>>& hotPixels) {
 }
 
 //Function to rotate images
-Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat& invertedFlatFrame, const float& backGroundCorrection, const vector<float>& RTparams, const vector<vector<int>>& hotPixels) {
+Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat& invertedFlatFrame, const Size& s, const float& backGroundCorrection, const vector<float>& RTparams, const vector<vector<int>>& hotPixels) {
     Mat lightFrame = imread(framePath, IMREAD_GRAYSCALE);
     normalize(lightFrame, lightFrame, 0, 1, cv::NORM_MINMAX, CV_32F);
     lightFrame = backGroundCorrection * (lightFrame - masterDarkFrame).mul(invertedFlatFrame);
     removeHotPixels(lightFrame, hotPixels);
-    resize(lightFrame, lightFrame, Size(), samplingFactor, samplingFactor, interpolationFlag);
+    resize(lightFrame, lightFrame, s, interpolationFlag);
     Mat M = (Mat_<float>(2, 3) << RTparams[0], -RTparams[1], RTparams[2], RTparams[1], RTparams[0], RTparams[3]);
     warpAffine(lightFrame, lightFrame, M, Size(), interpolationFlag);
     return lightFrame;
@@ -459,11 +459,15 @@ vector<int> Hydra::Form1::Stack() {
             Mat p(s.height, s.width, CV_32FC1, Scalar(0)), psqr(s.height, s.width, CV_32FC1, Scalar(0)), std(s.height, s.width, CV_32FC1, Scalar(0)), medianFrame(s.height, s.width, CV_32FC1, Scalar(0)), stackFrame(s.height, s.width, CV_32FC1, Scalar(0));
             vector<Mat> medianArray(medianBatchSize, Mat(s.height, s.width, CV_32FC1));
 
+            int test = 0;
+
             for (int k = 0; k < batches; k++) {
                 #pragma omp parallel for num_threads(numLogicalCores*2)
                 for (int c = 0; c < medianBatchSize; c++) {
                     int i = m[k * medianBatchSize + c];
-                    medianArray[c] = processFrame(stackArray[i], masterDarkFrame, invertedCalibratedFlatFrame, mean_background / background[i], RTparams[i], hotPixels);
+                    medianArray[c] = processFrame(stackArray[i], masterDarkFrame, invertedCalibratedFlatFrame, s, mean_background / background[i], RTparams[i], hotPixels);
+                    test = medianArray[c].rows;
+                    
                     addWeighted(p, 1, medianArray[c] / iterations, 1, 0.0, p);
                     addWeighted(psqr, 1, medianArray[c].mul(medianArray[c]) / iterations, 1, 0.0, psqr);
                 }
@@ -475,7 +479,7 @@ vector<int> Hydra::Form1::Stack() {
             #pragma omp parallel for num_threads(numLogicalCores*2) 
             for (int k = 0; k < n; k++) {
                 Mat absDiff, mask;
-                Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, invertedCalibratedFlatFrame, mean_background / background[k], RTparams[k], hotPixels);
+                Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, invertedCalibratedFlatFrame, s, mean_background / background[k], RTparams[k], hotPixels);
                 absdiff(lightFrame, medianFrame, absDiff);
                 compare(absDiff, 2.0 * std, mask, CMP_GT);
                 medianFrame.copyTo(lightFrame, mask);
