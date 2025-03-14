@@ -111,8 +111,8 @@
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64); C:\opencv411\build\x64\vc16\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='console|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath); C:\opencv410\build\include</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64); C:\opencv410\build\x64\vc16\lib</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath); C:\opencv411\build\include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64); C:\opencv411\build\x64\vc16\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -196,12 +196,12 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\opencv410\build\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\opencv411\build\include\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <OpenMPSupport>Yes</OpenMPSupport>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opencv_world4100.lib</AdditionalDependencies>
+      <AdditionalDependencies>opencv_world4110.lib</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>main</EntryPointSymbol>
       <AdditionalLibraryDirectories>C:\opencv\build\x64\vc16\lib\</AdditionalLibraryDirectories>
