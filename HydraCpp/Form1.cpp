@@ -222,7 +222,7 @@ Mat getCalibrationFrame(const int& height, const int& width, const string& calib
     else {
         vector<string> calibrationFrameArray = getFrames(calibrationPath + "/", ext);
         if (!calibrationFrameArray.empty()) {
-            Mat tmpMasterFrame(width, height, CV_32FC1, Scalar(0));
+            Mat tmpMasterFrame(height, width, CV_32FC1, Scalar(0));
             #pragma omp parallel for num_threads(numLogicalCores*2)
             for (int n = 0; n < calibrationFrameArray.size(); n++) {
                 Mat calibrationFrame = imread(calibrationFrameArray[n], IMREAD_ANYDEPTH);
