@@ -164,8 +164,7 @@ vector<float> alignFrames(const vector<vector<int>>& starPairs, const vector<flo
     Mat frameMatrix(2, topMatches, CV_32F), referenceMatrix(2, topMatches, CV_32F), centroid_F, centroid_R, U, S, Vt, R, t;
 
     for (int i = 0; i < topMatches; i++) 
-        if (topMatches <= starPairs.size())
-        {
+        if (topMatches <= starPairs.size()) {
             referenceMatrix.at<float>(0, i) = refVectorX[starPairs[i][0]];
             referenceMatrix.at<float>(1, i) = refVectorY[starPairs[i][0]];
             frameMatrix.at<float>(0, i) = xvec[starPairs[i][1]];
