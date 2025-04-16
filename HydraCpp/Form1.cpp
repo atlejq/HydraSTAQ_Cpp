@@ -177,12 +177,8 @@ vector<float> alignFrames(const vector<vector<int>>& starPairs, const vector<flo
     subtract(referenceMatrix, repeat(centroid_R, 1, referenceMatrix.cols), referenceMatrix);
 
     SVD::compute(frameMatrix * referenceMatrix.t(), S, U, Vt);
+    Vt.row(1) *= (determinant(U * Vt) < 0) ? -1 : 1;
     R = (U * Vt).t();
-
-    if (determinant(R) < 0) {
-        Vt.row(1) *= -1;
-        R = (U * Vt).t();
-    }
 
     t = -R * centroid_F + centroid_R;
     return { R.at<float>(0, 0), R.at<float>(1, 0), t.at<float>(0, 0), t.at<float>(1, 0) };
