@@ -165,10 +165,10 @@ vector<float> alignFrames(const vector<vector<int>>& starPairs, const vector<flo
 
     if (topMatches <= starPairs.size()) 
         for (int i = 0; i < topMatches; i++) {
-                referenceMatrix.at<float>(0, i) = refVectorX[starPairs[i][0]];
-                referenceMatrix.at<float>(1, i) = refVectorY[starPairs[i][0]];
-                frameMatrix.at<float>(0, i) = xvec[starPairs[i][1]];
-                frameMatrix.at<float>(1, i) = yvec[starPairs[i][1]];
+            referenceMatrix.at<float>(0, i) = refVectorX[starPairs[i][0]];
+            referenceMatrix.at<float>(1, i) = refVectorY[starPairs[i][0]];
+            frameMatrix.at<float>(0, i) = xvec[starPairs[i][1]];
+            frameMatrix.at<float>(1, i) = yvec[starPairs[i][1]];
         }
 
     reduce(frameMatrix, centroid_F, 1, REDUCE_AVG);
