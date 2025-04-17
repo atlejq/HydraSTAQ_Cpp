@@ -165,10 +165,6 @@ vector<float> alignFrames(const vector<vector<int>>& starPairs, const vector<flo
 
     if (topMatches <= starPairs.size()) 
         for (int i = 0; i < topMatches; i++) {
-
-          //  referenceMatrix.col(i) = cv::Vec2f(refVectorX[starPairs[i][0]], refVectorY[starPairs[i][0]]);
-          //  frameMatrix.col(i) = cv::Vec2f(xvec[starPairs[i][1]], yvec[starPairs[i][1]]);
-
             referenceMatrix.at<float>(0, i) = refVectorX[starPairs[i][0]];
             referenceMatrix.at<float>(1, i) = refVectorY[starPairs[i][0]];
             frameMatrix.at<float>(0, i) = xvec[starPairs[i][1]];
@@ -204,9 +200,8 @@ vector<vector<float>> analyzeStarField(Mat lightFrame, const float& t) {
 
         for (const auto& c : contours) {
             RotatedRect rect = minAreaRect(c);
-            float d = sqrt(rect.size.width * rect.size.width + rect.size.height * rect.size.height);
-            
-            if (d < 25)
+
+            if (float d = std::sqrt(rect.size.width * rect.size.width + rect.size.height * rect.size.height); d < 25)
                 starMatrix.push_back({ rect.center.x, rect.center.y, d });
         }
     }
