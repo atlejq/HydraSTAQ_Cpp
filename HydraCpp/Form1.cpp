@@ -148,8 +148,8 @@ vector<vector<int>> getStarPairs(const vector<vector<float>>& refTriangles, cons
                 nextLargestRowElement = voteMatrix[row][c];                
 
         for (int r = 0; r < voteMatrix.size(); r++) 
-            if (r != row && nextLargestColElement < voteMatrix[r][maxRowVoteIndex])
-                nextLargestColElement = voteMatrix[r][maxRowVoteIndex];
+            if (r != row)
+                nextLargestColElement = max(nextLargestColElement, voteMatrix[r][maxRowVoteIndex]);
 
         int correctedVotes = max((maxRowVote - max(nextLargestColElement, nextLargestRowElement)), 0);
 
@@ -165,6 +165,10 @@ vector<float> alignFrames(const vector<vector<int>>& starPairs, const vector<flo
 
     if (topMatches <= starPairs.size()) 
         for (int i = 0; i < topMatches; i++) {
+
+          //  referenceMatrix.col(i) = cv::Vec2f(refVectorX[starPairs[i][0]], refVectorY[starPairs[i][0]]);
+          //  frameMatrix.col(i) = cv::Vec2f(xvec[starPairs[i][1]], yvec[starPairs[i][1]]);
+
             referenceMatrix.at<float>(0, i) = refVectorX[starPairs[i][0]];
             referenceMatrix.at<float>(1, i) = refVectorY[starPairs[i][0]];
             frameMatrix.at<float>(0, i) = xvec[starPairs[i][1]];
