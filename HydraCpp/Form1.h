@@ -595,7 +595,7 @@ namespace Hydra {
 				this->numericUpDown5->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 65536 });
 				this->numericUpDown5->Location = System::Drawing::Point(304, 197);
 				this->numericUpDown5->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 2, 0, 0, 0 });
-				this->numericUpDown5->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 5, 0, 0, 65536 });
+				this->numericUpDown5->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 0 });
 				this->numericUpDown5->Name = L"numericUpDown5";
 				this->numericUpDown5->Size = System::Drawing::Size(66, 22);
 				this->numericUpDown5->TabIndex = 42;
