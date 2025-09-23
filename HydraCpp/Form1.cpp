@@ -223,7 +223,7 @@ Mat getCalibrationFrame(const int& height, const int& width, const string& calib
         vector<string> calibrationFrameArray = getFrames(calibrationPath + "/", ext);
         if (!calibrationFrameArray.empty()) {
             Mat tmpMasterFrame(height, width, CV_32FC1, Scalar(0));
-            #pragma omp parallel for num_threads(numLogicalCores*2)
+            #pragma omp parallel for num_threads(numLogicalCores)
             for (int n = 0; n < calibrationFrameArray.size(); n++) {
                 Mat calibrationFrame = imread(calibrationFrameArray[n], IMREAD_ANYDEPTH);
                 if (calibrationFrame.cols == width && calibrationFrame.rows == height) {
@@ -264,28 +264,35 @@ Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat&
     warpAffine(lightFrame, lightFrame, M, Size(), interpolationFlag);
     return lightFrame;
 }
-
-//Function to compute median image
-Mat computeMedianImage(const vector<Mat>& imageStack, const int& rows, const int& cols) {
+  
+Mat computeMedianImage(const std::vector<Mat>& imageStack, int rows, int cols) {
     Mat medianImage(rows, cols, CV_32FC1);
-    int numImages = imageStack.size();
-    int midIndex = numImages / 2;
+    const int numImages = imageStack.size();
+    const int midIndex = numImages / 2;
+    const bool even = (numImages % 2 == 0);
 
-    #pragma omp parallel num_threads(numLogicalCores*2) 
+    #pragma omp parallel num_threads(numLogicalCores) 
     {
-        vector<float> pixelValues(numImages);
+        std::vector<float> pixelValues(numImages);
         #pragma omp for
         for (int i = 0; i < rows * cols; i++) {
             for (int imgIdx = 0; imgIdx < numImages; imgIdx++)
-                pixelValues[imgIdx] = imageStack[imgIdx].at<float>(i);
+                pixelValues[imgIdx] = imageStack[imgIdx].ptr<float>()[i];
 
-            partial_sort(pixelValues.begin(), pixelValues.begin() + midIndex + 1, pixelValues.end());
-            medianImage.at<float>(i) = (numImages % 2 == 0) ? (pixelValues[midIndex] + pixelValues[midIndex - 1]) / 2.0f : pixelValues[midIndex];
+            std::nth_element(pixelValues.begin(), pixelValues.begin() + midIndex, pixelValues.end());
+            float median = pixelValues[midIndex];
+
+            if (even) {
+                std::nth_element(pixelValues.begin(), pixelValues.begin() + midIndex - 1, pixelValues.end());
+                median = 0.5f * (median + pixelValues[midIndex - 1]);
+            }
+
+            medianImage.ptr<float>()[i] = median;
         }
     }
-
     return medianImage;
 }
+
 
 //Function to read images
 vector<int> Hydra::Form1::RegisterFrames() {
@@ -300,7 +307,7 @@ vector<int> Hydra::Form1::RegisterFrames() {
         vector<vector<string>> qualVecS;
         vector<string> testVec(6 + 2 * maxStars);
 
-        #pragma omp parallel for num_threads(numLogicalCores*2)
+        #pragma omp parallel for num_threads(numLogicalCores)
         for (int k = 0; k < n; k++) {
             Mat lightFrame = imread(lightFrames[k], IMREAD_ANYCOLOR | IMREAD_ANYDEPTH);
             vector<vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
@@ -385,7 +392,7 @@ vector<int> Hydra::Form1::ComputeOffsets() {
 
                 for (int j = 0; j < xRef.size(); j++) circle(maxQualFrame, Point_(xRef[j] / scaling, yRef[j] / scaling), 8, colorMap.at(alignFilter));
 
-                #pragma omp parallel for num_threads(numLogicalCores*2)
+                #pragma omp parallel for num_threads(numLogicalCores)
                 for (int k = 0; k < n; k++) {
                     vector xFrame = clean(xvecFrame[k]);
                     vector yFrame = clean(yvecFrame[k]);
@@ -468,7 +475,7 @@ vector<int> Hydra::Form1::Stack() {
             int test = 0;
 
             for (int k = 0; k < batches; k++) {
-                #pragma omp parallel for num_threads(numLogicalCores*2)
+                #pragma omp parallel for num_threads(numLogicalCores)
                 for (int c = 0; c < medianBatchSize; c++) {
                     int i = m[k * medianBatchSize + c];
                     medianArray[c] = processFrame(stackArray[i], masterDarkFrame, invertedCalibratedFlatFrame, s, mean_background / background[i], RTparams[i], hotPixels);
@@ -482,7 +489,7 @@ vector<int> Hydra::Form1::Stack() {
 
             sqrt((psqr - p.mul(p)) * iterations / (iterations - 1), std);
 
-            #pragma omp parallel for num_threads(numLogicalCores*2) 
+            #pragma omp parallel for num_threads(numLogicalCores) 
             for (int k = 0; k < n; k++) {
                 Mat absDiff, mask;
                 Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, invertedCalibratedFlatFrame, s, mean_background / background[k], RTparams[k], hotPixels);
