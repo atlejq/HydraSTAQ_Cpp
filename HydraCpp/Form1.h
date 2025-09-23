@@ -561,7 +561,7 @@ namespace Hydra {
 				this->numericUpDown2->Enabled = false;
 				this->numericUpDown2->Location = System::Drawing::Point(304, 62);
 				this->numericUpDown2->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 12, 0, 0, 0 });
-				this->numericUpDown2->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 6, 0, 0, 0 });
+				this->numericUpDown2->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 3, 0, 0, 0 });
 				this->numericUpDown2->Name = L"numericUpDown2";
 				this->numericUpDown2->Size = System::Drawing::Size(66, 22);
 				this->numericUpDown2->TabIndex = 25;

@@ -296,7 +296,8 @@ vector<int> Hydra::Form1::RegisterFrames() {
     if (!lightFrames.empty()) {
         auto startTime = chrono::high_resolution_clock::now();
         vector<vector<float>> qualVec(lightFrames.size(), vector<float>(6 + 2 * maxStars, 0));
-        vector<vector<string>> qualVecS(lightFrames.size(), vector<string>(6 + 2 * maxStars));
+        vector<vector<string>> qualVecS;
+        vector<string> testVec(6 + 2 * maxStars);
 
         #pragma omp parallel for num_threads(numLogicalCores*2)
         for (int k = 0; k < n; k++) {
@@ -310,7 +311,7 @@ vector<int> Hydra::Form1::RegisterFrames() {
             qualVec[k][4] = lightFrame.rows;
             qualVec[k][5] = lightFrame.elemSize();
 
-            if (starMatrix.size() > 3) {
+            if (starMatrix.size() >= 3) {
                 sortByColumn(starMatrix, 2);
                 for (int i = 0; i < min(maxStars, int(starMatrix.size())); i++) {
                     qualVec[k][i + 6] = starMatrix[i][0];
@@ -322,9 +323,14 @@ vector<int> Hydra::Form1::RegisterFrames() {
         sortByColumn(qualVec, 1);
 
         for (int k = 0; k < qualVec.size(); k++) {
-            qualVecS[k][0] = lightFrames[int(qualVec[k][0])];
-            for (int l = 1; l < qualVec[0].size(); l++)
-                qualVecS[k][l] = to_string(qualVec[k][l]);
+            if (qualVec[k][1] >= 3)
+            {
+                testVec[0] = lightFrames[int(qualVec[k][0])];
+                for (int l = 1; l < qualVec[0].size(); l++)
+                    testVec[l] = to_string(qualVec[k][l]);
+
+                qualVecS.push_back(testVec);
+            }
         }
 
         elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
