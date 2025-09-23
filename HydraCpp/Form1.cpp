@@ -97,28 +97,29 @@ string filterSelector(string input) {
 
 //Function for enumerating star triangles
 vector<vector<float>> triangles(const vector<float>& x, const vector<float>& y) {
-    vector<vector<float>> triangleParameters;
-    const float minSquare = 2500; //50 * 50;
-    const int n = x.size();
-    float s0, s1, s2;
-    for (int i = 0; i < n - 2; i++)
+    vector<vector<float>> res;
+    const float minSq = 2500;
+    int n = x.size();
+
+    for (int i = 0; i < n - 2; i++) {
         for (int j = i + 1; j < n - 1; j++) {
-            if (float s3 = ((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j])) > minSquare) {
-                for (int k = j + 1; k < n; k++) {
-                    s1 = ((x[j] - x[k]) * (x[j] - x[k]) + (y[j] - y[k]) * (y[j] - y[k]));
-                    s2 = ((x[i] - x[k]) * (x[i] - x[k]) + (y[i] - y[k]) * (y[i] - y[k]));
-                    if (s1 > minSquare && s2 > minSquare) {
-                        s0 = s3;
-                        if (s1 > s2) swap(s1, s2);
-                        if (s0 > s2) swap(s0, s2);
-                        if (s0 > s1) swap(s0, s1);
-                        triangleParameters.push_back({ float(i), float(j), float(k), sqrt(s1 / s2), sqrt(s0 / s2) });
-                    }
-                }
+            float s0 = (x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]);
+            if (s0 <= minSq) continue;
+
+            for (int k = j + 1; k < n; k++) {
+                float s1 = (x[j] - x[k]) * (x[j] - x[k]) + (y[j] - y[k]) * (y[j] - y[k]);
+                float s2 = (x[i] - x[k]) * (x[i] - x[k]) + (y[i] - y[k]) * (y[i] - y[k]);
+                if (s1 <= minSq || s2 <= minSq) continue;
+
+                if (s1 > s2) swap(s1, s2);
+                if (s0 > s2) swap(s0, s2);
+                if (s0 > s1) swap(s0, s1);
+
+                res.push_back({ float(i), float(j), float(k), sqrt(s1 / s2), sqrt(s0 / s2) });
             }
         }
-
-    return triangleParameters;
+    }
+    return res;
 }
 
 //Function for computing the "vote matrix"
