@@ -240,12 +240,15 @@ Mat getCalibrationFrame(const int& height, const int& width, const string& calib
 
 //Find hot pixels
 void findHotPixels(const Mat& masterDarkFrame, const int& ySize, const int& xSize, vector<vector<int>>& hotPixels) {
-    float meanValue = mean(masterDarkFrame)[0];
+    float threshold = 10 * mean(masterDarkFrame)[0];
 
-    for (int y = 1; y < ySize - 1; y++)
-        for (int x = 1; x < xSize - 1; x++)
-            if (masterDarkFrame.at<float>(y, x) > 10 * meanValue)
+    for (int y = 1; y < ySize - 1; y++) {
+        const float* row = masterDarkFrame.ptr<float>(y);
+        for (int x = 1; x < xSize - 1; x++) {
+            if (row[x] > threshold)
                 hotPixels.push_back({ x,y });
+        }
+    }
 }
 
 //Function to remove hotpixels
