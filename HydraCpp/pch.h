@@ -12,6 +12,7 @@
 #include <fstream>
 #include <omp.h>
 #include <opencv2/opencv.hpp>
+#include <opencv2/core/utility.hpp>  
 #include <random>
 #include <vector>
 
