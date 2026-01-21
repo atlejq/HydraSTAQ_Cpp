@@ -296,7 +296,6 @@ Mat computeMedianImage(const std::vector<Mat>& imageStack, int rows, int cols) {
     return medianImage;
 }
 
-
 //Function to read images
 vector<int> Hydra::Form1::RegisterFrames() {
     int elapsedTime = 0;
