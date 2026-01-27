@@ -516,36 +516,29 @@ vector<int> Hydra::Form1::Stack() {
 
             for (int k = 0; k < batches; k++) {
 
-                int T = (numLogicalCores);
+                std::vector<Mat> p_tls(numLogicalCores);
+                std::vector<Mat> psqr_tls(numLogicalCores);
 
-                std::vector<Mat> p_tls(T);
-                std::vector<Mat> psqr_tls(T);
-
-                for (int t = 0; t < T; t++) {
+                for (int t = 0; t < numLogicalCores; t++) {
                     p_tls[t] = Mat::zeros(s.height, s.width, CV_32FC1);
                     psqr_tls[t] = Mat::zeros(s.height, s.width, CV_32FC1);
                 }
 
-                #pragma omp parallel num_threads(T)
+                #pragma omp parallel num_threads(numLogicalCores)
                 {
                     int tid = omp_get_thread_num();
-
                     Mat& p_local = p_tls[tid];
                     Mat& psqr_local = psqr_tls[tid];
 
                     #pragma omp for
                     for (int c = 0; c < medianBatchSize; c++) {
                         int i = m[k * medianBatchSize + c];
-
                         medianArray[c] = processFrame(stackArray[i], masterDarkFrame, invertedCalibratedFlatFrame, s, mean_background / background[i], RTparams[i], hotPixels);
-
-                        p_local += medianArray[c] / iterations;
-                        psqr_local += medianArray[c].mul(medianArray[c]) / iterations;
+                        addWeighted(p_local, 1, medianArray[c] / iterations, 1, 0.0, p_local);
+                        addWeighted(psqr_local, 1, medianArray[c].mul(medianArray[c]) / iterations, 1, 0.0, psqr_local);
                     }
                 }
-                addWeighted(medianFrame, 1, computeMedianImage(medianArray, s.height, s.width), 1 / float(batches), 0.0, medianFrame);
-                // addWeighted(p, 1, medianArray[c] / iterations, 1, 0.0, p);
-               // addWeighted(psqr, 1, medianArray[c].mul(medianArray[c]) / iterations, 1, 0.0, psqr);
+                addWeighted(medianFrame, 1, computeMedianImage(medianArray, s.height, s.width), 1 / float(batches), 0.0, medianFrame);            
             }
 
             sqrt((psqr - p.mul(p)) * iterations / (iterations - 1), std);
@@ -571,7 +564,6 @@ vector<int> Hydra::Form1::Stack() {
                 }
             }
 
-            // single-threaded merge
             stackFrame = cv::Mat::zeros(stackFrame.size(), stackFrame.type());
 
             for (const auto& acc : threadAccum) 
