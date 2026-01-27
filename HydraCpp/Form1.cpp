@@ -480,9 +480,7 @@ vector<int> Hydra::Form1::Stack() {
                 #pragma omp parallel for num_threads(numLogicalCores)
                 for (int c = 0; c < medianBatchSize; c++) {
                     int i = m[k * medianBatchSize + c];
-                    medianArray[c] = processFrame(stackArray[i], masterDarkFrame, invertedCalibratedFlatFrame, s, mean_background / background[i], RTparams[i], hotPixels);
-                    test = medianArray[c].rows;
-                    
+                    medianArray[c] = processFrame(stackArray[i], masterDarkFrame, invertedCalibratedFlatFrame, s, mean_background / background[i], RTparams[i], hotPixels);                    
                     addWeighted(p, 1, medianArray[c] / iterations, 1, 0.0, p);
                     addWeighted(psqr, 1, medianArray[c].mul(medianArray[c]) / iterations, 1, 0.0, psqr);
                 }
