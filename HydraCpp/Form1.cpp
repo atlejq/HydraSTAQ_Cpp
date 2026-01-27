@@ -274,81 +274,119 @@ Mat computeMedianImage(const std::vector<Mat>& imageStack, int rows, int cols) {
     const int midIndex = numImages / 2;
     const bool even = (numImages % 2 == 0);
 
-    #pragma omp parallel num_threads(numLogicalCores) 
+    constexpr int BLOCK_PIXELS = 512; // tune this (e.g. 512–4096)
+
+    #pragma omp parallel num_threads(numLogicalCores)
     {
         std::vector<float> pixelValues(numImages);
-        #pragma omp for
-        for (int i = 0; i < rows * cols; i++) {
-            for (int imgIdx = 0; imgIdx < numImages; imgIdx++)
-                pixelValues[imgIdx] = imageStack[imgIdx].ptr<float>()[i];
 
-            std::nth_element(pixelValues.begin(), pixelValues.begin() + midIndex, pixelValues.end());
-            float median = pixelValues[midIndex];
+        #pragma omp for schedule(static)
+        for (int blockStart = 0; blockStart < rows * cols; blockStart += BLOCK_PIXELS) {
 
-            if (even) {
-                std::nth_element(pixelValues.begin(), pixelValues.begin() + midIndex - 1, pixelValues.end());
-                median = 0.5f * (median + pixelValues[midIndex - 1]);
+            int blockEnd = std::min(blockStart + BLOCK_PIXELS, rows * cols);
+
+            for (int i = blockStart; i < blockEnd; ++i) {
+                for (int imgIdx = 0; imgIdx < numImages; ++imgIdx) {
+                    pixelValues[imgIdx] = imageStack[imgIdx].ptr<float>()[i];
+                }
+
+                std::nth_element(pixelValues.begin(), pixelValues.begin() + midIndex, pixelValues.end());
+
+                float median = pixelValues[midIndex];
+
+                if (even) {
+                    std::nth_element(pixelValues.begin(), pixelValues.begin() + midIndex - 1, pixelValues.end());
+                    median = 0.5f * (median + pixelValues[midIndex - 1]);
+                }
+
+                medianImage.ptr<float>()[i] = median;
             }
-
-            medianImage.ptr<float>()[i] = median;
         }
     }
+
     return medianImage;
 }
 
 //Function to read images
-vector<int> Hydra::Form1::RegisterFrames() {
+vector<int> Hydra::Form1::RegisterFrames()
+{
     int elapsedTime = 0;
 
     vector<string> lightFrames = getFrames(path + lightDir + frameFilter, ext);
-    int n = lightFrames.size();
+    const int n = lightFrames.size();
 
-    if (!lightFrames.empty()) {
-        auto startTime = chrono::high_resolution_clock::now();
-        vector<vector<float>> qualVec(lightFrames.size(), vector<float>(6 + 2 * maxStars, 0));
-        vector<vector<string>> qualVecS;
-        vector<string> testVec(6 + 2 * maxStars);
+    if (n == 0) return { 0, 0 };
 
-        #pragma omp parallel for num_threads(numLogicalCores)
+    auto startTime = chrono::high_resolution_clock::now();
+
+    constexpr int PAD = 16;
+    const int rowSize = 6 + 2 * maxStars + PAD;
+
+    vector<vector<float>> qualVec(n, vector<float>(rowSize, 0.0f));
+
+    #pragma omp parallel num_threads(numLogicalCores)
+    {
+        Mat lightFrame;
+        vector<vector<float>> starMatrix;
+
+        #pragma omp for 
         for (int k = 0; k < n; k++) {
-            Mat lightFrame = imread(lightFrames[k], IMREAD_ANYCOLOR | IMREAD_ANYDEPTH);
-            vector<vector<float>> starMatrix = analyzeStarField(lightFrame, float(detectionThreshold) / 100);
+            lightFrame = imread(lightFrames[k], IMREAD_ANYCOLOR | IMREAD_ANYDEPTH);
 
-            qualVec[k][0] = k;
-            qualVec[k][1] = starMatrix.size();
-            qualVec[k][2] = sum(lightFrame)[0];
-            qualVec[k][3] = lightFrame.cols;
-            qualVec[k][4] = lightFrame.rows;
-            qualVec[k][5] = lightFrame.elemSize();
+            if (lightFrame.empty()) continue;
+
+            starMatrix = analyzeStarField(lightFrame, detectionThreshold * 0.01f);
+
+            auto& q = qualVec[k];
+
+            q[0] = static_cast<float>(k);
+            q[1] = static_cast<float>(starMatrix.size());
+            q[2] = static_cast<float>(sum(lightFrame)[0]);
+            q[3] = static_cast<float>(lightFrame.cols);
+            q[4] = static_cast<float>(lightFrame.rows);
+            q[5] = static_cast<float>(lightFrame.elemSize());
 
             if (starMatrix.size() >= 3) {
                 sortByColumn(starMatrix, 2);
-                for (int i = 0; i < min(maxStars, int(starMatrix.size())); i++) {
-                    qualVec[k][i + 6] = starMatrix[i][0];
-                    qualVec[k][i + 6 + maxStars] = starMatrix[i][1];
+                const int m = min(maxStars, (int)starMatrix.size());
+                for (int i = 0; i < m; i++) {
+                    q[i + 6] = starMatrix[i][0];
+                    q[i + 6 + maxStars] = starMatrix[i][1];
                 }
             }
         }
+    }
 
-        sortByColumn(qualVec, 1);
+    sortByColumn(qualVec, 1);
 
-        for (int k = 0; k < qualVec.size(); k++) {
-            if (qualVec[k][1] >= 3)
-            {
-                testVec[0] = lightFrames[int(qualVec[k][0])];
-                for (int l = 1; l < qualVec[0].size(); l++)
-                    testVec[l] = to_string(qualVec[k][l]);
+    vector<vector<string>> qualVecS;
+    qualVecS.reserve(n);
 
-                qualVecS.push_back(testVec);
+    #pragma omp parallel num_threads(numLogicalCores)
+    {
+        vector<vector<string>> local;
+        vector<string> row(6 + 2 * maxStars);
+
+        #pragma omp for nowait
+        for (int k = 0; k < n; k++) {
+            if (qualVec[k][1] >= 3) {
+                row[0] = lightFrames[int(qualVec[k][0])];
+                for (int l = 1; l < row.size(); l++)
+                    row[l] = to_string(qualVec[k][l]);
+                local.push_back(row);
             }
         }
 
-        elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
-
-        if (!filesystem::exists(path + parameterDir)) filesystem::create_directory(path + parameterDir);
-
-        writeStringMatrix(path + parameterDir + "qualVec" + frameFilter + ".csv", qualVecS);
+        #pragma omp critical
+        qualVecS.insert(qualVecS.end(), local.begin(), local.end());
     }
+
+    elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime).count();
+
+    if (!filesystem::exists(path + parameterDir)) filesystem::create_directory(path + parameterDir);
+
+    writeStringMatrix(path + parameterDir + "qualVec" + frameFilter + ".csv", qualVecS);
+
     return { n, elapsedTime };
 }
 
@@ -477,29 +515,67 @@ vector<int> Hydra::Form1::Stack() {
             int test = 0;
 
             for (int k = 0; k < batches; k++) {
-                #pragma omp parallel for num_threads(numLogicalCores)
-                for (int c = 0; c < medianBatchSize; c++) {
-                    int i = m[k * medianBatchSize + c];
-                    medianArray[c] = processFrame(stackArray[i], masterDarkFrame, invertedCalibratedFlatFrame, s, mean_background / background[i], RTparams[i], hotPixels);
-                    test = medianArray[c].rows;
-                    
-                    addWeighted(p, 1, medianArray[c] / iterations, 1, 0.0, p);
-                    addWeighted(psqr, 1, medianArray[c].mul(medianArray[c]) / iterations, 1, 0.0, psqr);
+
+                int T = (numLogicalCores);
+
+                std::vector<Mat> p_tls(T);
+                std::vector<Mat> psqr_tls(T);
+
+                for (int t = 0; t < T; t++) {
+                    p_tls[t] = Mat::zeros(s.height, s.width, CV_32FC1);
+                    psqr_tls[t] = Mat::zeros(s.height, s.width, CV_32FC1);
+                }
+
+                #pragma omp parallel num_threads(T)
+                {
+                    int tid = omp_get_thread_num();
+
+                    Mat& p_local = p_tls[tid];
+                    Mat& psqr_local = psqr_tls[tid];
+
+                    #pragma omp for
+                    for (int c = 0; c < medianBatchSize; c++) {
+                        int i = m[k * medianBatchSize + c];
+
+                        medianArray[c] = processFrame(stackArray[i], masterDarkFrame, invertedCalibratedFlatFrame, s, mean_background / background[i], RTparams[i], hotPixels);
+
+                        p_local += medianArray[c] / iterations;
+                        psqr_local += medianArray[c].mul(medianArray[c]) / iterations;
+                    }
                 }
                 addWeighted(medianFrame, 1, computeMedianImage(medianArray, s.height, s.width), 1 / float(batches), 0.0, medianFrame);
+                // addWeighted(p, 1, medianArray[c] / iterations, 1, 0.0, p);
+               // addWeighted(psqr, 1, medianArray[c].mul(medianArray[c]) / iterations, 1, 0.0, psqr);
             }
 
             sqrt((psqr - p.mul(p)) * iterations / (iterations - 1), std);
 
-            #pragma omp parallel for num_threads(numLogicalCores) 
-            for (int k = 0; k < n; k++) {
-                Mat absDiff, mask;
-                Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, invertedCalibratedFlatFrame, s, mean_background / background[k], RTparams[k], hotPixels);
-                absdiff(lightFrame, medianFrame, absDiff);
-                compare(absDiff, 2.0 * std, mask, CMP_GT);
-                medianFrame.copyTo(lightFrame, mask);
-                addWeighted(stackFrame, 1, lightFrame, 1 / float(n), 0.0, stackFrame);
+            std::vector<cv::Mat> threadAccum(numLogicalCores);
+
+            #pragma omp parallel num_threads(numLogicalCores)
+            {
+                int tid = omp_get_thread_num();
+                threadAccum[tid] = cv::Mat::zeros(stackFrame.size(), stackFrame.type());
+
+                #pragma omp for
+                for (int k = 0; k < n; k++) {
+                    cv::Mat absDiff, mask;
+
+                    cv::Mat lightFrame = processFrame(stackArray[k], masterDarkFrame, invertedCalibratedFlatFrame, s, mean_background / background[k], RTparams[k], hotPixels);
+
+                    absdiff(lightFrame, medianFrame, absDiff);
+                    compare(absDiff, 2.0 * std, mask, CMP_GT);
+                    medianFrame.copyTo(lightFrame, mask);
+
+                    addWeighted(threadAccum[tid], 1.0, lightFrame, 1.0f / float(n), 0.0, threadAccum[tid]);
+                }
             }
+
+            // single-threaded merge
+            stackFrame = cv::Mat::zeros(stackFrame.size(), stackFrame.type());
+
+            for (const auto& acc : threadAccum) 
+                stackFrame += acc;
 
             if (!filesystem::exists(path + outputDir)) filesystem::create_directory(path + outputDir);
 
