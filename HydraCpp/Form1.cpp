@@ -88,13 +88,6 @@ template <typename T> void sortByColumn(vector<vector<T>>& data, size_t column) 
     sort(data.begin(), data.end(), [column](const vector<T>& v1, const vector<T>& v2) { return v1[column] > v2[column]; });
 }
 
-string filterSelector(string input) {
-    if (input == "LRGB") return "LRGB";
-    else if (input == "RGB" && frameFilter == "L") return "L";
-    else if (input == "RGB" && frameFilter != "L") return "RGB";
-    else return frameFilter;
-}
-
 //Function for enumerating star triangles
 vector<vector<float>> triangles(const vector<float>& x, const vector<float>& y) {
     vector<vector<float>> res;
@@ -207,6 +200,13 @@ vector<vector<float>> analyzeStarField(Mat lightFrame, const float& t) {
         }
     }
     return starMatrix;
+}
+
+string filterSelector(string input) {
+    if (input == "LRGB") return "LRGB";
+    else if (input == "RGB" && frameFilter == "L") return "L";
+    else if (input == "RGB" && frameFilter != "L") return "RGB";
+    else return frameFilter;
 }
 
 //Function to fetch a calibration frame
