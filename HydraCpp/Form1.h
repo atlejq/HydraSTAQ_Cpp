@@ -1,5 +1,4 @@
 #pragma once
-#include <stdlib.h>     /* srand, rand */
 #include <stdexcept>
 
 extern std::string path;
