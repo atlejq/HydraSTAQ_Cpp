@@ -267,26 +267,35 @@ Mat processFrame(const string& framePath, const Mat& masterDarkFrame, const Mat&
     warpAffine(lightFrame, lightFrame, M, Size(), interpolationFlag);
     return lightFrame;
 }
-  
-Mat computeMedianImage(const std::vector<Mat>& imageStack, int rows, int cols) {
-    Mat medianImage(rows, cols, CV_32FC1);
-    const int numImages = imageStack.size();
+
+cv::Mat computeMedianImage(const vector<cv::Mat>& imageStack, int rows, int cols)
+{
+    cv::Mat medianImage(rows, cols, CV_32FC1);
+    const int numImages = static_cast<int>(imageStack.size());
     const int midIndex = numImages / 2;
     const bool even = (numImages % 2 == 0);
+    const int totalPixels = rows * cols;
 
     #pragma omp parallel num_threads(numLogicalCores)
     {
         std::vector<float> pixelValues(numImages);
-        #pragma omp for
-        for (int i = 0; i < rows * cols; i++) {
-            for (int imgIdx = 0; imgIdx < numImages; imgIdx++)
-                pixelValues[imgIdx] = imageStack[imgIdx].ptr<float>()[i];
+        int threadId = omp_get_thread_num();
+        int batchSize = (totalPixels + numLogicalCores - 1) / numLogicalCores; // ceiling division
+        int startIdx = threadId * batchSize;
+        int endIdx = std::min(startIdx + batchSize, totalPixels);
 
+        for (int i = startIdx; i < endIdx; ++i) {
+            // Extract pixel values from all images
+            for (int imgIdx = 0; imgIdx < numImages; ++imgIdx) {
+                const float* ptr = imageStack[imgIdx].ptr<float>();
+                pixelValues[imgIdx] = ptr[i];
+            }
+
+            // Compute median
             std::nth_element(pixelValues.begin(), pixelValues.begin() + midIndex, pixelValues.end());
             float median = pixelValues[midIndex];
 
             if (even) {
-                // Find max of lower half for even number of elements
                 float lowerMax = *std::max_element(pixelValues.begin(), pixelValues.begin() + midIndex);
                 median = 0.5f * (median + lowerMax);
             }
@@ -297,6 +306,7 @@ Mat computeMedianImage(const std::vector<Mat>& imageStack, int rows, int cols) {
 
     return medianImage;
 }
+
 
 //Function to read images
 vector<int> Hydra::Form1::RegisterFrames() {
