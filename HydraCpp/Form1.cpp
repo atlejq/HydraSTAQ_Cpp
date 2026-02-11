@@ -274,7 +274,7 @@ Mat computeMedianImage(const std::vector<Mat>& imageStack, int rows, int cols) {
     const int midIndex = numImages / 2;
     const bool even = (numImages % 2 == 0);
 
-    #pragma omp parallel num_threads(numLogicalCores) 
+    #pragma omp parallel num_threads(numLogicalCores)
     {
         std::vector<float> pixelValues(numImages);
         #pragma omp for
@@ -286,13 +286,15 @@ Mat computeMedianImage(const std::vector<Mat>& imageStack, int rows, int cols) {
             float median = pixelValues[midIndex];
 
             if (even) {
-                std::nth_element(pixelValues.begin(), pixelValues.begin() + midIndex - 1, pixelValues.end());
-                median = 0.5f * (median + pixelValues[midIndex - 1]);
+                // Find max of lower half for even number of elements
+                float lowerMax = *std::max_element(pixelValues.begin(), pixelValues.begin() + midIndex);
+                median = 0.5f * (median + lowerMax);
             }
 
             medianImage.ptr<float>()[i] = median;
         }
     }
+
     return medianImage;
 }
 
